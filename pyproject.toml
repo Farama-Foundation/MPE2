@@ -13,6 +13,13 @@ pygame = "2.3.0"
 pettingzoo = "^1.23.1"
 
 
+[tool.poetry.group.testing.dependencies]
+pytest = "^7.3.1"
+pytest-cov = "^4.1.0"
+pre-commit = "^3.3.2"
+pynput = "^1.7.6"
+autorom = "^0.6.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
