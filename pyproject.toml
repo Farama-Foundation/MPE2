@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.8"
 numpy = "^1.24.3"
 pygame = "2.3.0"
+pettingzoo = "^1.23.1"
 
 
 [build-system]
