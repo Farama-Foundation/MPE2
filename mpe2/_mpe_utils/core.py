@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 import numpy as np
 
 
@@ -15,7 +17,7 @@ class AgentState(
     def __init__(self):
         super().__init__()
         # communication utterance
-        self.c = None
+        self.c = cast(Any, None)
 
 
 class Action:  # action of the agent
@@ -79,6 +81,8 @@ class Agent(Entity):  # properties of agent entities
         self.action = Action()
         # script behavior to execute
         self.action_callback = None
+        # whether agent is adversary
+        self.adversary: bool | None = None
 
 
 class World:  # multi-agent world
@@ -99,6 +103,18 @@ class World:  # multi-agent world
         # contact response parameters
         self.contact_force = 1e2
         self.contact_margin = 1e-3
+        # whether agents share rewards
+
+    # whether rewards are shared by agents
+    @property
+    def collaborative(self):
+        if self._collaborative is None:
+            raise NotImplementedError
+        return self._collaborative
+
+    @collaborative.setter
+    def collaborative(self, value: bool):
+        self._collaborative = value
 
     # return all entities in the world
     @property
@@ -114,6 +130,11 @@ class World:  # multi-agent world
     @property
     def scripted_agents(self):
         return [agent for agent in self.agents if agent.action_callback is not None]
+
+    #  number of agents
+    @property
+    def num_agents(self):
+        return len(self.agents)
 
     # update state of the world
     def step(self):

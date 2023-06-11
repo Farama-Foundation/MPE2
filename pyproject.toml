@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.24.3"
-pygame = "2.3.0"
+pygame = "2.4.0"
 pettingzoo = "^1.23.1"
 
 
