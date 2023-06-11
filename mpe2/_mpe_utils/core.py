@@ -5,10 +5,28 @@ import numpy as np
 
 class EntityState:  # physical/external base state of all entities
     def __init__(self):
-        # physical position
-        self.p_pos = None
-        # physical velocity
-        self.p_vel = None
+        pass
+
+    # physical position
+    @property
+    def p_pos(self):
+        if self._p_pos is None:
+            raise NotImplementedError
+        return self._p_pos
+
+    @p_pos.setter
+    def p_pos(self, val: np.ndarray):
+        self._p_pos = val
+
+    @property
+    def p_vel(self):
+        if self._p_vel is None:
+            raise NotImplementedError
+        return self._p_vel
+
+    @p_vel.setter
+    def p_vel(self, val: np.ndarray):
+        self._p_vel = val
 
 
 class AgentState(
@@ -43,12 +61,31 @@ class Entity:  # properties and state of physical world entity
         # color
         self.color = None
         # max speed and accel
-        self.max_speed = None
-        self.accel = None
+        self.accel = cast(float, None)
         # state
         self.state = EntityState()
         # mass
         self.initial_mass = 1.0
+
+    @property
+    def max_speed(self):
+        if self._max_speed is None:
+            raise NotImplementedError
+        return self._max_speed
+
+    @max_speed.setter
+    def max_speed(self, val: float):
+        self._max_speed = val
+
+    @property
+    def accel(self):
+        if self._accel is None:
+            raise NotImplementedError
+        return self._accel
+
+    @accel.setter
+    def accel(self, val: float):
+        self._accel = val
 
     @property
     def mass(self):
@@ -58,6 +95,16 @@ class Entity:  # properties and state of physical world entity
 class Landmark(Entity):  # properties of landmark entities
     def __init__(self):
         super().__init__()
+
+    @property
+    def boundary(self):
+        if self._boundary is None:
+            raise NotImplementedError
+        return self._boundary
+
+    @boundary.setter
+    def boundary(self, val: bool):
+        self._boundary = val
 
 
 class Agent(Entity):  # properties of agent entities
@@ -84,12 +131,24 @@ class Agent(Entity):  # properties of agent entities
         # whether agent is adversary
         self.adversary: bool | None = None
 
+    @property
+    def leader(self):
+        if self._leader is None:
+            raise NotImplementedError
+        return self._leader
+
+    @leader.setter
+    def leader(self, val: bool):
+        self._leader = val
+
 
 class World:  # multi-agent world
     def __init__(self):
         # list of agents and entities (can change at execution-time!)
         self.agents = []
-        self.landmarks = []
+        self.landmarks: list[Landmark] = []
+        self.food: list[Landmark] = []
+        self.forests: list[Landmark] = []
         # communication channel dimensionality
         self.dim_c = 0
         # position dimensionality
@@ -103,7 +162,6 @@ class World:  # multi-agent world
         # contact response parameters
         self.contact_force = 1e2
         self.contact_margin = 1e-3
-        # whether agents share rewards
 
     # whether rewards are shared by agents
     @property

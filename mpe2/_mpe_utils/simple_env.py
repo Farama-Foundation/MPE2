@@ -1,15 +1,17 @@
 import os
+from typing import Any
 
 import gymnasium
 import numpy as np
 import pygame
+import pygame.freetype
 from gymnasium import spaces
 from gymnasium.utils import seeding
-
 from pettingzoo import AECEnv
-from pettingzoo.mpe._mpe_utils.core import Agent
 from pettingzoo.utils import wrappers
 from pettingzoo.utils.agent_selector import agent_selector
+
+from mpe2._mpe_utils.core import Agent
 
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -158,12 +160,15 @@ class SimpleEnv(AECEnv):
         self.agent_selection = self._agent_selector.reset()
         self.steps = 0
 
-        self.current_actions = [None] * self.num_agents
+        self.current_actions: list[Any] = [None] * self.num_agents
 
     def _execute_world_step(self):
         # set action for each agent
         for i, agent in enumerate(self.world.agents):
             action = self.current_actions[i]
+            assert (
+                action is not None
+            ), f"You are attempting to execute a world step but {agent} has no current action."
             scenario_action = []
             if agent.movable:
                 mdim = self.world.dim_p * 2 + 1
@@ -231,14 +236,14 @@ class SimpleEnv(AECEnv):
                 agent.action.c[action[0]] = 1.0
             action = action[1:]
         # make sure we used all elements of action
-        assert len(action) == 0
+        assert len(action) == 0, "Ensure all elements of action are used."
 
     def step(self, action):
         if (
             self.terminations[self.agent_selection]
             or self.truncations[self.agent_selection]
         ):
-            self._was_dead_step(action)
+            self._was_dead_step(action)  # pyright: ignore
             return
         cur_agent = self.agent_selection
         current_idx = self._index_map[self.agent_selection]
@@ -323,6 +328,7 @@ class SimpleEnv(AECEnv):
                 if np.all(entity.state.c == 0):
                     word = "_"
                 elif self.continuous_actions:
+                    assert entity.state.c is not None
                     word = (
                         "[" + ",".join([f"{comm:.2f}" for comm in entity.state.c]) + "]"
                     )
@@ -333,7 +339,10 @@ class SimpleEnv(AECEnv):
                 message_x_pos = self.width * 0.05
                 message_y_pos = self.height * 0.95 - (self.height * 0.05 * text_line)
                 self.game_font.render_to(
-                    self.screen, (message_x_pos, message_y_pos), message, (0, 0, 0)
+                    self.screen,  # pyright:ignore
+                    (message_x_pos, message_y_pos),  # pyright:ignore
+                    message,  # pyright:ignore
+                    (0, 0, 0),  # pyright:ignore
                 )
                 text_line += 1
 
