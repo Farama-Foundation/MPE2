@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "mpe2"
+version = "0.1.0"
+description = "Lightweight miniature pixel environments for multiagent learning."
+authors = ["Farama Foundation"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+numpy = "^1.24.3"
+pygame = "2.4.0"
+pettingzoo = "^1.23.1"
+
+
+[tool.poetry.group.testing.dependencies]
+pytest = "^7.3.1"
+pytest-cov = "^4.1.0"
+pre-commit = "^3.3.2"
+pynput = "^1.7.6"
+autorom = "^0.6.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
