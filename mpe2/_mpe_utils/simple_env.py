@@ -5,11 +5,11 @@ import numpy as np
 import pygame
 from gymnasium import spaces
 from gymnasium.utils import seeding
-
 from pettingzoo import AECEnv
-from mpe2._mpe_utils.core import Agent
 from pettingzoo.utils import wrappers
 from pettingzoo.utils.agent_selector import AgentSelector
+
+from mpe2._mpe_utils.core import Agent
 
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 

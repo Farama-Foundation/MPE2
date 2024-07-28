@@ -52,11 +52,11 @@ simple_speaker_listener_v4.env(max_cycles=25, continuous_actions=False, dynamic_
 
 import numpy as np
 from gymnasium.utils import EzPickle
+from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
-from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 
 class raw_env(SimpleEnv, EzPickle):
