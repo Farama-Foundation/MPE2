@@ -7,7 +7,7 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 
 from pettingzoo import AECEnv
-from pettingzoo.mpe._mpe_utils.core import Agent
+from mpe2._mpe_utils.core import Agent
 from pettingzoo.utils import wrappers
 from pettingzoo.utils.agent_selector import AgentSelector
 

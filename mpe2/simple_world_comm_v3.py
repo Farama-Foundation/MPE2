@@ -1,4 +1,4 @@
-from pettingzoo.mpe.simple_world_comm.simple_world_comm import (
+from mpe2.simple_world_comm.simple_world_comm import (
     env,
     parallel_env,
     raw_env,

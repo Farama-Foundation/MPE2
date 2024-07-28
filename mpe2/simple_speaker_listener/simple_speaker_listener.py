@@ -9,7 +9,7 @@
 
 This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.
 
-| Import               | `from pettingzoo.mpe import simple_speaker_listener_v4` |
+| Import               |      `from mpe2 import simple_speaker_listener_v4`      |         
 |----------------------|---------------------------------------------------------|
 | Actions              | Discrete/Continuous                                     |
 | Parallel API         | Yes                                                     |
@@ -53,9 +53,9 @@ simple_speaker_listener_v4.env(max_cycles=25, continuous_actions=False, dynamic_
 import numpy as np
 from gymnasium.utils import EzPickle
 
-from pettingzoo.mpe._mpe_utils.core import Agent, Landmark, World
-from pettingzoo.mpe._mpe_utils.scenario import BaseScenario
-from pettingzoo.mpe._mpe_utils.simple_env import SimpleEnv, make_env
+from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.scenario import BaseScenario
+from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 
