@@ -1,6 +1,3 @@
-import sys
-
-sys.path.append("..")
 from mpe2 import simple_push_v3
 
 env = simple_push_v3.env(render_mode="human")
