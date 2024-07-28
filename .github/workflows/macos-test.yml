@@ -1,0 +1,33 @@
+---
+name: MacOS tests
+
+on:
+    push:
+        branches: [none]
+
+permissions:
+    contents: read
+
+jobs:
+    macos-test:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+            # Big Sur, Monterey
+                os: [macos-11, macos-12]
+                python-version: ['3.8', '3.9', '3.10', '3.11']
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies
+              run: |
+                  pip install -e .[testing]
+            - name: Set dummy SDL video driver
+              run: |
+                  export SDL_VIDEODRIVER=dummy
+            - name: Full Python tests
+              run: |
+                  pytest -v --cov=mpe --cov-report term
