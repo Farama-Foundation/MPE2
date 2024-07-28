@@ -25,7 +25,7 @@ jobs:
             - name: Install dependencies
               run: |
                   sudo apt-get install python3-opengl xvfb
-                  git clone https://github.com/Farama-Foundation/PettingZoo.git && cd PettingZoo && pip install . && cd ..
+                  pip install git+https://github.com/Farama-Foundation/PettingZoo.git@master
                   pip install -e .[testing]
             - name: Source distribution test
               run: |
