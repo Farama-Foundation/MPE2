@@ -26,6 +26,7 @@ jobs:
                   python-version: ${{ matrix.python-version }}
             - name: Install dependencies
               run: |
+                  git clone https://github.com/Farama-Foundation/PettingZoo.git && cd PettingZoo && pip install . && cd ..
                   pip install -e .[testing]
             - name: Set dummy SDL video driver
               run: |
