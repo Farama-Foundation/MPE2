@@ -31,4 +31,4 @@ line-length = 88
 [tool.isort]
 atomic = true
 profile = "black"
-src_paths = ["pettingzoo", "test"]
+src_paths = ["mpe2", "test"]
