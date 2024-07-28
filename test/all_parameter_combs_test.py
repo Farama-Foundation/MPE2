@@ -1,6 +1,11 @@
 from __future__ import annotations
 
 import pytest
+from pettingzoo.test import max_cycles_test, parallel_api_test
+from pettingzoo.test.api_test import api_test
+from pettingzoo.test.render_test import render_test
+from pettingzoo.test.seed_test import parallel_seed_test, seed_test
+from pettingzoo.test.state_test import state_test
 
 from mpe2 import (
     simple_adversary_v3,
@@ -13,11 +18,6 @@ from mpe2 import (
     simple_v3,
     simple_world_comm_v3,
 )
-from pettingzoo.test import max_cycles_test, parallel_api_test
-from pettingzoo.test.api_test import api_test
-from pettingzoo.test.render_test import render_test
-from pettingzoo.test.seed_test import parallel_seed_test, seed_test
-from pettingzoo.test.state_test import state_test
 
 parameterized_envs = [
     [simple_v3, dict(max_cycles=50)],

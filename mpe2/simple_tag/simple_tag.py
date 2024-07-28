@@ -66,10 +66,11 @@ simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25,
 
 import numpy as np
 from gymnasium.utils import EzPickle
+from pettingzoo.utils.conversions import parallel_wrapper_fn
+
 from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
-from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 
 class raw_env(SimpleEnv, EzPickle):
