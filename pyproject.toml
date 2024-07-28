@@ -1,0 +1,34 @@
+# Package ######################################################################
+
+[build-system]
+requires = ["setuptools >= 61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mpe2"
+description = "Multi Particle Environments Version 2"
+readme = "README.md"
+requires-python = ">= 3.8"
+authors = [{ name = "Farama Foundation", email = "contact@farama.org" }]
+license = { text = "MIT License" }
+keywords = ["Reinforcement Learning", "game", "RL", "AI", "gymnasium"]
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    'Intended Audience :: Science/Research',
+    'Topic :: Scientific/Engineering :: Artificial Intelligence',
+]
+dependencies = ["pettingzoo>=1.24.3", "pygame>=2.6.0"]
+dynamic = ["version"]
+
+# Linters and Test tools #######################################################
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+atomic = true
+profile = "black"
+src_paths = ["pettingzoo", "test"]
