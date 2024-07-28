@@ -3,7 +3,9 @@ name: MacOS tests
 
 on:
     push:
-        branches: [none]
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 permissions:
     contents: read
