@@ -8,7 +8,7 @@ CWD = pathlib.Path(__file__).absolute().parent
 
 
 def get_version():
-    """Gets the pettingzoo version."""
+    """Gets the mpe2 version."""
     path = CWD / "mpe2" / "__init__.py"
     content = path.read_text()
 
