@@ -23,9 +23,6 @@ jobs:
       - name: Install MPE2
         run: pip install -e .
 
-      - name: Run some auxiliary scripts, e.g. build environments docs
-        run: python docs/_scripts/gen_envs_mds.py
-
       - name: Build
         run: sphinx-build -b dirhtml -v docs _build
 
