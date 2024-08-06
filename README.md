@@ -7,9 +7,6 @@
 conda create -n mpe2_env python=3.10
 conda activate mpe2_env
 
-# install dependencies
-python3 -m pip install pettingzoo pygame
-
 # clone repo
 git clone https://github.com/Farama-Foundation/MPE2.git
 python3 -m pip install -e .

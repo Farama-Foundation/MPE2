@@ -4,12 +4,13 @@ firstpage:
 lastpage:
 ---
 
-```{project-logo} _static/MPE2-text.png
-:alt: MPE2 Logo
+```{figure} _static/img/mpe_simple_tag.gif
+   :alt: GIF for MPE2 simple_tag environment
+   :width: 300
 ```
 
 ```{project-heading}
-Description of the Project
+A set of communication oriented environment
 ```
 
 **Basic example:**

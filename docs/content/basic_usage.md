@@ -8,7 +8,8 @@ firstpage:
 
 ## Installation
 
-```
-pip install mpe2
+```bash
+git clone https://github.com/Farama-Foundation/MPE2.git
+python3 -m pip install -e .
 ```
 
