@@ -164,3 +164,9 @@ cython_debug/
 
 # test scripts
 scripts/
+
+# Mac OS
+.DS_Store
+
+# VS Code
+.vscode/
