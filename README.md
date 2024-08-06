@@ -9,5 +9,10 @@ conda activate mpe2_env
 
 # clone repo
 git clone https://github.com/Farama-Foundation/MPE2.git
+
+# for development
+python3 -m pip install -e .[testing, documentation]
+
+# for usage
 python3 -m pip install -e .
 ```
