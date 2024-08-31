@@ -74,7 +74,7 @@ html_theme_options = {
     "dark_logo": "img/mpe2_white.svg",
     "gtag": "G-6H9C8TWXZ8",
     "description": "mpe2 DESCRIPTION",
-    "image": "img/mpe2-github.png",
+    "image": "img/mpe2_github.png",
     "versioning": True,
     "source_repository": "https://github.com/Farama-Foundation/MPE2/",
     "source_branch": "main",
