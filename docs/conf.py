@@ -70,8 +70,8 @@ html_baseurl = "https://mpe2.farama.org"
 html_copy_source = False
 html_favicon = "_static/img/favicon.png"
 html_theme_options = {
-    "light_logo": "img/mpe2_black.svg",
-    "dark_logo": "img/mpe2_white.svg",
+    "light_logo": "img/mpe2-black.svg",
+    "dark_logo": "img/mpe2-white.svg",
     "gtag": "G-6H9C8TWXZ8",
     "description": "mpe2 DESCRIPTION",
     "image": "img/mpe2-github.png",
