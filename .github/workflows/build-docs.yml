@@ -1,7 +1,7 @@
 name: Deploy Docs
 on:
   push:
-    branches: [paused]
+    branches: [main]
 
 permissions:
   contents: write
