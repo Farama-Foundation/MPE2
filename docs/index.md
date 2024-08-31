@@ -4,7 +4,7 @@ firstpage:
 lastpage:
 ---
 
-```{figure} _static/img/mpe_simple_tag.gif
+```{figure} _static/img/mpe-simple-tag.gif
    :alt: GIF for MPE2 simple_tag environment
    :width: 300
 ```
