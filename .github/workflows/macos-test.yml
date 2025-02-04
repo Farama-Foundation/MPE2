@@ -27,6 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install git+https://github.com/Farama-Foundation/PettingZoo.git@master
+          pip install -e .[all]
           pip install -e .[testing]
       - name: Set dummy SDL video driver
         run: |

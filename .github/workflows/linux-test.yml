@@ -26,6 +26,7 @@ jobs:
         run: |
           sudo apt-get update && sudo apt-get install -y python3-opengl xvfb 
           pip install git+https://github.com/Farama-Foundation/PettingZoo.git@master
+          pip install -e .[all]
           pip install -e .[testing]
       - name: Source distribution test
         run: |
