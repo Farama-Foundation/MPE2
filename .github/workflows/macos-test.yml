@@ -2,35 +2,36 @@
 name: MacOS tests
 
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
-    contents: read
+  contents: read
 
 jobs:
-    macos-test:
-        runs-on: ${{ matrix.os }}
-        strategy:
-            matrix:
-            # Monterey
-                os: [macos-12]
-                python-version: ['3.8', '3.9', '3.10', '3.11']
-        steps:
-            - uses: actions/checkout@v4
-            - name: Set up Python ${{ matrix.python-version }}
-              uses: actions/setup-python@v4
-              with:
-                  python-version: ${{ matrix.python-version }}
-            - name: Install dependencies
-              run: |
-                  pip install git+https://github.com/Farama-Foundation/PettingZoo.git@master
-                  pip install -e .[testing]
-            - name: Set dummy SDL video driver
-              run: |
-                  export SDL_VIDEODRIVER=dummy
-            - name: Full Python tests
-              run: |
-                  pytest -v --cov=mpe --cov-report term
+  macos-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Monterey
+        os: [macos-14]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pip install git+https://github.com/Farama-Foundation/PettingZoo.git@master
+          pip install -e .[all]
+          pip install -e .[testing]
+      - name: Set dummy SDL video driver
+        run: |
+          export SDL_VIDEODRIVER=dummy
+      - name: Full Python tests
+        run: |
+          pytest -v --cov=mpe --cov-report term
