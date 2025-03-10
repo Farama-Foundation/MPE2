@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "mpe2"
 description = "Multi Particle Environments Version 2"
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.9"
 authors = [{ name = "Farama Foundation", email = "contact@farama.org" }]
 license = { text = "MIT License" }
 keywords = ["Reinforcement Learning", "game", "RL", "AI", "gymnasium"]
