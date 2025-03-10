@@ -1,5 +1,4 @@
 ---
-hide-toc: true
 firstpage:
 lastpage:
 ---
@@ -40,8 +39,25 @@ env.close()
 :hidden:
 :caption: Introduction
 
-content/basic_usage
+mpe2
 ```
+
+```{toctree}
+:hidden:
+:caption: Environments
+
+environments/simple
+environments/simple_adversary
+environments/simple_crypto
+environments/simple_push
+environments/simple_reference
+environments/simple_speaker_listener
+environments/simple_spread
+environments/simple_tag
+environments/simple_world_comm
+```
+
+
 
 ```{toctree}
 :hidden:
