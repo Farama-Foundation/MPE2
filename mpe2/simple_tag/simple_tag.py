@@ -2,7 +2,7 @@
 """
 # Simple Tag
 
-```{figure} mpe_simple_tag.gif
+```{figure} mpe2/mpe2_simple_tag.gif
 :width: 140px
 :name: simple_tag
 ```

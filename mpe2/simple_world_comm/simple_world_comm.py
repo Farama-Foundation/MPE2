@@ -2,7 +2,7 @@
 """
 # Simple World Comm
 
-```{figure} mpe_simple_world_comm.gif
+```{figure} mpe2/mpe2_simple_world_comm.gif
 :width: 140px
 :name: simple_world_comm
 ```

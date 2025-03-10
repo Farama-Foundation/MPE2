@@ -2,7 +2,7 @@
 """
 # Simple
 
-```{figure} mpe_simple.gif
+```{figure} mpe2/mpe2_simple.gif
 :width: 140px
 :name: simple
 ```

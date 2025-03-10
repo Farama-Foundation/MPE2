@@ -2,7 +2,7 @@
 """
 # Simple Crypto
 
-```{figure} mpe_simple_crypto.gif
+```{figure} mpe2/mpe2_simple_crypto.gif
 :width: 140px
 :name: simple_crypto
 ```
