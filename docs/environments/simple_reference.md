@@ -10,7 +10,7 @@ env_icon: "../../../_static/img/icons/simple_reference.png"
 :name: simple_reference
 ```
 
-This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.
+This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
 | Import             |      `from mpe2 import simple_reference_v3`      |
 |--------------------|--------------------------------------------------|

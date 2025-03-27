@@ -7,7 +7,7 @@
 :name: simple_spread
 ```
 
-This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.
+This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
 | Import               |      `from mpe2 import simple_spread_v3`      |
 |----------------------|-----------------------------------------------|
