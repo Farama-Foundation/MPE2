@@ -2,7 +2,7 @@
 """
 # Simple Spread
 
-```{figure} mpe_simple_spread.gif
+```{figure} mpe2/mpe2_simple_spread.gif
 :width: 140px
 :name: simple_spread
 ```

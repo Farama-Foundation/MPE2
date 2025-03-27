@@ -2,7 +2,7 @@
 """
 # Simple Reference
 
-```{figure} mpe_simple_reference.gif
+```{figure} mpe2/mpe2_simple_reference.gif
 :width: 140px
 :name: simple_reference
 ```

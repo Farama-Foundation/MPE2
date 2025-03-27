@@ -2,7 +2,7 @@
 """
 # Simple Adversary
 
-```{figure} mpe_simple_adversary.gif
+```{figure} mpe2/mpe2_simple_adversary.gif
 :width: 140px
 :name: simple_adversary
 ```

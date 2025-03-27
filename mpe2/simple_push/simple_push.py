@@ -2,7 +2,7 @@
 """
 # Simple Push
 
-```{figure} mpe_simple_push.gif
+```{figure} mpe2/mpe2_simple_push.gif
 :width: 140px
 :name: simple_push
 ```

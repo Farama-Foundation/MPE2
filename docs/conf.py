@@ -18,7 +18,9 @@
 import os
 from typing import Any, Dict
 import mpe2
+import sys
 
+sys.path.insert(0, os.path.abspath(".."))
 
 project = "MPE2"
 copyright = "2024 Farama Foundation"
