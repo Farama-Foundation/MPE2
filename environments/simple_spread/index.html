@@ -7,12 +7,12 @@
     <meta property="og:title" content="MPE2 Documentation" />
     <meta property="og:type" content="website" />
     <meta property="og:description" content="mpe2 DESCRIPTION" />
-    <meta property="og:url" content="https://mpe2.farama.org/content/basic_usage.html" /><meta property="og:image" content="https://mpe2.farama.org/_static/img/mpe2-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="prev" title="&lt;no title&gt;" href="../../" />
-        <link rel="canonical" href="https://mpe2.farama.org/content/basic_usage.html" />
+    <meta property="og:url" content="https://mpe2.farama.org/environments/simple_spread.html" /><meta property="og:image" content="https://mpe2.farama.org/_static/img/mpe2-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Simple Tag" href="../simple_tag/" /><link rel="prev" title="Simple Speaker Listener" href="../simple_speaker_listener/" />
+        <link rel="canonical" href="https://mpe2.farama.org/environments/simple_spread.html" />
 
     <link rel="shortcut icon" href="../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
-        <title>Basic Usage - MPE2 Documentation</title>
+        <title>Simple Spread - MPE2 Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=3e7f4c72" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=82c8b628" />
@@ -211,8 +211,20 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../mpe2/">MPE</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Environments</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Basic Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple/">Simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_adversary/">Simple Adversary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_crypto/">Simple Crypto</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_push/">Simple Push</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_reference/">Simple Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_speaker_listener/">Simple Speaker Listener</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Simple Spread</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_tag/">Simple Tag</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../simple_world_comm/">Simple World Comm</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
@@ -242,16 +254,7 @@
             </svg>
             <span>Back to top</span>
           </a>
-          <div class="content-icon-container"><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/Farama-Foundation/MPE2/edit/main/docs/content/basic_usage.md" title="Edit this page">
-    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
-      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
-    </svg>
-    <span class="visually-hidden">Edit this page</span>
-  </a>
-</div><div class="theme-toggle-container theme-toggle-content">
+          <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
               <button class="theme-toggle" title="Toggle color theme">
                 <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
                 <svg class="theme-icon-when-auto">
@@ -273,15 +276,78 @@
             </label>
           </div>
           <article role="main">
-            
-            <section class="tex2jax_ignore mathjax_ignore" id="basic-usage">
-<h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading">¶</a></h1>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Farama-Foundation/MPE2.git
-python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+            <div class="farama-env-icon-container">
+              <img class="farama-env-icon" src="../../../_static/img/icons/simple_spread.png">
+            </div>
+            <section class="tex2jax_ignore mathjax_ignore" id="simple-spread">
+<h1>Simple Spread<a class="headerlink" href="#simple-spread" title="Link to this heading">¶</a></h1>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../../_images/mpe2_simple_spread.gif"><img alt="../../_images/mpe2_simple_spread.gif" src="../../_images/mpe2_simple_spread.gif" style="width: 140px;" />
+</a>
+</figure>
+<p>This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Import</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mpe2</span> <span class="pre">import</span> <span class="pre">simple_spread_v3</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Actions</p></td>
+<td><p>Discrete/Continuous</p></td>
+</tr>
+<tr class="row-odd"><td><p>Parallel API</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p>Manual Control</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p>Agents</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">agents=</span> <span class="pre">[agent_0,</span> <span class="pre">agent_1,</span> <span class="pre">agent_2]</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Agents</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-odd"><td><p>Action Shape</p></td>
+<td><p>(5)</p></td>
+</tr>
+<tr class="row-even"><td><p>Action Values</p></td>
+<td><p>Discrete(5)/Box(0.0, 1.0, (5))</p></td>
+</tr>
+<tr class="row-odd"><td><p>Observation Shape</p></td>
+<td><p>(18)</p></td>
+</tr>
+<tr class="row-even"><td><p>Observation Values</p></td>
+<td><p>(-inf,inf)</p></td>
+</tr>
+<tr class="row-odd"><td><p>State Shape</p></td>
+<td><p>(54,)</p></td>
+</tr>
+<tr class="row-even"><td><p>State Values</p></td>
+<td><p>(-inf,inf)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>This environment has N agents, N landmarks (default N=3). At a high level, agents must learn to cover all the landmarks while avoiding collisions.</p>
+<p>More specifically, all agents are globally rewarded based on how far the closest agent is to each landmark (sum of the minimum distances). Locally, the agents are penalized if they collide with other agents (-1 for each collision). The relative weights of these rewards can be controlled with the
+<code class="docutils literal notranslate"><span class="pre">local_ratio</span></code> parameter.</p>
+<p>Agent observations: <code class="docutils literal notranslate"><span class="pre">[self_vel,</span> <span class="pre">self_pos,</span> <span class="pre">landmark_rel_positions,</span> <span class="pre">other_agent_rel_positions,</span> <span class="pre">communication]</span></code></p>
+<p>Agent action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
+<section id="arguments">
+<h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simple_spread_v3</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">local_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">N</span></code>:  number of agents and landmarks</p>
+<p><code class="docutils literal notranslate"><span class="pre">local_ratio</span></code>:  Weight applied to local reward and global reward. Global reward weight will always be 1 - local reward weight.</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_cycles</span></code>:  number of frames (a step for each agent) until game terminates</p>
+<p><code class="docutils literal notranslate"><span class="pre">continuous_actions</span></code>: Whether agent action spaces are discrete(default) or continuous</p>
+<p><code class="docutils literal notranslate"><span class="pre">dynamic_rescaling</span></code>: Whether to rescale the size of agents and landmarks based on the screen size</p>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
 </section>
 </section>
 
@@ -290,8 +356,30 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
         <footer>
           
           <div class="related-pages">
-            
-            
+            <a class="next-page" href="../simple_tag/">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Simple Tag</div>
+              </div>
+              <svg class="furo-related-icon">
+                <use href="#svg-arrow-right"></use>
+              </svg>
+            </a>
+            <a class="prev-page" href="../simple_speaker_listener/">
+              <svg class="furo-related-icon">
+                <use href="#svg-arrow-right"></use>
+              </svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Simple Speaker Listener</div>
+                
+              </div>
+            </a>
           </div>
           <div class="bottom-of-page">
             <div class="left-details">
@@ -332,8 +420,9 @@ python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </s
           <div class="toc-tree-container">
             <div class="toc-tree">
               <ul>
-<li><a class="reference internal" href="#">Basic Usage</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#">Simple Spread</a><ul>
+<li><a class="reference internal" href="#arguments">Arguments</a></li>
+<li><a class="reference internal" href="#api">API</a></li>
 </ul>
 </li>
 </ul>
