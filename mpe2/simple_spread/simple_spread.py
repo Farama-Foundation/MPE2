@@ -157,7 +157,7 @@ class Scenario(BaseScenario):
                 occupied_landmarks += 1
         if agent.collide:
             for a in world.agents:
-                if self.is_collision(a, agent):
+                if self.is_collision(a, agent) and a != agent:
                     rew -= 1
                     collisions += 1
         return (rew, collisions, min_dists, occupied_landmarks)
