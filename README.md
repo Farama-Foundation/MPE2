@@ -21,22 +21,27 @@ pip install mpe2
 ```
 
 ### Usage
-To launch a [Simple Tag](/environments/simple_tag/) environment with random agents:
 
-``` python
-from mpe2 import simple_tag_v3
-env = simple_tag_v3.env(render_mode='human')
+To launch a [Simple Push](/environments/simple_push/) environment with random agents:
 
-env.reset()
+```{code-block} python
+
+from mpe2 import simple_push_v3
+
+env = simple_push_v3.env(render_mode="human")
+env.reset(seed=42)
+
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()
 
     if termination or truncation:
         action = None
     else:
-        action = env.action_space(agent).sample() # this is where you would insert your policy
+        # this is where you would insert your policy
+        action = env.action_space(agent).sample()
 
     env.step(action)
+    
 env.close()
 ```
 
