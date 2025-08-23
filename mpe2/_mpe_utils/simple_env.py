@@ -284,6 +284,15 @@ class SimpleEnv(AECEnv):
             return
 
         self.enable_render(self.render_mode)
+        # Add event handling to fix rendering issues on Windows
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.WINDOWCLOSE:
+                pygame.quit()
+                return
+        pygame.event.pump()  # 确保事件系统正常运行
 
         self.draw()
         if self.render_mode == "rgb_array":
