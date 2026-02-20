@@ -8,6 +8,7 @@ from pettingzoo.test.seed_test import parallel_seed_test, seed_test
 from pettingzoo.test.state_test import state_test
 
 from mpe2 import (
+    collect_treasure_v1,
     simple_adversary_v3,
     simple_crypto_v3,
     simple_push_v3,
@@ -20,6 +21,25 @@ from mpe2 import (
 )
 
 parameterized_envs = [
+    [collect_treasure_v1, dict(max_cycles=50)],
+    [
+        collect_treasure_v1,
+        dict(num_collectors=4, num_deposits=2, num_treasures=4, max_cycles=50),
+    ],
+    [
+        collect_treasure_v1,
+        dict(continuous_actions=True, max_cycles=50),
+    ],
+    [
+        collect_treasure_v1,
+        dict(
+            num_collectors=3,
+            num_deposits=1,
+            num_treasures=3,
+            continuous_actions=True,
+            max_cycles=50,
+        ),
+    ],
     [simple_v3, dict(max_cycles=50)],
     [simple_v3, dict(continuous_actions=True, max_cycles=50)],
     [simple_push_v3, dict(max_cycles=50)],
