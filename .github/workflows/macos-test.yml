@@ -18,7 +18,7 @@ jobs:
         strategy:
             matrix:
                 # macos-13: Intel (x86_64), macos-latest: Apple Silicon (arm64)
-                os: [macos-13, macos-latest]
+                os: [macos-latest]
                 python-version: ['3.9', '3.13']
         steps:
             - uses: actions/checkout@v4
