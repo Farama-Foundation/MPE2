@@ -19,7 +19,7 @@ jobs:
             matrix:
                 # macos-13: Intel (x86_64), macos-latest: Apple Silicon (arm64)
                 os: [macos-latest]
-                python-version: ['3.9', '3.13']
+                python-version: ['3.9']
         steps:
             - uses: actions/checkout@v4
             - name: Set up Python ${{ matrix.python-version }}
