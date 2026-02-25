@@ -7,12 +7,12 @@
     <meta property="og:title" content="MPE2 Documentation" />
     <meta property="og:type" content="website" />
     <meta property="og:description" content="mpe2 DESCRIPTION" />
-    <meta property="og:url" content="https://mpe2.farama.org/environments/simple.html" /><meta property="og:image" content="https://mpe2.farama.org/_static/img/mpe2-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Simple Adversary" href="../simple_adversary/" /><link rel="prev" title="MPE" href="../../mpe2/" />
-        <link rel="canonical" href="https://mpe2.farama.org/environments/simple.html" />
+    <meta property="og:url" content="https://mpe2.farama.org/environments/collect_treasure.html" /><meta property="og:image" content="https://mpe2.farama.org/_static/img/mpe2-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" />
+        <link rel="canonical" href="https://mpe2.farama.org/environments/collect_treasure.html" />
 
     <link rel="shortcut icon" href="../../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
-        <title>Simple - MPE2 Documentation</title>
+        <title>Collect Treasure - MPE2 Documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=3e7f4c72" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=82c8b628" />
@@ -215,8 +215,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../mpe2/">MPE</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Environments</span></p>
-<ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Simple</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../simple/">Simple</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../simple_adversary/">Simple Adversary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../simple_crypto/">Simple Crypto</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../simple_push/">Simple Push</a></li>
@@ -277,20 +277,16 @@
           </div>
           <article role="main">
             <div class="farama-env-icon-container">
-              <img class="farama-env-icon" src="../../../_static/img/icons/simple.png">
+              <img class="farama-env-icon" src="../../../_static/img/icons/collect_treasure.png">
             </div>
-            <section class="tex2jax_ignore mathjax_ignore" id="simple">
-<h1>Simple<a class="headerlink" href="#simple" title="Link to this heading">¶</a></h1>
-<figure class="align-default" id="id1">
-<a class="reference internal image-reference" href="../../_images/mpe2_simple.gif"><img alt="../../_images/mpe2_simple.gif" src="../../_images/mpe2_simple.gif" style="width: 140px;" />
-</a>
-</figure>
-<p>This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.</p>
+            <section class="tex2jax_ignore mathjax_ignore" id="collect-treasure">
+<h1>Collect Treasure<a class="headerlink" href="#collect-treasure" title="Link to this heading">¶</a></h1>
+<p>This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Import</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mpe2</span> <span class="pre">import</span> <span class="pre">simple_v3</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mpe2</span> <span class="pre">import</span> <span class="pre">collect_treasure_v1</span></code></p></th>
 </tr>
 </thead>
 <tbody>
@@ -304,53 +300,97 @@
 <td><p>No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Agents</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">agents=</span> <span class="pre">[agent_0]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">agents=</span> <span class="pre">[collector_0,</span> <span class="pre">...,</span> <span class="pre">collector_5,</span> <span class="pre">deposit_0,</span> <span class="pre">deposit_1]</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Agents</p></td>
-<td><p>1</p></td>
+<td><p>8 (default: 6 collectors + 2 deposits)</p></td>
 </tr>
 <tr class="row-odd"><td><p>Action Shape</p></td>
-<td><p>(5)</p></td>
+<td><p>(5,)</p></td>
 </tr>
 <tr class="row-even"><td><p>Action Values</p></td>
 <td><p>Discrete(5)/Box(0.0, 1.0, (5,))</p></td>
 </tr>
 <tr class="row-odd"><td><p>Observation Shape</p></td>
-<td><p>(4)</p></td>
+<td><p>(86,) for collectors, (84,) for deposits (default config)</p></td>
 </tr>
 <tr class="row-even"><td><p>Observation Values</p></td>
-<td><p>(-inf,inf)</p></td>
+<td><p>(-inf, inf)</p></td>
 </tr>
 <tr class="row-odd"><td><p>State Shape</p></td>
-<td><p>(4,)</p></td>
+<td><p>(684,) (default config)</p></td>
 </tr>
 <tr class="row-even"><td><p>State Values</p></td>
-<td><p>(-inf,inf)</p></td>
+<td><p>(-inf, inf)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>In this environment a single agent sees a landmark position and is rewarded based on how close it gets to the landmark (Euclidean distance). This is not a multiagent environment, and is primarily intended for debugging purposes.</p>
-<p>Observation space: <code class="docutils literal notranslate"><span class="pre">[self_vel,</span> <span class="pre">landmark_rel_position]</span></code></p>
+<p>A cooperative multi-agent task in which collector agents must pick up treasures and deliver
+them to the matching deposit agent.</p>
+<p>There are two types of agents:</p>
+<ul class="simple">
+<li><p><strong>Collectors</strong> (grey by default): roam the environment to pick up treasure landmarks and
+carry them to the appropriate deposit agent. A collector can hold at most one treasure at a
+time. When holding a treasure it changes color to match the treasure’s type.</p></li>
+<li><p><strong>Deposits</strong> (dark-tinted, color-coded by type): goal zones. Each deposit accepts only one
+treasure type. Deposits try to position themselves near collectors that are carrying matching
+treasure.</p></li>
+</ul>
+<p>Treasures are landmarks that appear at random positions. When a collector touches a treasure
+(is within collision distance), the collector picks it up and the treasure disappears. The
+treasure then respawns at a new random location on the next step. When a collector carrying a
+treasure touches the matching deposit agent, the treasure is delivered, the collector’s
+inventory is cleared, and it turns grey again.</p>
+<p><strong>Reward structure (shared globally + shaped locally):</strong></p>
+<ul class="simple">
+<li><p>+5 global reward each time a collector is touching a live treasure while not holding anything</p></li>
+<li><p>+5 global reward each time a collector is touching its matching deposit while carrying the
+right treasure type</p></li>
+<li><p>-0.1 * distance shaping for collectors (toward nearest treasure or matching deposit)</p></li>
+<li><p>-0.1 * distance shaping for deposits (toward collectors carrying matching treasure, or
+toward the centroid of all collectors if none are carrying their type)</p></li>
+<li><p>-5 per pair of collectors that are overlapping (collision penalty)</p></li>
+</ul>
+<p><strong>Observations:</strong>
+Each agent observes its own position and velocity. Collectors additionally observe a one-hot
+encoding of what they are holding. Every agent then sees all other agents sorted by distance,
+each described by relative position, velocity, and a 4-element encoding
+[deposit_type_0, deposit_type_1, holding_type_0, holding_type_1]. Finally, every agent
+observes all treasures sorted by distance, each described by relative position and a one-hot
+type encoding. Dead (just-picked-up) treasures are shown with zero relative position and
+zero type encoding.</p>
+<p><strong>Agent action space:</strong> <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
 <section id="arguments">
 <h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simple_v3</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">collect_treasure_v1</span><span class="o">.</span><span class="n">env</span><span class="p">(</span>
+    <span class="n">num_collectors</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">num_deposits</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">num_treasures</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">max_cycles</span></code>:  number of frames (a step for each agent) until game terminates</p>
-<p><code class="docutils literal notranslate"><span class="pre">continuous_actions</span></code>: Whether agent action spaces are discrete(default) or continuous</p>
-<p><code class="docutils literal notranslate"><span class="pre">dynamic_rescaling</span></code>: Whether to rescale the size of agents and landmarks based on the screen size</p>
+<p><code class="docutils literal notranslate"><span class="pre">num_collectors</span></code>: number of collector agents</p>
+<p><code class="docutils literal notranslate"><span class="pre">num_deposits</span></code>: number of deposit agents (also sets the number of treasure types)</p>
+<p><code class="docutils literal notranslate"><span class="pre">num_treasures</span></code>: number of treasure landmarks in the world</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_cycles</span></code>: number of frames (a step for each agent) until game terminates</p>
+<p><code class="docutils literal notranslate"><span class="pre">continuous_actions</span></code>: Whether agent action spaces are discrete (default) or continuous</p>
+<p><code class="docutils literal notranslate"><span class="pre">dynamic_rescaling</span></code>: Whether to rescale the size of agents and landmarks based on the screen
+size</p>
 </section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="mpe2.simple.simple.env">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpe2.simple.simple.</span></span><span class="sig-name descname"><span class="pre">env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.simple.simple.env" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mpe2.collect_treasure.collect_treasure.env">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpe2.collect_treasure.collect_treasure.</span></span><span class="sig-name descname"><span class="pre">env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.collect_treasure.collect_treasure.env" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="mpe2.simple.simple.raw_env">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpe2.simple.simple.</span></span><span class="sig-name descname"><span class="pre">raw_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_rescaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.simple.simple.raw_env" title="Link to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mpe2.collect_treasure.collect_treasure.raw_env">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpe2.collect_treasure.collect_treasure.</span></span><span class="sig-name descname"><span class="pre">raw_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_collectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_deposits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_treasures</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_rescaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.collect_treasure.collect_treasure.raw_env" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>
@@ -361,17 +401,7 @@
         <footer>
           
           <div class="related-pages">
-            <a class="next-page" href="../simple_adversary/">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title">Simple Adversary</div>
-              </div>
-              <svg class="furo-related-icon">
-                <use href="#svg-arrow-right"></use>
-              </svg>
-            </a>
+            
             
           </div>
           <div class="bottom-of-page">
@@ -413,11 +443,11 @@
           <div class="toc-tree-container">
             <div class="toc-tree">
               <ul>
-<li><a class="reference internal" href="#">Simple</a><ul>
+<li><a class="reference internal" href="#">Collect Treasure</a><ul>
 <li><a class="reference internal" href="#arguments">Arguments</a></li>
 <li><a class="reference internal" href="#api">API</a><ul>
-<li><a class="reference internal" href="#mpe2.simple.simple.env"><code class="docutils literal notranslate"><span class="pre">env</span></code></a></li>
-<li><a class="reference internal" href="#mpe2.simple.simple.raw_env"><code class="docutils literal notranslate"><span class="pre">raw_env</span></code></a></li>
+<li><a class="reference internal" href="#mpe2.collect_treasure.collect_treasure.env"><code class="docutils literal notranslate"><span class="pre">env</span></code></a></li>
+<li><a class="reference internal" href="#mpe2.collect_treasure.collect_treasure.raw_env"><code class="docutils literal notranslate"><span class="pre">raw_env</span></code></a></li>
 </ul>
 </li>
 </ul>
