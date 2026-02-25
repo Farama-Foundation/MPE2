@@ -71,6 +71,7 @@ class raw_env(SimpleEnv, EzPickle):
         continuous_actions=False,
         render_mode=None,
         dynamic_rescaling=False,
+        benchmark_data=False,
     ):
         EzPickle.__init__(
             self,
@@ -79,6 +80,7 @@ class raw_env(SimpleEnv, EzPickle):
             max_cycles=max_cycles,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            benchmark_data=benchmark_data,
         )
         assert (
             0.0 <= local_ratio <= 1.0
@@ -94,6 +96,7 @@ class raw_env(SimpleEnv, EzPickle):
             continuous_actions=continuous_actions,
             local_ratio=local_ratio,
             dynamic_rescaling=dynamic_rescaling,
+            benchmark_data=benchmark_data,
         )
         self.metadata["name"] = "simple_spread_v3"
 

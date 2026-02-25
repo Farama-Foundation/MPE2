@@ -121,6 +121,7 @@ class raw_env(SimpleEnv, EzPickle):
         continuous_actions=False,
         render_mode=None,
         dynamic_rescaling=False,
+        benchmark_data=False,
     ):
         EzPickle.__init__(
             self,
@@ -131,6 +132,7 @@ class raw_env(SimpleEnv, EzPickle):
             continuous_actions=continuous_actions,
             render_mode=render_mode,
             dynamic_rescaling=dynamic_rescaling,
+            benchmark_data=benchmark_data,
         )
         scenario = Scenario()
         world = scenario.make_world(num_collectors, num_deposits, num_treasures)
@@ -142,6 +144,7 @@ class raw_env(SimpleEnv, EzPickle):
             max_cycles=max_cycles,
             continuous_actions=continuous_actions,
             dynamic_rescaling=dynamic_rescaling,
+            benchmark_data=benchmark_data,
         )
         self.metadata["name"] = "collect_treasure_v1"
 
@@ -173,6 +176,8 @@ class raw_env(SimpleEnv, EzPickle):
 
         for agent in self.world.agents:
             self.rewards[agent.name] = float(self.scenario.reward(agent, self.world))
+
+        self._populate_benchmark_data()
 
     # ------------------------------------------------------------------
     # Override draw to skip non-alive landmarks (picked-up treasures are
@@ -468,6 +473,16 @@ class Scenario(BaseScenario):
 
         rew += self._global_reward(world)
         return rew
+
+    def benchmark_data(self, agent, world):
+        num_alive = sum(1 for lm in world.landmarks if lm.alive)
+        if agent.collector:
+            return (agent.holding, num_alive)
+        else:
+            carrying_matching = sum(
+                1 for c in self.collectors(world) if c.holding == agent.d_i
+            )
+            return (carrying_matching, num_alive)
 
     # ------------------------------------------------------------------
     # Observation

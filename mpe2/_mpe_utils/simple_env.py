@@ -43,6 +43,7 @@ class SimpleEnv(AECEnv):
         continuous_actions=False,
         local_ratio=None,
         dynamic_rescaling=False,
+        benchmark_data=False,
     ):
         super().__init__()
 
@@ -68,6 +69,7 @@ class SimpleEnv(AECEnv):
         self.continuous_actions = continuous_actions
         self.local_ratio = local_ratio
         self.dynamic_rescaling = dynamic_rescaling
+        self.benchmark_data = benchmark_data
 
         self.scenario.reset_world(self.world, self.np_random)
 
@@ -167,6 +169,15 @@ class SimpleEnv(AECEnv):
 
         self.current_actions = [None] * self.num_agents
 
+    def _populate_benchmark_data(self):
+        """Populate self.infos with scenario benchmark_data for each agent, if enabled."""
+        if not self.benchmark_data:
+            return
+        for agent in self.world.agents:
+            self.infos[agent.name] = {
+                "benchmark_data": self.scenario.benchmark_data(agent, self.world)
+            }
+
     def _execute_world_step(self):
         # set action for each agent
         for i, agent in enumerate(self.world.agents):
@@ -201,6 +212,8 @@ class SimpleEnv(AECEnv):
                 reward = agent_reward
 
             self.rewards[agent.name] = reward
+
+        self._populate_benchmark_data()
 
     # set env action for a particular agent
     def _set_action(self, action, agent, action_space, time=None):
