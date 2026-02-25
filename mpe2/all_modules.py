@@ -1,4 +1,5 @@
 from mpe2 import (
+    collect_treasure_v1,
     simple_adversary_v3,
     simple_crypto_v3,
     simple_push_v3,
@@ -11,6 +12,7 @@ from mpe2 import (
 )
 
 mpe_environments = {
+    "mpe/collect_treasure_v1": collect_treasure_v1,
     "mpe/simple_adversary_v3": simple_adversary_v3,
     "mpe/simple_crypto_v3": simple_crypto_v3,
     "mpe/simple_push_v3": simple_push_v3,
