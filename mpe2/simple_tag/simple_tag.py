@@ -45,7 +45,7 @@ Agent and adversary action space: `[no_action, move_left, move_right, move_down,
 ### Arguments
 
 ``` python
-simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False)
 ```
 
 
@@ -61,6 +61,20 @@ simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25,
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`curriculum`: Whether to enable curriculum learning mode. When enabled, prey (good agents) start
+slow and become faster as stages advance, making them progressively harder to catch. Use
+`env.unwrapped.advance_curriculum()` to move to the next stage, or
+`env.unwrapped.set_curriculum_stage(n)` to jump to a specific stage. Stage changes take effect
+on the next `env.reset()`.
+
+Curriculum stages (prey max_speed / accel as fraction of full speed 1.3 / 4.0):
+  - Stage 0: 50% speed — prey is slow and easy to catch.
+  - Stage 1: 75% speed — prey moves at moderate pace.
+  - Stage 2: 100% speed — prey moves at full speed (normal game difficulty).
+
+To scale the number of agents across stages, recreate the environment with updated `num_good` /
+`num_adversaries` values and reset the curriculum stage accordingly.
 
 """
 
@@ -84,6 +98,7 @@ class raw_env(SimpleEnv, EzPickle):
         render_mode=None,
         dynamic_rescaling=False,
         benchmark_data=False,
+        curriculum=False,
     ):
         EzPickle.__init__(
             self,
@@ -94,8 +109,9 @@ class raw_env(SimpleEnv, EzPickle):
             continuous_actions=continuous_actions,
             render_mode=render_mode,
             benchmark_data=benchmark_data,
+            curriculum=curriculum,
         )
-        scenario = Scenario()
+        scenario = Scenario(curriculum=curriculum)
         world = scenario.make_world(num_good, num_adversaries, num_obstacles)
         SimpleEnv.__init__(
             self,
@@ -109,12 +125,53 @@ class raw_env(SimpleEnv, EzPickle):
         )
         self.metadata["name"] = "simple_tag_v3"
 
+    @property
+    def curriculum_stage(self):
+        """Current curriculum stage (0-indexed). Only meaningful when curriculum=True."""
+        return self.scenario.curriculum_stage
+
+    def advance_curriculum(self):
+        """Advance to the next curriculum stage. Takes effect on the next env.reset()."""
+        self.scenario.advance_curriculum()
+
+    def set_curriculum_stage(self, stage):
+        """Jump to a specific curriculum stage (0-indexed, clamped to valid range). Takes effect on the next env.reset()."""
+        self.scenario.set_curriculum_stage(stage)
+
 
 env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
+    # Curriculum stages for simple_tag.
+    # Prey (good agents) start slow, making them easier to catch.
+    # Each stage increases prey speed toward full difficulty.
+    CURRICULUM_STAGES = [
+        {"prey_speed_factor": 0.5},   # Stage 0: prey at 50% speed — easy
+        {"prey_speed_factor": 0.75},  # Stage 1: prey at 75% speed — moderate
+        {"prey_speed_factor": 1.0},   # Stage 2: prey at 100% speed — full difficulty
+    ]
+
+    # Base kinematic values for prey (good agents)
+    _PREY_BASE_MAX_SPEED = 1.3
+    _PREY_BASE_ACCEL = 4.0
+
+    def __init__(self, curriculum=False):
+        self.curriculum = curriculum
+        self.curriculum_stage = 0
+
+    def advance_curriculum(self):
+        """Move to the next curriculum stage. No-op at the final stage."""
+        max_stage = len(self.CURRICULUM_STAGES) - 1
+        if self.curriculum_stage < max_stage:
+            self.curriculum_stage += 1
+
+    def set_curriculum_stage(self, stage):
+        """Set curriculum stage directly (clamped to valid range)."""
+        max_stage = len(self.CURRICULUM_STAGES) - 1
+        self.curriculum_stage = max(0, min(stage, max_stage))
+
     def make_world(self, num_good=1, num_adversaries=3, num_obstacles=2):
         world = World()
         # set any world properties first
@@ -165,6 +222,13 @@ class Scenario(BaseScenario):
             if not landmark.boundary:
                 landmark.state.p_pos = np_random.uniform(-0.9, +0.9, world.dim_p)
                 landmark.state.p_vel = np.zeros(world.dim_p)
+        # Apply curriculum speed scaling to prey (good agents).
+        if self.curriculum:
+            speed_factor = self.CURRICULUM_STAGES[self.curriculum_stage]["prey_speed_factor"]
+            for agent in world.agents:
+                if not agent.adversary:
+                    agent.max_speed = self._PREY_BASE_MAX_SPEED * speed_factor
+                    agent.accel = self._PREY_BASE_ACCEL * speed_factor
 
     def benchmark_data(self, agent, world):
         # returns data for benchmarking purposes
