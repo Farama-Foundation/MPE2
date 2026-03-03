@@ -76,6 +76,9 @@ Curriculum stages (prey max_speed / accel as fraction of full speed 1.3 / 4.0):
 To scale the number of agents across stages, recreate the environment with updated `num_good` /
 `num_adversaries` values and reset the curriculum stage accordingly.
 
+`terminate_on_success`: When `True`, the episode terminates as soon as every good agent is
+simultaneously caught (colliding with at least one adversary).
+
 """
 
 import numpy as np
@@ -99,6 +102,7 @@ class raw_env(SimpleEnv, EzPickle):
         dynamic_rescaling=False,
         benchmark_data=False,
         curriculum=False,
+        terminate_on_success=False,
     ):
         EzPickle.__init__(
             self,
@@ -110,8 +114,9 @@ class raw_env(SimpleEnv, EzPickle):
             render_mode=render_mode,
             benchmark_data=benchmark_data,
             curriculum=curriculum,
+            terminate_on_success=terminate_on_success,
         )
-        scenario = Scenario(curriculum=curriculum)
+        scenario = Scenario(curriculum=curriculum, terminate_on_success=terminate_on_success)
         world = scenario.make_world(num_good, num_adversaries, num_obstacles)
         SimpleEnv.__init__(
             self,
@@ -157,9 +162,10 @@ class Scenario(BaseScenario):
     _PREY_BASE_MAX_SPEED = 1.3
     _PREY_BASE_ACCEL = 4.0
 
-    def __init__(self, curriculum=False):
+    def __init__(self, curriculum=False, terminate_on_success=False):
         self.curriculum = curriculum
         self.curriculum_stage = 0
+        self.terminate_on_success = terminate_on_success
 
     def advance_curriculum(self):
         """Move to the next curriculum stage. No-op at the final stage."""
@@ -171,6 +177,23 @@ class Scenario(BaseScenario):
         """Set curriculum stage directly (clamped to valid range)."""
         max_stage = len(self.CURRICULUM_STAGES) - 1
         self.curriculum_stage = max(0, min(stage, max_stage))
+
+    def is_terminal(self, world):
+        """Return True when every good agent is simultaneously caught by an adversary.
+
+        Only active when terminate_on_success=True. A good agent is considered caught
+        when it is currently colliding with at least one adversary. This gives a crisp
+        success signal to the adversaries and works naturally with curriculum learning —
+        early stages (slow prey) produce frequent, short episodes; later stages produce
+        longer, harder-to-terminate episodes.
+        """
+        if not self.terminate_on_success:
+            return False
+        adversaries = self.adversaries(world)
+        for prey in self.good_agents(world):
+            if not any(self.is_collision(prey, adv) for adv in adversaries):
+                return False
+        return True
 
     def make_world(self, num_good=1, num_adversaries=3, num_obstacles=2):
         world = World()

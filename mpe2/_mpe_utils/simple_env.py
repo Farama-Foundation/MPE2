@@ -274,6 +274,9 @@ class SimpleEnv(AECEnv):
             if self.steps >= self.max_cycles:
                 for a in self.agents:
                     self.truncations[a] = True
+            elif self.scenario.is_terminal(self.world):
+                for a in self.agents:
+                    self.terminations[a] = True
         else:
             self._clear_rewards()
 

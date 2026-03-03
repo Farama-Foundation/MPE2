@@ -7,3 +7,6 @@ class BaseScenario:  # defines scenario upon which the world is built
 
     def benchmark_data(self, agent, world):  # return benchmark metrics for evaluation
         return {}
+
+    def is_terminal(self, world):  # return True to end the episode early on success
+        return False
