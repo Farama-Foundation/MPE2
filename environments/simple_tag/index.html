@@ -345,7 +345,7 @@ default, there is 1 good agent, 3 adversaries and 2 obstacles.</p>
 <p>Agent and adversary action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
 <section id="arguments">
 <h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simple_tag_v3</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">num_good</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_obstacles</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simple_tag_v3</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">num_good</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_adversaries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_obstacles</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">curriculum</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">num_good</span></code>:  number of good agents</p>
@@ -354,6 +354,19 @@ default, there is 1 good agent, 3 adversaries and 2 obstacles.</p>
 <p><code class="docutils literal notranslate"><span class="pre">max_cycles</span></code>:  number of frames (a step for each agent) until game terminates</p>
 <p><code class="docutils literal notranslate"><span class="pre">continuous_actions</span></code>: Whether agent action spaces are discrete(default) or continuous</p>
 <p><code class="docutils literal notranslate"><span class="pre">dynamic_rescaling</span></code>: Whether to rescale the size of agents and landmarks based on the screen size</p>
+<p><code class="docutils literal notranslate"><span class="pre">curriculum</span></code>: Whether to enable curriculum learning mode. When enabled, prey (good agents) start
+slow and become faster as stages advance, making them progressively harder to catch. Use
+<code class="docutils literal notranslate"><span class="pre">env.unwrapped.advance_curriculum()</span></code> to move to the next stage, or
+<code class="docutils literal notranslate"><span class="pre">env.unwrapped.set_curriculum_stage(n)</span></code> to jump to a specific stage. Stage changes take effect
+on the next <code class="docutils literal notranslate"><span class="pre">env.reset()</span></code>.</p>
+<p>Curriculum stages (prey max_speed / accel as fraction of full speed 1.3 / 4.0):</p>
+<ul class="simple">
+<li><p>Stage 0: 50% speed — prey is slow and easy to catch.</p></li>
+<li><p>Stage 1: 75% speed — prey moves at moderate pace.</p></li>
+<li><p>Stage 2: 100% speed — prey moves at full speed (normal game difficulty).</p></li>
+</ul>
+<p>To scale the number of agents across stages, recreate the environment with updated <code class="docutils literal notranslate"><span class="pre">num_good</span></code> /
+<code class="docutils literal notranslate"><span class="pre">num_adversaries</span></code> values and reset the curriculum stage accordingly.</p>
 </section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
@@ -364,8 +377,26 @@ default, there is 1 good agent, 3 adversaries and 2 obstacles.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mpe2.simple_tag.simple_tag.raw_env">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpe2.simple_tag.simple_tag.</span></span><span class="sig-name descname"><span class="pre">raw_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_good</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_adversaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_obstacles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_rescaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.simple_tag.simple_tag.raw_env" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mpe2.simple_tag.simple_tag.</span></span><span class="sig-name descname"><span class="pre">raw_env</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_good</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_adversaries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_obstacles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cycles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">continuous_actions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dynamic_rescaling</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">benchmark_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curriculum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.simple_tag.simple_tag.raw_env" title="Link to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mpe2.simple_tag.simple_tag.raw_env.advance_curriculum">
+<span class="sig-name descname"><span class="pre">advance_curriculum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.simple_tag.simple_tag.raw_env.advance_curriculum" title="Link to this definition">¶</a></dt>
+<dd><p>Advance to the next curriculum stage. Takes effect on the next env.reset().</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mpe2.simple_tag.simple_tag.raw_env.curriculum_stage">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">curriculum_stage</span></span><a class="headerlink" href="#mpe2.simple_tag.simple_tag.raw_env.curriculum_stage" title="Link to this definition">¶</a></dt>
+<dd><p>Current curriculum stage (0-indexed). Only meaningful when curriculum=True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mpe2.simple_tag.simple_tag.raw_env.set_curriculum_stage">
+<span class="sig-name descname"><span class="pre">set_curriculum_stage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpe2.simple_tag.simple_tag.raw_env.set_curriculum_stage" title="Link to this definition">¶</a></dt>
+<dd><p>Jump to a specific curriculum stage (0-indexed, clamped to valid range). Takes effect on the next env.reset().</p>
+</dd></dl>
+
+</dd></dl>
 
 </section>
 </section>
@@ -443,7 +474,12 @@ default, there is 1 good agent, 3 adversaries and 2 obstacles.</p>
 <li><a class="reference internal" href="#arguments">Arguments</a></li>
 <li><a class="reference internal" href="#api">API</a><ul>
 <li><a class="reference internal" href="#mpe2.simple_tag.simple_tag.env"><code class="docutils literal notranslate"><span class="pre">env</span></code></a></li>
-<li><a class="reference internal" href="#mpe2.simple_tag.simple_tag.raw_env"><code class="docutils literal notranslate"><span class="pre">raw_env</span></code></a></li>
+<li><a class="reference internal" href="#mpe2.simple_tag.simple_tag.raw_env"><code class="docutils literal notranslate"><span class="pre">raw_env</span></code></a><ul>
+<li><a class="reference internal" href="#mpe2.simple_tag.simple_tag.raw_env.advance_curriculum"><code class="docutils literal notranslate"><span class="pre">raw_env.advance_curriculum()</span></code></a></li>
+<li><a class="reference internal" href="#mpe2.simple_tag.simple_tag.raw_env.curriculum_stage"><code class="docutils literal notranslate"><span class="pre">raw_env.curriculum_stage</span></code></a></li>
+<li><a class="reference internal" href="#mpe2.simple_tag.simple_tag.raw_env.set_curriculum_stage"><code class="docutils literal notranslate"><span class="pre">raw_env.set_curriculum_stage()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
