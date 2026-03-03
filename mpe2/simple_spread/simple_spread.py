@@ -36,7 +36,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False)
 ```
 
 
@@ -50,6 +50,17 @@ simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=Fal
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`curriculum`: Whether to enable curriculum learning mode. When enabled, training proceeds through
+stages that gradually increase task difficulty. Use `env.unwrapped.advance_curriculum()` to move
+to the next stage, or `env.unwrapped.set_curriculum_stage(n)` to jump to a specific stage.
+
+Curriculum stages:
+  - Stage 0: Agents receive no collision penalty — focus purely on covering landmarks.
+  - Stage 1: Collision penalty is restored — agents must cover landmarks while avoiding each other.
+
+To scale the number of agents/landmarks across stages, recreate the environment with a larger `N`
+and reset the curriculum stage accordingly.
 
 """
 
@@ -72,6 +83,7 @@ class raw_env(SimpleEnv, EzPickle):
         render_mode=None,
         dynamic_rescaling=False,
         benchmark_data=False,
+        curriculum=False,
     ):
         EzPickle.__init__(
             self,
@@ -81,11 +93,12 @@ class raw_env(SimpleEnv, EzPickle):
             continuous_actions=continuous_actions,
             render_mode=render_mode,
             benchmark_data=benchmark_data,
+            curriculum=curriculum,
         )
         assert (
             0.0 <= local_ratio <= 1.0
         ), "local_ratio is a proportion. Must be between 0 and 1."
-        scenario = Scenario()
+        scenario = Scenario(curriculum=curriculum)
         world = scenario.make_world(N)
         SimpleEnv.__init__(
             self,
@@ -100,12 +113,48 @@ class raw_env(SimpleEnv, EzPickle):
         )
         self.metadata["name"] = "simple_spread_v3"
 
+    @property
+    def curriculum_stage(self):
+        """Current curriculum stage (0-indexed). Only meaningful when curriculum=True."""
+        return self.scenario.curriculum_stage
+
+    def advance_curriculum(self):
+        """Advance to the next curriculum stage. No-op if already at the final stage."""
+        self.scenario.advance_curriculum()
+
+    def set_curriculum_stage(self, stage):
+        """Jump to a specific curriculum stage (0-indexed, clamped to valid range)."""
+        self.scenario.set_curriculum_stage(stage)
+
 
 env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
+    # Curriculum stages for simple_spread.
+    # Stage 0: no collision penalty — agents learn to cover landmarks first.
+    # Stage 1: collision penalty enabled — agents learn to spread without colliding.
+    CURRICULUM_STAGES = [
+        {"collision_penalty": False},
+        {"collision_penalty": True},
+    ]
+
+    def __init__(self, curriculum=False):
+        self.curriculum = curriculum
+        self.curriculum_stage = 0
+
+    def advance_curriculum(self):
+        """Move to the next curriculum stage. No-op at the final stage."""
+        max_stage = len(self.CURRICULUM_STAGES) - 1
+        if self.curriculum_stage < max_stage:
+            self.curriculum_stage += 1
+
+    def set_curriculum_stage(self, stage):
+        """Set curriculum stage directly (clamped to valid range)."""
+        max_stage = len(self.CURRICULUM_STAGES) - 1
+        self.curriculum_stage = max(0, min(stage, max_stage))
+
     def make_world(self, N=3):
         world = World()
         # set any world properties first
@@ -172,9 +221,12 @@ class Scenario(BaseScenario):
         return True if dist < dist_min else False
 
     def reward(self, agent, world):
-        # Agents are rewarded based on minimum agent distance to each landmark, penalized for collisions
+        # Agents are rewarded based on minimum agent distance to each landmark, penalized for collisions.
+        # In curriculum stage 0, the collision penalty is suppressed so agents first learn to reach landmarks.
         rew = 0
-        if agent.collide:
+        stage_config = self.CURRICULUM_STAGES[self.curriculum_stage]
+        collision_penalty_active = (not self.curriculum) or stage_config["collision_penalty"]
+        if agent.collide and collision_penalty_active:
             for a in world.agents:
                 rew -= 1.0 * (self.is_collision(a, agent) and a != agent)
         return rew
