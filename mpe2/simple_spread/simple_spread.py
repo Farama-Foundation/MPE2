@@ -62,6 +62,10 @@ Curriculum stages:
 To scale the number of agents/landmarks across stages, recreate the environment with a larger `N`
 and reset the curriculum stage accordingly.
 
+`terminate_on_success`: When `True`, the episode terminates as soon as every landmark is covered
+by at least one agent (an agent is within distance 0.1 of the landmark). This gives a stronger
+training signal than always running to `max_cycles`, and pairs naturally with curriculum learning.
+
 """
 
 import numpy as np
@@ -84,6 +88,7 @@ class raw_env(SimpleEnv, EzPickle):
         dynamic_rescaling=False,
         benchmark_data=False,
         curriculum=False,
+        terminate_on_success=False,
     ):
         EzPickle.__init__(
             self,
@@ -94,11 +99,12 @@ class raw_env(SimpleEnv, EzPickle):
             render_mode=render_mode,
             benchmark_data=benchmark_data,
             curriculum=curriculum,
+            terminate_on_success=terminate_on_success,
         )
         assert (
             0.0 <= local_ratio <= 1.0
         ), "local_ratio is a proportion. Must be between 0 and 1."
-        scenario = Scenario(curriculum=curriculum)
+        scenario = Scenario(curriculum=curriculum, terminate_on_success=terminate_on_success)
         world = scenario.make_world(N)
         SimpleEnv.__init__(
             self,
@@ -140,9 +146,13 @@ class Scenario(BaseScenario):
         {"collision_penalty": True},
     ]
 
-    def __init__(self, curriculum=False):
+    # Distance threshold within which an agent is considered to "occupy" a landmark.
+    CAPTURE_RADIUS = 0.1
+
+    def __init__(self, curriculum=False, terminate_on_success=False):
         self.curriculum = curriculum
         self.curriculum_stage = 0
+        self.terminate_on_success = terminate_on_success
 
     def advance_curriculum(self):
         """Move to the next curriculum stage. No-op at the final stage."""
@@ -219,6 +229,23 @@ class Scenario(BaseScenario):
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
+
+    def is_terminal(self, world):
+        """Return True when every landmark is covered by at least one agent.
+
+        Only active when terminate_on_success=True. The capture radius matches
+        the threshold used in benchmark_data so success is measured consistently.
+        """
+        if not self.terminate_on_success:
+            return False
+        for lm in world.landmarks:
+            dists = [
+                np.sqrt(np.sum(np.square(a.state.p_pos - lm.state.p_pos)))
+                for a in world.agents
+            ]
+            if min(dists) >= self.CAPTURE_RADIUS:
+                return False
+        return True
 
     def reward(self, agent, world):
         # Agents are rewarded based on minimum agent distance to each landmark, penalized for collisions.
