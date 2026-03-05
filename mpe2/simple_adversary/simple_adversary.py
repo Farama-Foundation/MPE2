@@ -39,7 +39,7 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 
@@ -52,6 +52,26 @@ simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_re
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
 
+`num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
+observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
+available count are zero-padded so the observation shape remains fixed.
+``None`` (default) = full observability.
+
+    .. warning::
+        **Solvability under PO is not guaranteed for simple_adversary.**
+        The core task requires good agents to *split up* and cover all N
+        landmarks simultaneously to confuse the adversary.  Under tight PO
+        constraints good agents may not observe every landmark or every
+        other good agent, making coordinated coverage much harder or
+        impossible.  Investigation and task-specific tuning are recommended
+        before applying PO to this environment.
+
+`num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
+observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
+Note: the goal landmark relative position is *always* included in good agents' observations
+regardless of this setting (it is private, 2-D information, not a positional slot).
+``None`` (default) = full observability.
+
 """
 
 import numpy as np
@@ -59,6 +79,7 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.partial_observability import padded_relative_positions
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -72,7 +93,15 @@ class raw_env(SimpleEnv, EzPickle):
         render_mode=None,
         dynamic_rescaling=False,
         benchmark_data=False,
+        num_agent_neighbors=None,
+        num_landmark_neighbors=None,
     ):
+        assert num_agent_neighbors is None or (
+            isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
+        ), "num_agent_neighbors must be a positive integer or None."
+        assert num_landmark_neighbors is None or (
+            isinstance(num_landmark_neighbors, int) and num_landmark_neighbors > 0
+        ), "num_landmark_neighbors must be a positive integer or None."
         EzPickle.__init__(
             self,
             N=N,
@@ -80,8 +109,13 @@ class raw_env(SimpleEnv, EzPickle):
             continuous_actions=continuous_actions,
             render_mode=render_mode,
             benchmark_data=benchmark_data,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
         )
-        scenario = Scenario()
+        scenario = Scenario(
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+        )
         world = scenario.make_world(N)
         SimpleEnv.__init__(
             self,
@@ -101,6 +135,10 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
+    def __init__(self, num_agent_neighbors=None, num_landmark_neighbors=None):
+        self.num_agent_neighbors = num_agent_neighbors
+        self.num_landmark_neighbors = num_landmark_neighbors
+
     def make_world(self, N=2):
         world = World()
         # set any world properties first
@@ -240,22 +278,56 @@ class Scenario(BaseScenario):
             return adv_rew
 
     def observation(self, agent, world):
-        # get positions of all entities in this agent's reference frame
-        entity_pos = []
-        for entity in world.landmarks:
-            entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # entity colors
-        entity_color = []
-        for entity in world.landmarks:
-            entity_color.append(entity.color)
-        # communication of all other agents
-        other_pos = []
-        for other in world.agents:
-            if other is agent:
-                continue
-            other_pos.append(other.state.p_pos - agent.state.p_pos)
+        """Return the observation vector for *agent*.
+
+        Good-agent structure:
+            ``[goal_rel_pos, landmark_positions, other_agent_positions]``
+
+            * ``goal_rel_pos``       – relative position of the goal landmark
+              (always included; this is private information regardless of PO).
+            * ``landmark_positions`` – relative positions of observed landmarks.
+            * ``other_agent_pos``    – relative positions of observed other agents.
+
+        Adversary structure:
+            ``[landmark_positions, other_agent_positions]``
+
+            The adversary does not know which landmark is the goal.
+
+        Full observability (``num_*_neighbors=None``, default):
+
+        Partial observability:
+            Landmark and other-agent slots are filtered to the N nearest and
+            zero-padded to maintain a *fixed* observation shape.  The goal
+            relative position (good agents only) is *always* included and is
+            not subject to neighbour filtering.
+
+        .. warning::
+            simple_adversary may **not be solvable** under strict PO
+            constraints.  Good agents must collectively cover all N landmarks
+            to confuse the adversary; with limited landmark/agent visibility
+            this coordination becomes much harder.  See docstring for
+            details.
+        """
+        others = [other for other in world.agents if other is not agent]
+
+        # lsndmark
+        if self.num_landmark_neighbors is None:
+            entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
+        else:
+            entity_pos = padded_relative_positions(
+                agent, world.landmarks, self.num_landmark_neighbors
+            )
+
+        # Other agents
+        if self.num_agent_neighbors is None:
+            other_pos = [o.state.p_pos - agent.state.p_pos for o in others]
+        else:
+            other_pos = padded_relative_positions(
+                agent, others, self.num_agent_neighbors
+            )
 
         if not agent.adversary:
+            # Goal position is always observable by good agents (private info).
             return np.concatenate(
                 [agent.goal_a.state.p_pos - agent.state.p_pos] + entity_pos + other_pos
             )

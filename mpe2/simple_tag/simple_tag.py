@@ -45,7 +45,7 @@ Agent and adversary action space: `[no_action, move_left, move_right, move_down,
 ### Arguments
 
 ``` python
-simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False)
+simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 
@@ -68,6 +68,17 @@ slow and become faster as stages advance, making them progressively harder to ca
 `env.unwrapped.set_curriculum_stage(n)` to jump to a specific stage. Stage changes take effect
 on the next `env.reset()`.
 
+`num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
+observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
+available count are zero-padded so the observation shape remains fixed.  ``None`` (default)
+restores full observability (all agents observed) and preserves backwards-compatibility.
+Under PO, velocity information is restricted to good agents visible within the neighbour
+window; velocity slots for adversaries or padded slots are zero.
+
+`num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* (obstacles)
+each agent observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed
+size when fewer landmarks are available.  ``None`` (default) = full observability.
+
 Curriculum stages (prey max_speed / accel as fraction of full speed 1.3 / 4.0):
   - Stage 0: 50% speed — prey is slow and easy to catch.
   - Stage 1: 75% speed — prey moves at moderate pace.
@@ -86,6 +97,10 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.partial_observability import (
+    padded_relative_positions,
+    padded_velocities,
+)
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -103,7 +118,15 @@ class raw_env(SimpleEnv, EzPickle):
         benchmark_data=False,
         curriculum=False,
         terminate_on_success=False,
+        num_agent_neighbors=None,
+        num_landmark_neighbors=None,
     ):
+        assert num_agent_neighbors is None or (
+            isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
+        ), "num_agent_neighbors must be a positive integer or None."
+        assert num_landmark_neighbors is None or (
+            isinstance(num_landmark_neighbors, int) and num_landmark_neighbors > 0
+        ), "num_landmark_neighbors must be a positive integer or None."
         EzPickle.__init__(
             self,
             num_good=num_good,
@@ -115,8 +138,15 @@ class raw_env(SimpleEnv, EzPickle):
             benchmark_data=benchmark_data,
             curriculum=curriculum,
             terminate_on_success=terminate_on_success,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
         )
-        scenario = Scenario(curriculum=curriculum, terminate_on_success=terminate_on_success)
+        scenario = Scenario(
+            curriculum=curriculum,
+            terminate_on_success=terminate_on_success,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+        )
         world = scenario.make_world(num_good, num_adversaries, num_obstacles)
         SimpleEnv.__init__(
             self,
@@ -162,10 +192,12 @@ class Scenario(BaseScenario):
     _PREY_BASE_MAX_SPEED = 1.3
     _PREY_BASE_ACCEL = 4.0
 
-    def __init__(self, curriculum=False, terminate_on_success=False):
+    def __init__(self, curriculum=False, terminate_on_success=False, num_agent_neighbors=None, num_landmark_neighbors=None,):
         self.curriculum = curriculum
         self.curriculum_stage = 0
         self.terminate_on_success = terminate_on_success
+        self.num_agent_neighbors = num_agent_neighbors
+        self.num_landmark_neighbors = num_landmark_neighbors
 
     def advance_curriculum(self):
         """Move to the next curriculum stage. No-op at the final stage."""
@@ -340,22 +372,49 @@ class Scenario(BaseScenario):
         return rew
 
     def observation(self, agent, world):
-        # get positions of all entities in this agent's reference frame
-        entity_pos = []
-        for entity in world.landmarks:
-            if not entity.boundary:
-                entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # communication of all other agents
-        comm = []
-        other_pos = []
-        other_vel = []
-        for other in world.agents:
-            if other is agent:
-                continue
-            comm.append(other.state.c)
-            other_pos.append(other.state.p_pos - agent.state.p_pos)
-            if not other.adversary:
-                other_vel.append(other.state.p_vel)
+        """Return the observation vector for *agent*.
+
+        * ``self_vel``       – agent's own velocity (dim_p,)
+        * ``self_pos``       – agent's own position (dim_p,)
+        * ``landmark_pos``   – relative positions of observed landmarks
+        * ``other_agent_pos``– relative positions of observed other agents
+        * ``good_agent_vel`` – velocities of visible good agents (zeros for
+                               adversary slots or padded slots)
+
+        Full observability (``num_*_neighbors=None``, default):
+            All non-boundary landmarks are included; all other agents' positions are included;
+            only good agents contribute velocities (matching legacy size).
+
+        Partial observability:
+            Only the N nearest landmarks / agents are included.  Slots are
+            zero-padded to maintain a *fixed* observation shape.  Velocity
+            slots for adversary agents within the neighbour window are zeros.
+        """
+        # Landmarks ---
+        non_boundary_landmarks = [e for e in world.landmarks if not e.boundary]
+        entity_pos = padded_relative_positions(
+            agent, non_boundary_landmarks, self.num_landmark_neighbors
+        )
+
+        # Other agents ---
+        others = [other for other in world.agents if other is not agent]
+
+        if self.num_agent_neighbors is None:
+            # Full observability
+            other_pos = [o.state.p_pos - agent.state.p_pos for o in others]
+            other_vel = [o.state.p_vel for o in others if not o.adversary]
+        else:
+            # Partial observability
+            other_pos = padded_relative_positions(
+                agent, others, self.num_agent_neighbors
+            )
+            other_vel = padded_velocities(
+                agent,
+                others,
+                self.num_agent_neighbors,
+                predicate=lambda e: not e.adversary,
+            )
+
         return np.concatenate(
             [agent.state.p_vel]
             + [agent.state.p_pos]
