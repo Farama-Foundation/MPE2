@@ -36,7 +36,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False)
+simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 
@@ -66,6 +66,17 @@ and reset the curriculum stage accordingly.
 by at least one agent (an agent is within distance 0.1 of the landmark). This gives a stronger
 training signal than always running to `max_cycles`, and pairs naturally with curriculum learning.
 
+`num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
+observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
+available count are zero-padded so the observation shape remains fixed.  Communication signals
+are also filtered to the same N nearest agents.  ``None`` (default) = full observability.
+simple_spread is generally solvable under PO – agents can learn locally-greedy covering
+policies without needing global information.
+
+`num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
+observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
+``None`` (default) = full observability.
+
 """
 
 import numpy as np
@@ -73,6 +84,10 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.partial_observability import (
+    padded_comms,
+    padded_relative_positions,
+)
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -89,7 +104,18 @@ class raw_env(SimpleEnv, EzPickle):
         benchmark_data=False,
         curriculum=False,
         terminate_on_success=False,
+        num_agent_neighbors=None,
+        num_landmark_neighbors=None,
     ):
+        assert (
+            0.0 <= local_ratio <= 1.0
+        ), "local_ratio is a proportion. Must be between 0 and 1."
+        assert num_agent_neighbors is None or (
+            isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
+        ), "num_agent_neighbors must be a positive integer or None."
+        assert num_landmark_neighbors is None or (
+            isinstance(num_landmark_neighbors, int) and num_landmark_neighbors > 0
+        ), "num_landmark_neighbors must be a positive integer or None."
         EzPickle.__init__(
             self,
             N=N,
@@ -100,11 +126,15 @@ class raw_env(SimpleEnv, EzPickle):
             benchmark_data=benchmark_data,
             curriculum=curriculum,
             terminate_on_success=terminate_on_success,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
         )
-        assert (
-            0.0 <= local_ratio <= 1.0
-        ), "local_ratio is a proportion. Must be between 0 and 1."
-        scenario = Scenario(curriculum=curriculum, terminate_on_success=terminate_on_success)
+        scenario = Scenario(
+            curriculum=curriculum,
+            terminate_on_success=terminate_on_success,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+        )
         world = scenario.make_world(N)
         SimpleEnv.__init__(
             self,
@@ -149,10 +179,12 @@ class Scenario(BaseScenario):
     # Distance threshold within which an agent is considered to "occupy" a landmark.
     CAPTURE_RADIUS = 0.1
 
-    def __init__(self, curriculum=False, terminate_on_success=False):
+    def __init__(self, curriculum=False, terminate_on_success=False, num_agent_neighbors=None, num_landmark_neighbors=None,):
         self.curriculum = curriculum
         self.curriculum_stage = 0
         self.terminate_on_success = terminate_on_success
+        self.num_agent_neighbors = num_agent_neighbors
+        self.num_landmark_neighbors = num_landmark_neighbors
 
     def advance_curriculum(self):
         """Move to the next curriculum stage. No-op at the final stage."""
@@ -269,18 +301,36 @@ class Scenario(BaseScenario):
         return rew
 
     def observation(self, agent, world):
-        # get positions of all entities in this agent's reference frame
-        entity_pos = []
-        for entity in world.landmarks:  # world.entities:
-            entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # communication of all other agents
-        comm = []
-        other_pos = []
-        for other in world.agents:
-            if other is agent:
-                continue
-            comm.append(other.state.c)
-            other_pos.append(other.state.p_pos - agent.state.p_pos)
+        """Return the observation vector for *agent*.
+
+        Full observability (``num_*_neighbors=None``, default):
+
+        Partial observability:
+            Only the N nearest landmarks / other agents are included.
+            Slots are zero-padded to maintain a *fixed* observation shape.
+            Communication slots are aligned with agent position slots (same
+            N nearest agents).
+        """
+        others = [other for other in world.agents if other is not agent]
+
+        # lsndmarks
+        if self.num_landmark_neighbors is None:
+            entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
+        else:
+            entity_pos = padded_relative_positions(
+                agent, world.landmarks, self.num_landmark_neighbors
+            )
+
+        # Other agents + comm
+        if self.num_agent_neighbors is None:
+            other_pos = [o.state.p_pos - agent.state.p_pos for o in others]
+            comm = [o.state.c for o in others]
+        else:
+            other_pos = padded_relative_positions(
+                agent, others, self.num_agent_neighbors
+            )
+            comm = padded_comms(agent, others, self.num_agent_neighbors, world.dim_c)
+
         return np.concatenate(
             [agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm
         )
