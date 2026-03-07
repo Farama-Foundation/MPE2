@@ -5,15 +5,10 @@ This script reads documentation from /mpe2 and puts it into md files inside the 
 import os
 import re
 
-GIF_WIDTH = "140px"
+GIF_WIDTH = "280px"
 VIDEO_PATH = "_static/img/videos"
 ICON_PATH = "_static/img/icons"
 FIGURE_RE = re.compile(r"\n?```\\{figure\\}.*?\n```", re.DOTALL)
-
-
-def verify_path_exists(path, label, env_name):
-    if not os.path.exists(path):
-        print(f"WARNING: Missing {label} for '{env_name}': {path}")
 
 
 def make_figure_block(env_id):
@@ -74,13 +69,12 @@ if __name__ == "__main__":
 
         icon_file = os.path.join(docs_dir, ICON_PATH, f"{env_name}.png")
         video_file = os.path.join(docs_dir, VIDEO_PATH, f"mpe2_{env_name}.gif")
-        verify_path_exists(video_file, "video", env_name)
 
         frontmatter_options = {}
         if os.path.exists(icon_file):
             frontmatter_options["env_icon"] = f'"/_static/img/icons/{env_name}.png"'
         else:
-            print(f"INFO: Skipping env_icon for '{env_name}' (missing {icon_file})")
+            print(f"WARNING: Skipping env_icon for '{env_name}' (missing {icon_file})")
 
         if i == 0:
             frontmatter_options["firstpage"] = ""
@@ -90,7 +84,10 @@ if __name__ == "__main__":
         docs_text = get_docs_from_py(
             os.path.join(env_path, env_name + ".py")
         )
-        docs_text = ensure_figure(docs_text, env_name)
+        if os.path.exists(video_file):
+            docs_text = ensure_figure(docs_text, env_name)
+        else:
+            print(f"WARNING: Missing video for '{env_name}': {video_file}")
 
         docs_text += f"""## API
 ```{{eval-rst}}

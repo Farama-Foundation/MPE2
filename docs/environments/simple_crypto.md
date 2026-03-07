@@ -6,7 +6,7 @@ env_icon: "/_static/img/icons/simple_crypto.png"
 # Simple Crypto
 
 ```{figure} /_static/img/videos/mpe2_simple_crypto.gif
-:width: 140px
+:width: 280px
 :name: simple_crypto
 ```
 

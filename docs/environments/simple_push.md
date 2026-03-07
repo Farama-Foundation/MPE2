@@ -6,7 +6,7 @@ env_icon: "/_static/img/icons/simple_push.png"
 # Simple Push
 
 ```{figure} /_static/img/videos/mpe2_simple_push.gif
-:width: 140px
+:width: 280px
 :name: simple_push
 ```
 
