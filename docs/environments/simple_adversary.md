@@ -42,7 +42,7 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 
@@ -54,6 +54,26 @@ simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_re
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
+observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
+available count are zero-padded so the observation shape remains fixed.
+``None`` (default) = full observability.
+
+    .. warning::
+        **Solvability under PO is not guaranteed for simple_adversary.**
+        The core task requires good agents to *split up* and cover all N
+        landmarks simultaneously to confuse the adversary.  Under tight PO
+        constraints good agents may not observe every landmark or every
+        other good agent, making coordinated coverage much harder or
+        impossible.  Investigation and task-specific tuning are recommended
+        before applying PO to this environment.
+
+`num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
+observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
+Note: the goal landmark relative position is *always* included in good agents' observations
+regardless of this setting (it is private, 2-D information, not a positional slot).
+``None`` (default) = full observability.
 
 ## API
 ```{eval-rst}

@@ -49,12 +49,15 @@ mpe2
 environments/simple
 environments/simple_adversary
 environments/simple_crypto
+environments/simple_formation
+environments/simple_line
 environments/simple_push
 environments/simple_reference
 environments/simple_speaker_listener
 environments/simple_spread
 environments/simple_tag
 environments/simple_world_comm
+environments/collect_treasure
 ```
 
 
