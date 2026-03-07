@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_adversary.png"
 
 # Simple Adversary
 
-```{figure} mpe2/mpe2_simple_adversary.gif
+```{figure} _static/img/videos/mpe2_simple_adversary.gif
 :width: 140px
 :name: simple_adversary
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -74,7 +75,6 @@ observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixe
 Note: the goal landmark relative position is *always* included in good agents' observations
 regardless of this setting (it is private, 2-D information, not a positional slot).
 ``None`` (default) = full observability.
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_adversary.simple_adversary

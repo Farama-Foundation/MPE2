@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_speaker_listener.png"
 
 # Simple Speaker Listener
 
-```{figure} mpe2/mpe2_simple_speaker_listener.gif
+```{figure} _static/img/videos/mpe2_simple_speaker_listener.gif
 :width: 140px
 :name: simple_speaker_listener
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -50,7 +51,6 @@ simple_speaker_listener_v4.env(max_cycles=25, continuous_actions=False, dynamic_
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_speaker_listener.simple_speaker_listener

@@ -2,11 +2,6 @@
 """
 # Simple World Comm
 
-```{figure} mpe2/mpe2_simple_world_comm.gif
-:width: 140px
-:name: simple_world_comm
-```
-
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
 | Import             |                       `from mpe2 import simple_world_comm_v3`                       |

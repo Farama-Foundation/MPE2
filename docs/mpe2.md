@@ -7,7 +7,7 @@ firstpage:
 
 
 ```{raw} html
-    :file: environments/mpe2/list.html
+    :file: environments/list.html
 ```
 
 Multi Particle Environments (MPE) are a set of communication oriented environment where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.

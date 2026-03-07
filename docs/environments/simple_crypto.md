@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_crypto.png"
 
 # Simple Crypto
 
-```{figure} mpe2/mpe2_simple_crypto.gif
+```{figure} _static/img/videos/mpe2_simple_crypto.gif
 :width: 140px
 :name: simple_crypto
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -58,7 +59,6 @@ simple_crypto_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_crypto.simple_crypto

@@ -5,6 +5,12 @@ env_icon: "../../../_static/img/icons/simple_line.png"
 
 # Simple Line
 
+```{figure} _static/img/videos/mpe2_simple_line.gif
+:width: 140px
+:name: simple_line
+```
+
+
 This environment is part of the <a href='https://github.com/sumitsk/marl_transfer/tree/master/mape/multiagent/scenarios'>"Learning Transferable Cooperative Behavior in Multi-Agent Teams" Paper</a>.
 
 | Import               | `from mpe2 import simple_line_v1`             |
@@ -42,7 +48,6 @@ simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_on_su
 
 `terminate_on_success`: when True, the episode ends as soon as every agent is within
   0.05 units of its assigned target position.
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_line.simple_line

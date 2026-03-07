@@ -2,11 +2,6 @@
 """
 # Simple
 
-```{figure} mpe2/mpe2_simple.gif
-:width: 140px
-:name: simple
-```
-
 This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.
 
 | Import             |      `from mpe2 import simple_v3`      |

@@ -1,9 +1,11 @@
 import os
 import sys
 
+GIF_DIR = "../_static/img/videos"
+
 all_envs = {
     "mpe2": [
-        "simple"
+        "simple",
         "simple_adversary",
         "simple_crypto",
         "simple_formation",
@@ -21,11 +23,12 @@ all_envs = {
 
 def create_grid_cell(type_id, env_id, base_path):
     # The relative image path assumes that the list will be at /environment/env_type/
+    gif_path = f"{GIF_DIR}/{type_id}_{env_id}.gif"
     return f"""
-            <a href="{base_path}{env_id}">
+            <a href="environments/{env_id}">
                 <div class="env-grid__cell">
                     <div class="cell__image-container">
-                        <img src="../_images/{type_id}_{env_id}.gif">
+                        <img src="{gif_path}">
                     </div>
                     <div class="cell__title">
                         <span>{' '.join(env_id.split('_')).title()}</span>
@@ -71,7 +74,7 @@ if __name__ == "__main__":
 
     for key in all_envs.keys():
         env_list = all_envs[key]
-        envs_path = os.path.join(os.path.dirname(__file__), "..", "environments", key)
+        envs_path = os.path.join(os.path.dirname(__file__), "..", "environments")
         page = generate_page(key, env_list)
         fp = open(os.path.join(envs_path, "list.html"), "w+", encoding="utf-8")
         fp.write(page)

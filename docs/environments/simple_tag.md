@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_tag.png"
 
 # Simple Tag
 
-```{figure} mpe2/mpe2_simple_tag.gif
+```{figure} _static/img/videos/mpe2_simple_tag.gif
 :width: 140px
 :name: simple_tag
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -92,7 +93,6 @@ To scale the number of agents across stages, recreate the environment with updat
 
 `terminate_on_success`: When `True`, the episode terminates as soon as every good agent is
 simultaneously caught (colliding with at least one adversary).
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_tag.simple_tag
