@@ -6,8 +6,8 @@ import os
 import re
 
 GIF_WIDTH = "140px"
-VIDEO_REL_PATH = "_static/img/videos"
-ICON_REL_PATH = "_static/img/icons"
+VIDEO_PATH = "_static/img/videos"
+ICON_PATH = "_static/img/icons"
 FIGURE_RE = re.compile(r"\n?```\\{figure\\}.*?\n```", re.DOTALL)
 
 
@@ -17,7 +17,7 @@ def verify_path_exists(path, label, env_name):
 
 
 def make_figure_block(env_id):
-    return f"""```{{figure}} {VIDEO_REL_PATH}/mpe2_{env_id}.gif
+    return f"""```{{figure}} /{VIDEO_PATH}/mpe2_{env_id}.gif
 :width: {GIF_WIDTH}
 :name: {env_id}
 ```
@@ -72,17 +72,13 @@ if __name__ == "__main__":
         if not os.path.isdir(env_path) or env_name in ignore_dirs:
             continue
 
-        icon_file = os.path.join(docs_dir, ICON_REL_PATH, f"{env_name}.png")
-        video_file = os.path.join(
-            docs_dir,
-            VIDEO_REL_PATH,
-            f"mpe2_{env_name}.gif",
-        )
+        icon_file = os.path.join(docs_dir, ICON_PATH, f"{env_name}.png")
+        video_file = os.path.join(docs_dir, VIDEO_PATH, f"mpe2_{env_name}.gif")
         verify_path_exists(video_file, "video", env_name)
 
         frontmatter_options = {}
         if os.path.exists(icon_file):
-            frontmatter_options["env_icon"] = f'"../../../_static/img/icons/{env_name}.png"'
+            frontmatter_options["env_icon"] = f'"/_static/img/icons/{env_name}.png"'
         else:
             print(f"INFO: Skipping env_icon for '{env_name}' (missing {icon_file})")
 
