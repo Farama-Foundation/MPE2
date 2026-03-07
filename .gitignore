@@ -170,3 +170,9 @@ scripts/
 
 # VS Code
 .vscode/
+
+# Docs
+_site
+docs/_build/
+docs/build/
+_build/
