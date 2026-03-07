@@ -6,7 +6,7 @@ env_icon: "/_static/img/icons/simple_tag.png"
 # Simple Tag
 
 ```{figure} /_static/img/videos/mpe2_simple_tag.gif
-:width: 140px
+:width: 280px
 :name: simple_tag
 ```
 

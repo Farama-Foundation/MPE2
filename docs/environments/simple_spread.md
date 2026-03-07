@@ -6,7 +6,7 @@ env_icon: "/_static/img/icons/simple_spread.png"
 # Simple Spread
 
 ```{figure} /_static/img/videos/mpe2_simple_spread.gif
-:width: 140px
+:width: 280px
 :name: simple_spread
 ```
 

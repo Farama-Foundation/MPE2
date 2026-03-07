@@ -6,7 +6,7 @@ env_icon: "/_static/img/icons/simple_adversary.png"
 # Simple Adversary
 
 ```{figure} /_static/img/videos/mpe2_simple_adversary.gif
-:width: 140px
+:width: 280px
 :name: simple_adversary
 ```
 
