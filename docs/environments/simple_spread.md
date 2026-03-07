@@ -10,7 +10,7 @@ env_icon: "../../../_static/img/icons/simple_spread.png"
 :name: simple_spread
 ```
 
-This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.
+This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
 | Import               |      `from mpe2 import simple_spread_v3`      |
 |----------------------|-----------------------------------------------|
@@ -39,7 +39,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 
@@ -53,6 +53,32 @@ simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=Fal
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`curriculum`: Whether to enable curriculum learning mode. When enabled, training proceeds through
+stages that gradually increase task difficulty. Use `env.unwrapped.advance_curriculum()` to move
+to the next stage, or `env.unwrapped.set_curriculum_stage(n)` to jump to a specific stage.
+
+Curriculum stages:
+  - Stage 0: Agents receive no collision penalty — focus purely on covering landmarks.
+  - Stage 1: Collision penalty is restored — agents must cover landmarks while avoiding each other.
+
+To scale the number of agents/landmarks across stages, recreate the environment with a larger `N`
+and reset the curriculum stage accordingly.
+
+`terminate_on_success`: When `True`, the episode terminates as soon as every landmark is covered
+by at least one agent (an agent is within distance 0.1 of the landmark). This gives a stronger
+training signal than always running to `max_cycles`, and pairs naturally with curriculum learning.
+
+`num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
+observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
+available count are zero-padded so the observation shape remains fixed.  Communication signals
+are also filtered to the same N nearest agents.  ``None`` (default) = full observability.
+simple_spread is generally solvable under PO – agents can learn locally-greedy covering
+policies without needing global information.
+
+`num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
+observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
+``None`` (default) = full observability.
 
 ## API
 ```{eval-rst}

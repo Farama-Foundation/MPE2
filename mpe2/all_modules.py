@@ -1,5 +1,6 @@
 from mpe2 import (
     collect_treasure_v1,
+    simple_v3,
     simple_adversary_v3,
     simple_crypto_v3,
     simple_formation_v1,
@@ -9,12 +10,12 @@ from mpe2 import (
     simple_speaker_listener_v4,
     simple_spread_v3,
     simple_tag_v3,
-    simple_v3,
     simple_world_comm_v3,
 )
 
 mpe_environments = {
     "mpe/collect_treasure_v1": collect_treasure_v1,
+    "mpe/simple_v3": simple_v3,
     "mpe/simple_adversary_v3": simple_adversary_v3,
     "mpe/simple_crypto_v3": simple_crypto_v3,
     "mpe/simple_formation_v1": simple_formation_v1,
@@ -25,5 +26,4 @@ mpe_environments = {
     "mpe/simple_spread_v3": simple_spread_v3,
     "mpe/simple_tag_v3": simple_tag_v3,
     "mpe/simple_world_comm_v3": simple_world_comm_v3,
-    "mpe/simple_v3": simple_v3,
 }

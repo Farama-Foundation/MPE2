@@ -3,15 +3,18 @@ import sys
 
 all_envs = {
     "mpe2": [
+        "simple"
         "simple_adversary",
         "simple_crypto",
+        "simple_formation",
+        "simple_line",
         "simple_push",
         "simple_reference",
         "simple_speaker_listener",
         "simple_spread",
         "simple_tag",
         "simple_world_comm",
-        "simple",
+        "collect_treasure",
     ]
 }
 

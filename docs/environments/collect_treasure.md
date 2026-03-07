@@ -5,7 +5,7 @@ env_icon: "../../../_static/img/icons/collect_treasure.png"
 
 # Collect Treasure
 
-This environment is part of the <a href='..'>MPE environments</a>. Please read that page first for general information.
+This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
 | Import               | `from mpe2 import collect_treasure_v1`                                    |
 |----------------------|---------------------------------------------------------------------------|
@@ -16,71 +16,47 @@ This environment is part of the <a href='..'>MPE environments</a>. Please read t
 | Agents               | 8 (default: 6 collectors + 2 deposits)                                    |
 | Action Shape         | (5,)                                                                      |
 | Action Values        | Discrete(5)/Box(0.0, 1.0, (5,))                                           |
-| Observation Shape    | (86,) collectors / (84,) deposits (default config)                        |
+| Observation Shape    | (86,) for collectors, (84,) for deposits (default config)                 |
 | Observation Values   | (-inf, inf)                                                               |
 | State Shape          | (684,) (default config)                                                   |
 | State Values         | (-inf, inf)                                                               |
 
-A cooperative multi-agent task in which **collector** agents must pick up typed treasures
-from the environment and deliver them to the correct **deposit** agent.
+A cooperative multi-agent task in which collector agents must pick up treasures and deliver
+them to the matching deposit agent.
 
-## Description
+There are two types of agents:
+- **Collectors** (grey by default): roam the environment to pick up treasure landmarks and
+  carry them to the appropriate deposit agent. A collector can hold at most one treasure at a
+  time. When holding a treasure it changes color to match the treasure's type.
+- **Deposits** (dark-tinted, color-coded by type): goal zones. Each deposit accepts only one
+  treasure type. Deposits try to position themselves near collectors that are carrying matching
+  treasure.
 
-The world contains two kinds of agents and a set of treasure landmarks:
+Treasures are landmarks that appear at random positions. When a collector touches a treasure
+(is within collision distance), the collector picks it up and the treasure disappears. The
+treasure then respawns at a new random location on the next step. When a collector carrying a
+treasure touches the matching deposit agent, the treasure is delivered, the collector's
+inventory is cleared, and it turns grey again.
 
-- **Collectors** (rendered in grey when empty): move around the arena to pick up treasures
-  and carry them to the matching deposit. A collector can hold at most one treasure at a time.
-  While carrying a treasure it is tinted with the treasure's colour.
-- **Deposits** (small, dark-tinted circles, colour-coded by type): stationary-ish goal zones.
-  Each deposit accepts exactly one treasure type. Deposits should move toward collectors that
-  are carrying the matching type.
+**Reward structure (shared globally + shaped locally):**
+- +5 global reward each time a collector is touching a live treasure while not holding anything
+- +5 global reward each time a collector is touching its matching deposit while carrying the
+  right treasure type
+- -0.1 * distance shaping for collectors (toward nearest treasure or matching deposit)
+- -0.1 * distance shaping for deposits (toward collectors carrying matching treasure, or
+  toward the centroid of all collectors if none are carrying their type)
+- -5 per pair of collectors that are overlapping (collision penalty)
 
-**Treasures** are small landmarks placed at random positions. When a collector comes within
-collision distance of a live treasure while not holding anything, it automatically picks up
-the treasure (the landmark disappears). The treasure respawns at a new random location on
-the very next step (respawn probability = 1.0). When a collector carrying a treasure reaches
-the matching deposit, the treasure is delivered: the collector's inventory is cleared and it
-returns to grey.
+**Observations:**
+Each agent observes its own position and velocity. Collectors additionally observe a one-hot
+encoding of what they are holding. Every agent then sees all other agents sorted by distance,
+each described by relative position, velocity, and a 4-element encoding
+[deposit_type_0, deposit_type_1, holding_type_0, holding_type_1]. Finally, every agent
+observes all treasures sorted by distance, each described by relative position and a one-hot
+type encoding. Dead (just-picked-up) treasures are shown with zero relative position and
+zero type encoding.
 
-## Reward
-
-All agents receive the same global team reward plus individual shaping:
-
-| Term | Value |
-|------|-------|
-| Collecting bonus (global) | +5 per collector touching a live treasure while not holding |
-| Deposit bonus (global) | +5 per collector touching its matching deposit while carrying the right type |
-| Collector shaping | -0.1 x distance to nearest live treasure (if not holding), or -0.1 x distance to matching deposit (if holding) |
-| Deposit shaping | -0.1 x distance to nearest relevant collector (or to centroid of all collectors if none carry the right type) |
-| Inter-collector collision penalty | -5 per colliding collector pair |
-
-## Observation Space
-
-Each agent observes a concatenated vector:
-
-**Collector** (`[self_pos, self_vel, holding_enc, *other_agents, *treasures]`):
-- `self_pos` (2): own world position
-- `self_vel` (2): own velocity
-- `holding_enc` (num_deposits): one-hot indicating which treasure type is being held (all zeros = empty)
-- For each of the other agents, sorted by distance:
-  - `rel_pos` (2): relative position
-  - `vel` (2): velocity
-  - `agent_enc` (2 x num_deposits): `[deposit_type_enc | holding_enc]`
-- For each treasure, sorted by distance (dead treasures last, zero-padded):
-  - `rel_pos` (2): relative position (zeros if dead)
-  - `type_enc` (num_deposits): one-hot treasure type (zeros if dead)
-
-**Deposit** (same as collector but without the `holding_enc` field):
-- `self_pos` (2), `self_vel` (2)
-- Per other agent: `rel_pos` (2), `vel` (2), `agent_enc` (2 x num_deposits)
-- Per treasure: `rel_pos` (2), `type_enc` (num_deposits)
-
-## Action Space
-
-`[no_action, move_left, move_right, move_down, move_up]`
-
-In continuous mode the action is a `Box(0, 1, (5,))` with the same semantics as other MPE2
-environments.
+**Agent action space:** `[no_action, move_left, move_right, move_down, move_up]`
 
 ### Arguments
 
@@ -95,18 +71,17 @@ collect_treasure_v1.env(
 )
 ```
 
-`num_collectors`: number of collector agents (default 6)
+`num_collectors`: number of collector agents
 
-`num_deposits`: number of deposit agents; also determines the number of treasure types
-(default 2, maximum 6)
+`num_deposits`: number of deposit agents (also sets the number of treasure types)
 
-`num_treasures`: number of treasure landmarks in the world (default 6)
+`num_treasures`: number of treasure landmarks in the world
 
-`max_cycles`: number of frames (a step for each agent) until the episode terminates (default 25)
+`max_cycles`: number of frames (a step for each agent) until game terminates
 
-`continuous_actions`: whether agent action spaces are discrete (default) or continuous
+`continuous_actions`: Whether agent action spaces are discrete (default) or continuous
 
-`dynamic_rescaling`: whether to rescale the size of agents and landmarks based on the screen
+`dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen
 size
 
 ## API
