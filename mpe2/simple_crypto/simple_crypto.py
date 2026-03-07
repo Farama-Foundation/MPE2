@@ -2,11 +2,6 @@
 """
 # Simple Crypto
 
-```{figure} mpe2/mpe2_simple_crypto.gif
-:width: 140px
-:name: simple_crypto
-```
-
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
 | Import             |      `from mpe2 import simple_crypto_v3`      |

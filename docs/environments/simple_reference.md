@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_reference.png"
 
 # Simple Reference
 
-```{figure} mpe2/mpe2_simple_reference.gif
+```{figure} _static/img/videos/mpe2_simple_reference.gif
 :width: 140px
 :name: simple_reference
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -55,7 +56,6 @@ simple_reference_v3.env(local_ratio=0.5, max_cycles=25, continuous_actions=False
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_reference.simple_reference

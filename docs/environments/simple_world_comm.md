@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_world_comm.png"
 
 # Simple World Comm
 
-```{figure} mpe2/mpe2_simple_world_comm.gif
+```{figure} _static/img/videos/mpe2_simple_world_comm.gif
 :width: 140px
 :name: simple_world_comm
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -75,7 +76,6 @@ simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_world_comm.simple_world_comm

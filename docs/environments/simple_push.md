@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_push.png"
 
 # Simple Push
 
-```{figure} mpe2/mpe2_simple_push.gif
+```{figure} _static/img/videos/mpe2_simple_push.gif
 :width: 140px
 :name: simple_push
 ```
+
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -49,7 +50,6 @@ simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=Fa
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
-
 
 ## API
 ```{eval-rst}

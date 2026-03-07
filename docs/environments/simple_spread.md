@@ -5,10 +5,11 @@ env_icon: "../../../_static/img/icons/simple_spread.png"
 
 # Simple Spread
 
-```{figure} mpe2/mpe2_simple_spread.gif
+```{figure} _static/img/videos/mpe2_simple_spread.gif
 :width: 140px
 :name: simple_spread
 ```
+
 
 This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -79,7 +80,6 @@ policies without needing global information.
 `num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
 observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
 ``None`` (default) = full observability.
-
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_spread.simple_spread
