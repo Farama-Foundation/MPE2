@@ -78,12 +78,13 @@ if __name__ == "__main__":
             VIDEO_REL_PATH,
             f"mpe2_{env_name}.gif",
         )
-        verify_path_exists(icon_file, "icon", env_name)
         verify_path_exists(video_file, "video", env_name)
 
-        frontmatter_options = {
-            "env_icon": f'"../../../_static/img/icons/{env_name}.png"'
-        }
+        frontmatter_options = {}
+        if os.path.exists(icon_file):
+            frontmatter_options["env_icon"] = f'"../../../_static/img/icons/{env_name}.png"'
+        else:
+            print(f"INFO: Skipping env_icon for '{env_name}' (missing {icon_file})")
 
         if i == 0:
             frontmatter_options["firstpage"] = ""
