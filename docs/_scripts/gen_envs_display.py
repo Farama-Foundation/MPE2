@@ -33,7 +33,7 @@ def create_grid_cell(type_id, env_id, base_path):
         else ""
     )
     return f"""
-            <a href="environments/{env_id}">
+            <a href="/environments/{env_id}">
                 <div class="env-grid__cell">
                     <div class="cell__image-container">
                         {gif_tag}
