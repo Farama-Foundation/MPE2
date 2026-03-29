@@ -23,7 +23,7 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "MPE2"
-copyright = "2024 Farama Foundation"
+copyright = "2026 Farama Foundation"
 author = "Farama Foundation"
 
 # The full version, including alpha/beta/rc tags
