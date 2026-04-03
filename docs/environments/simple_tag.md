@@ -6,7 +6,7 @@ lastpage:
 
 # Simple Tag
 
-```{figure} /_static/img/videos/mpe2_simple_tag.gif
+```{figure} /_static/videos/mpe2_simple_tag.gif
 :width: 280px
 :name: simple_tag
 ```

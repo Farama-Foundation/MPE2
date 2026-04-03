@@ -5,7 +5,7 @@ env_icon: "/_static/img/icons/simple_speaker_listener.png"
 
 # Simple Speaker Listener
 
-```{figure} /_static/img/videos/mpe2_simple_speaker_listener.gif
+```{figure} /_static/videos/mpe2_simple_speaker_listener.gif
 :width: 280px
 :name: simple_speaker_listener
 ```

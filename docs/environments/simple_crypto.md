@@ -6,7 +6,7 @@ firstpage:
 
 # Simple Crypto
 
-```{figure} /_static/img/videos/mpe2_simple_crypto.gif
+```{figure} /_static/videos/mpe2_simple_crypto.gif
 :width: 280px
 :name: simple_crypto
 ```

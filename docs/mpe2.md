@@ -1,9 +1,9 @@
 ---
-title: MPE Environments
+title: MPE2 Environments
 firstpage:
 ---
 
-# MPE
+# MPE2 Environments
 
 
 ```{raw} html
@@ -14,46 +14,14 @@ Multi Particle Environments 2 (MPE2) are a set of communication-oriented environ
 
 These environments are originally from [OpenAI’s MPE codebase](https://github.com/openai/multiagent-particle-envs), with several minor fixes, mostly related to making the action space discrete by default, making the rewards consistent and cleaning up the observation space of certain environments. MPE2 additionally includes 3 new environments.
 
-## Installation
 
-The unique dependencies for this set of environments can be installed via:
-
-```bash
-pip install mpe2
-```
-
-### Usage
-
-To launch a [Simple Push](/environments/simple_push/) environment with random agents:
-
-```{code-block} python
-
-from mpe2 import simple_push_v3
-
-env = simple_push_v3.env(render_mode="human")
-env.reset(seed=42)
-
-for agent in env.agent_iter():
-    observation, reward, termination, truncation, info = env.last()
-
-    if termination or truncation:
-        action = None
-    else:
-        # this is where you would insert your policy
-        action = env.action_space(agent).sample()
-
-    env.step(action)
-    
-env.close()
-```
-
-### Types of Environments
+## Types of Environments
 
 The Simple Adversary, Simple Crypto, Simple Push, Simple Tag, and Simple World Comm environments are adversarial (a "good" agent being rewarded means an "adversary" agent is punished and vice versa, though not always in a perfectly zero-sum manner). In most of these environments, there are "good" agents rendered in green and an "adversary" team rendered in red.
 
 Collect Treasure, Simple Formation, Simple Line, Simple Reference, Simple Speaker Listener, and Simple Spread are cooperative environments. Agents must work together to achieve their goals and receive a mixture of rewards based on their own success and the success of the other agents.
 
-### Key Concepts
+## Key Concepts
 
 * **Landmarks**: Landmarks are static circular features of the environment that cannot be controlled. In some environments, like Simple, they are destinations that affect the rewards of the agents depending on how close the agents are to them. In other environments, they can be obstacles that block the motion of the agents. These are described in more detail in the documentation for each environment.
 
@@ -65,17 +33,17 @@ Collect Treasure, Simple Formation, Simple Line, Simple Reference, Simple Speake
 
 * **Distances**: The landmarks and agents typically start out uniformly randomly placed from -1 to 1 on the map. This means they are typically around 1-2 units apart. This is important to keep in mind when reasoning about the scale of the rewards (which often depend on distance) and the observation space, which contains relative and absolute positions.
 
-### Termination
+## Termination
 
 The game terminates after the number of cycles specified by the `max_cycles` environment argument is executed. The default for all environments is 25 cycles, as in the original OpenAI source code.
 
-### Observation Space
+## Observation Space
 
 The observation space of an agent is a vector generally composed of the agent's position and velocity, other agents' relative positions and velocities, landmarks' relative positions, landmarks' and agents' types, and communications received from other agents. The exact form of this is detailed in the environments' documentation.
 
 If an agent cannot see or observe the communication of a second agent, then the second agent is not included in the first's observation space, resulting in different agents having different observation space sizes in certain environments.
 
-### Action Space
+## Action Space
 
 Note: [OpenAI's MPE](https://github.com/openai/multiagent-particle-envs) uses continuous action spaces by default.
 
@@ -87,32 +55,8 @@ Continuous action space (Set by continuous_actions=True):
 
 The action space is a continuous action space representing the movements and communication an agent can perform. Agents that can move can input a velocity between 0.0 and 1.0 in each of the four cardinal directions, where opposing velocities e.g. left and right are summed together. Agents that can communicate can output a continuous value over each communication channel in the environment which they have access to.
 
-### Rendering
+## Rendering
 
 Rendering displays the scene in a window that automatically grows if agents wander beyond its border. Communication is rendered at the bottom of the scene. The `render()` method also returns the pixel map of the rendered area.
 
-### Citation
 
-The MPE environments were originally described in the following work:
-
-```
-@article{mordatch2017emergence,
-  title={Emergence of Grounded Compositional Language in Multi-Agent Populations},
-  author={Mordatch, Igor and Abbeel, Pieter},
-  journal={arXiv preprint arXiv:1703.04908},
-  year={2017}
-}
-```
-
-But were first released as a part of this work:
-
-```
-@article{lowe2017multi,
-  title={Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments},
-  author={Lowe, Ryan and Wu, Yi and Tamar, Aviv and Harb, Jean and Abbeel, Pieter and Mordatch, Igor},
-  journal={Neural Information Processing Systems (NIPS)},
-  year={2017}
-}
-```
-
-Please cite one or both of these if you use these environments in your research.

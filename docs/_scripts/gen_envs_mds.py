@@ -6,8 +6,8 @@ import os
 import re
 
 GIF_WIDTH = "280px"
-VIDEO_PATH = "_static/img/videos"
-ICON_PATH = "_static/img/icons"
+VIDEO_PATH = "_static/videos"
+ICON_PATH = "_static/icons"
 FIGURE_RE = re.compile(r"\n?```\\{figure\\}.*?\n```", re.DOTALL)
 
 
