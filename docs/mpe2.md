@@ -1,19 +1,14 @@
 ---
-title: MPE2 Environments
+title: MPE2
 firstpage:
 ---
 
-# MPE2 Environments
+# MPE2
 
 
 ```{raw} html
     :file: environments/list.html
 ```
-
-Multi Particle Environments 2 (MPE2) are a set of communication-oriented environments where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.
-
-These environments are originally from [OpenAI’s MPE codebase](https://github.com/openai/multiagent-particle-envs), with several minor fixes, mostly related to making the action space discrete by default, making the rewards consistent and cleaning up the observation space of certain environments. MPE2 additionally includes 3 new environments.
-
 
 ## Types of Environments
 
@@ -58,5 +53,3 @@ The action space is a continuous action space representing the movements and com
 ## Rendering
 
 Rendering displays the scene in a window that automatically grows if agents wander beyond its border. Communication is rendered at the bottom of the scene. The `render()` method also returns the pixel map of the rendered area.
-
-
