@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                                        |
 | Manual Control     | No                                                         |
 | Agents             | `agents= [adversary_0, adversary_1, adversary_2, agent_0]` |
-| Agents             | 4                                                          |
+| Agent Count        | 4                                                          |
 | Action Shape       | (5)                                                        |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (50))                            |
 | Observation Shape  | (14),(16)                                                  |

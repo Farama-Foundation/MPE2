@@ -10,7 +10,7 @@ This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE envir
 | Parallel API         | Yes                                                                       |
 | Manual Control       | No                                                                        |
 | Agents               | `agents= [collector_0, ..., collector_5, deposit_0, deposit_1]`           |
-| Agents               | 8 (default: 6 collectors + 2 deposits)                                    |
+| Agent Count          | 8 (default: 6 collectors + 2 deposits)                                    |
 | Action Shape         | (5,)                                                                      |
 | Action Values        | Discrete(5)/Box(0.0, 1.0, (5,))                                           |
 | Observation Shape    | (86,) for collectors, (84,) for deposits (default config)                 |

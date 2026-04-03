@@ -10,35 +10,40 @@ firstpage:
     :file: environments/list.html
 ```
 
-Multi Particle Environments (MPE) are a set of communication oriented environment where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.
+Multi Particle Environments 2 (MPE2) are a set of communication-oriented environments where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.
 
-These environments are from [OpenAI's MPE](https://github.com/openai/multiagent-particle-envs) codebase, with several minor fixes, mostly related to making the action space discrete by default, making the rewards consistent and cleaning up the observation space of certain environments.
+These environments are originally from [OpenAI’s MPE codebase](https://github.com/openai/multiagent-particle-envs), with several minor fixes, mostly related to making the action space discrete by default, making the rewards consistent and cleaning up the observation space of certain environments. MPE2 additionally includes 3 new environments.
 
-### Installation
+## Installation
 
 The unique dependencies for this set of environments can be installed via:
 
-````bash
-pip install 'mpe2'
-````
+```bash
+pip install mpe2
+```
 
 ### Usage
-To launch a [Simple Tag](/environments/simple_tag/) environment with random agents:
 
-``` python
-from mpe2 import simple_tag_v3
-env = simple_tag_v3.env(render_mode='human')
+To launch a [Simple Push](/environments/simple_push/) environment with random agents:
 
-env.reset()
+```{code-block} python
+
+from mpe2 import simple_push_v3
+
+env = simple_push_v3.env(render_mode="human")
+env.reset(seed=42)
+
 for agent in env.agent_iter():
     observation, reward, termination, truncation, info = env.last()
 
     if termination or truncation:
         action = None
     else:
-        action = env.action_space(agent).sample() # this is where you would insert your policy
+        # this is where you would insert your policy
+        action = env.action_space(agent).sample()
 
     env.step(action)
+    
 env.close()
 ```
 
@@ -46,13 +51,13 @@ env.close()
 
 The Simple Adversary, Simple Crypto, Simple Push, Simple Tag, and Simple World Comm environments are adversarial (a "good" agent being rewarded means an "adversary" agent is punished and vice versa, though not always in a perfectly zero-sum manner). In most of these environments, there are "good" agents rendered in green and an "adversary" team rendered in red.
 
-The Simple Reference, Simple Speaker Listener, and Simple Spread environments are cooperative in nature (agents must work together to achieve their goals, and received a mixture of rewards based on their own success and the success of the other agents).
+Collect Treasure, Simple Formation, Simple Line, Simple Reference, Simple Speaker Listener, and Simple Spread are cooperative environments. Agents must work together to achieve their goals and receive a mixture of rewards based on their own success and the success of the other agents.
 
 ### Key Concepts
 
 * **Landmarks**: Landmarks are static circular features of the environment that cannot be controlled. In some environments, like Simple, they are destinations that affect the rewards of the agents depending on how close the agents are to them. In other environments, they can be obstacles that block the motion of the agents. These are described in more detail in the documentation for each environment.
 
-* **Visibility**: When an agent is visible to a another agent, that other agent's observation contains the first agent's relative position (and in Simple World Comm and Simple Tag, the first agent's velocity). If an agent is temporarily hidden (only possible in Simple World Comm) then the agent's position and velocity is set to zero.
+* **Visibility**: When an agent is visible to another agent, that other agent's observation contains the first agent's relative position (and in Simple World Comm and Simple Tag, the first agent's velocity). If an agent is temporarily hidden (only possible in Simple World Comm), then the agent's position and velocity is set to zero.
 
 * **Communication**: Some agents in some environments can broadcast a message as a part of its action (see action space for more details) which will be transmitted to each agent that is allowed to see that message. In Simple Crypto, this message is used to signal that Bob and Eve have reconstructed the message.
 

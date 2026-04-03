@@ -9,7 +9,7 @@ lastpage:
 ```
 
 ```{project-heading}
-A set of communication oriented environment
+A set of communication-oriented environments
 ```
 
 **Basic example:**
@@ -67,6 +67,5 @@ environments/collect_treasure
 :caption: Development
 
 Github <https://github.com/Farama-Foundation/MPE2>
-release_notes/index
 Contribute to the Docs <https://github.com/Farama-Foundation/MPE2/blob/main/docs/README.md>
 ```

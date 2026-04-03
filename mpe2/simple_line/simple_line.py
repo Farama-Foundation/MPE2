@@ -2,7 +2,9 @@
 """
 # Simple Line
 
-This environment is part of the <a href='https://github.com/sumitsk/marl_transfer/tree/master/mape/multiagent/scenarios'>"Learning Transferable Cooperative Behavior in Multi-Agent Teams" Paper</a>.
+This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
+
+The task is adapted from the <a href='https://github.com/sumitsk/marl_transfer/tree/master/mape/multiagent/scenarios'>"Learning Transferable Cooperative Behavior in Multi-Agent Teams"</a> work.
 
 | Import               | `from mpe2 import simple_line_v1`             |
 |----------------------|-----------------------------------------------|
@@ -10,6 +12,7 @@ This environment is part of the <a href='https://github.com/sumitsk/marl_transfe
 | Parallel API         | Yes                                           |
 | Manual Control       | No                                            |
 | Agents               | `agents= [agent_0, ..., agent_N-1]`           |
+| Agent  Count         | N                                             |
 | Action Shape         | (5)                                           |
 | Action Values        | Discrete(5)/Box(0.0, 1.0, (5))                |
 | Observation Shape    | (8)                                           |
