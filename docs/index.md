@@ -112,7 +112,6 @@ environments/collect_treasure
 :hidden:
 :caption: Development
 
-release_notes
 Github <https://github.com/Farama-Foundation/MPE2>
 Contribute to the Docs <https://github.com/Farama-Foundation/MPE2/blob/main/docs/README.md>
 ```
