@@ -10,7 +10,7 @@ This environment is part of the <a href='..'>MPE environments</a>. Please read t
 | Parallel API       | Yes                                    |
 | Manual Control     | No                                     |
 | Agents             | `agents= [agent_0]`                    |
-| Agents             | 1                                      |
+| Agent  Count       | 1                                      |
 | Action Shape       | (5)                                    |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (5,))        |
 | Observation Shape  | (4)                                    |
