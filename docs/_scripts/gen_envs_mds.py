@@ -6,13 +6,13 @@ import os
 import re
 
 GIF_WIDTH = "280px"
-VIDEO_PATH = "_static/videos"
-ICON_PATH = "_static/icons"
+VIDEO_DIR= "_static/videos"
+ICON_DIR = "_static/icons"
 FIGURE_RE = re.compile(r"\n?```\\{figure\\}.*?\n```", re.DOTALL)
 
 
 def make_figure_block(env_id):
-    return f"""```{{figure}} /{VIDEO_PATH}/mpe2_{env_id}.gif
+    return f"""```{{figure}} /{VIDEO_DIR}/mpe2_{env_id}.gif
 :width: {GIF_WIDTH}
 :name: {env_id}
 ```
@@ -67,12 +67,12 @@ if __name__ == "__main__":
         if not os.path.isdir(env_path) or env_name in ignore_dirs:
             continue
 
-        icon_file = os.path.join(docs_dir, ICON_PATH, f"{env_name}.png")
-        video_file = os.path.join(docs_dir, VIDEO_PATH, f"mpe2_{env_name}.gif")
+        icon_file = os.path.join(docs_dir, ICON_DIR, f"{env_name}.png")
+        video_file = os.path.join(docs_dir, VIDEO_DIR, f"mpe2_{env_name}.gif")
 
         frontmatter_options = {}
         if os.path.exists(icon_file):
-            frontmatter_options["env_icon"] = f'"/_static/img/icons/{env_name}.png"'
+            frontmatter_options["env_icon"] = f'"/{ICON_DIR}/{env_name}.png"'
         else:
             print(f"WARNING: Skipping env_icon for '{env_name}' (missing {icon_file})")
 
