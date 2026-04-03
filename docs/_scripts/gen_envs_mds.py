@@ -58,7 +58,7 @@ def get_docs_from_py(file_path):
 
 
 if __name__ == "__main__":
-    ignore_dirs = ["_mpe_utils"]
+    ignore_dirs = ["_mpe_utils", "__pycache__"]
     docs_dir = os.path.join(os.path.dirname(__file__), "..")
     envs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "mpe2")
 

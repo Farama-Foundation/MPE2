@@ -2,4 +2,5 @@
 
 This directory contains the documentation for MPE2.
 
+For documentation changes, open an issue or pull request in the [MPE2 repository](https://github.com/Farama-Foundation/MPE2).
 For more information about how to contribute to the documentation go to our [CONTRIBUTING.md](https://github.com/Farama-Foundation/Celshast/blob/main/CONTRIBUTING.md)
