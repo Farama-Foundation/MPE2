@@ -2,8 +2,8 @@ import os
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-GIF_REL_PATH = "../_static/videos"
-GIF_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "_static", "img", "videos"))
+GIF_REL_DIR = "../_static/videos"
+GIF_ABS_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, GIF_REL_DIR))
 
 all_envs = {
     "mpe2": [
@@ -26,9 +26,9 @@ all_envs = {
 def create_grid_cell(type_id, env_id, base_path):
     # The relative image path assumes that the list will be at /environment/env_type/
     gif_file = f"{type_id}_{env_id}.gif"
-    abs_path = os.path.join(GIF_DIR, gif_file)
+    abs_path = os.path.join(GIF_ABS_DIR, gif_file)
     gif_tag = (
-        f'<img src="{GIF_REL_PATH}/{gif_file}">'
+        f'<img src="{GIF_REL_DIR}/{gif_file}">'
         if os.path.exists(abs_path)
         else ""
     )
