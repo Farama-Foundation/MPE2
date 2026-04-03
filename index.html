@@ -8,7 +8,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:description" content="mpe2 DESCRIPTION" />
     <meta property="og:url" content="https://mpe2.farama.org/index.html" /><meta property="og:image" content="https://mpe2.farama.org/_static/img/mpe2-github.png" /><meta name="twitter:card" content="summary_large_image"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex/" /><link rel="search" title="Search" href="search/" /><link rel="next" title="MPE" href="mpe2/" />
+<link rel="index" title="Index" href="genindex/" /><link rel="search" title="Search" href="search/" /><link rel="next" title="MPE2 Environments" href="mpe2/" />
         <link rel="canonical" href="https://mpe2.farama.org/index.html" />
 
     <link rel="shortcut icon" href="_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Furo 2023.08.19.dev1 -->
@@ -212,7 +212,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="mpe2/">MPE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mpe2/">MPE2 Environments</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Environments</span></p>
 <ul>
@@ -231,6 +231,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="release_notes/">Release Notes</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/MPE2">Github</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/Farama-Foundation/MPE2/blob/main/docs/README.md">Contribute to the Docs</a></li>
 </ul>
@@ -289,16 +290,30 @@
           </div>
           <article role="main">
             
-            <figure class="align-default">
-<a class="reference internal image-reference" href="_images/mpe-simple-tag.gif"><img alt="GIF for MPE2 simple_tag environment" src="_images/mpe-simple-tag.gif" style="width: 300px;" />
-</a>
+            <figure class="farama-project-logo align-default">
+<img alt="MPE2 Logo" src="_images/mpe2-text.png" />
 </figure>
 <div class="docutils container">
 <h2 class='farama-project-heading'>
 A set of communication-oriented environments
 </h2>
 </div>
-<p><strong>Basic example:</strong></p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="_images/mpe-simple-tag.gif"><img alt="GIF for MPE2 simple_tag environment" src="_images/mpe-simple-tag.gif" style="width: 300px;" />
+</a>
+</figure>
+<p>Multi Particle Environments 2 (MPE2) is collection of environments where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.</p>
+<p>These environments are originally from <a class="reference external" href="https://github.com/openai/multiagent-particle-envs">OpenAI’s MPE codebase</a>, with several minor fixes, mostly related to making the action space discrete by default, making the rewards consistent and cleaning up the observation space of certain environments. MPE2 additionally includes 3 new environments.</p>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>The unique dependencies for this set of environments can be installed via:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>mpe2
+</pre></div>
+</div>
+</section>
+<section id="example">
+<h1>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h1>
+<p>To launch a <a class="reference internal" href="environments/simple_push/"><span class="doc std std-doc">Simple Push</span></a> environment with random agents:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">mpe2</span><span class="w"> </span><span class="kn">import</span> <span class="n">simple_push_v3</span>
 
 <span class="n">env</span> <span class="o">=</span> <span class="n">simple_push_v3</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">render_mode</span><span class="o">=</span><span class="s2">&quot;human&quot;</span><span class="p">)</span>
@@ -318,12 +333,35 @@ A set of communication-oriented environments
 <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
+</section>
+<section id="citation">
+<h1>Citation<a class="headerlink" href="#citation" title="Link to this heading">¶</a></h1>
+<p>The MPE environments were originally described in the following work:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">mordatch2017emergence</span><span class="p">,</span>
+  <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Emergence</span> <span class="n">of</span> <span class="n">Grounded</span> <span class="n">Compositional</span> <span class="n">Language</span> <span class="ow">in</span> <span class="n">Multi</span><span class="o">-</span><span class="n">Agent</span> <span class="n">Populations</span><span class="p">},</span>
+  <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Mordatch</span><span class="p">,</span> <span class="n">Igor</span> <span class="ow">and</span> <span class="n">Abbeel</span><span class="p">,</span> <span class="n">Pieter</span><span class="p">},</span>
+  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span> <span class="n">preprint</span> <span class="n">arXiv</span><span class="p">:</span><span class="mf">1703.04908</span><span class="p">},</span>
+  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2017</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>But were first released as a part of this work:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">lowe2017multi</span><span class="p">,</span>
+  <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Multi</span><span class="o">-</span><span class="n">Agent</span> <span class="n">Actor</span><span class="o">-</span><span class="n">Critic</span> <span class="k">for</span> <span class="n">Mixed</span> <span class="n">Cooperative</span><span class="o">-</span><span class="n">Competitive</span> <span class="n">Environments</span><span class="p">},</span>
+  <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Lowe</span><span class="p">,</span> <span class="n">Ryan</span> <span class="ow">and</span> <span class="n">Wu</span><span class="p">,</span> <span class="n">Yi</span> <span class="ow">and</span> <span class="n">Tamar</span><span class="p">,</span> <span class="n">Aviv</span> <span class="ow">and</span> <span class="n">Harb</span><span class="p">,</span> <span class="n">Jean</span> <span class="ow">and</span> <span class="n">Abbeel</span><span class="p">,</span> <span class="n">Pieter</span> <span class="ow">and</span> <span class="n">Mordatch</span><span class="p">,</span> <span class="n">Igor</span><span class="p">},</span>
+  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">Neural</span> <span class="n">Information</span> <span class="n">Processing</span> <span class="n">Systems</span> <span class="p">(</span><span class="n">NIPS</span><span class="p">)},</span>
+  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2017</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Please cite one or both of these if you use these environments in your research.</p>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
 </div>
+</section>
 
           </article>
         </div>
