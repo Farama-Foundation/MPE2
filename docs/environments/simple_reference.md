@@ -5,7 +5,7 @@ env_icon: "/_static/img/icons/simple_reference.png"
 
 # Simple Reference
 
-```{figure} /_static/img/videos/mpe2_simple_reference.gif
+```{figure} /_static/videos/mpe2_simple_reference.gif
 :width: 280px
 :name: simple_reference
 ```

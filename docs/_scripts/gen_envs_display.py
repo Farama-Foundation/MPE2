@@ -2,7 +2,7 @@ import os
 import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-GIF_REL_PATH = "../_static/img/videos"
+GIF_REL_PATH = "../_static/videos"
 GIF_DIR = os.path.normpath(os.path.join(SCRIPT_DIR, "..", "_static", "img", "videos"))
 
 all_envs = {

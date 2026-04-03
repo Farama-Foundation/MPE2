@@ -1,12 +1,13 @@
-# MPE2
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
 
 <p align="center">
     <a href="https://mpe2.farama.org/" target = "_blank">
-    <img src="https://raw.githubusercontent.com/Farama-Foundation/MPE2/main/MPE2-text.png" width="500px" />
+    <img src="https://raw.githubusercontent.com/Farama-Foundation/MPE2/main/docs/_static/img/mpe2-text.png" width="500px" />
 </a>
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/release/python-390/)
-
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Farama-Foundation/MPE2/main/docs/_static/img/mpe-simple-tag.gif" width=300 alt="GIF for MPE2 simple_tag environment">
+</p>
 
 Multi Particle Environments 2 (MPE2) are a set of communication-oriented environments where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.
 
@@ -20,7 +21,9 @@ The unique dependencies for this set of environments can be installed via:
 pip install mpe2
 ```
 
-### Usage
+## Usage
+
+### Basic Example
 
 To launch a [Simple Push](/environments/simple_push/) environment with random agents:
 
