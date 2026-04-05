@@ -174,7 +174,13 @@ class Scenario(BaseScenario):
     # Distance threshold within which an agent is considered to "occupy" a landmark.
     CAPTURE_RADIUS = 0.1
 
-    def __init__(self, curriculum=False, terminate_on_success=False, num_agent_neighbors=None, num_landmark_neighbors=None,):
+    def __init__(
+        self,
+        curriculum=False,
+        terminate_on_success=False,
+        num_agent_neighbors=None,
+        num_landmark_neighbors=None,
+    ):
         self.curriculum = curriculum
         self.curriculum_stage = 0
         self.terminate_on_success = terminate_on_success
@@ -279,7 +285,9 @@ class Scenario(BaseScenario):
         # In curriculum stage 0, the collision penalty is suppressed so agents first learn to reach landmarks.
         rew = 0
         stage_config = self.CURRICULUM_STAGES[self.curriculum_stage]
-        collision_penalty_active = (not self.curriculum) or stage_config["collision_penalty"]
+        collision_penalty_active = (not self.curriculum) or stage_config[
+            "collision_penalty"
+        ]
         if agent.collide and collision_penalty_active:
             for a in world.agents:
                 rew -= 1.0 * (self.is_collision(a, agent) and a != agent)

@@ -6,7 +6,7 @@ import os
 import re
 
 GIF_WIDTH = "280px"
-VIDEO_DIR= "_static/videos"
+VIDEO_DIR = "_static/videos"
 ICON_DIR = "_static/icons"
 FIGURE_RE = re.compile(r"\n?```\\{figure\\}.*?\n```", re.DOTALL)
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     docs_dir = os.path.join(os.path.dirname(__file__), "..")
     envs_dir = os.path.join(os.path.dirname(__file__), "..", "..", "mpe2")
 
-    for i,env_name in enumerate(os.listdir(envs_dir)):
+    for i, env_name in enumerate(os.listdir(envs_dir)):
         env_path = os.path.join(envs_dir, env_name)
         if not os.path.isdir(env_path) or env_name in ignore_dirs:
             continue
@@ -81,9 +81,7 @@ if __name__ == "__main__":
         elif i == len(os.listdir(envs_dir)) - 1:
             frontmatter_options["lastpage"] = ""
 
-        docs_text = get_docs_from_py(
-            os.path.join(env_path, env_name + ".py")
-        )
+        docs_text = get_docs_from_py(os.path.join(env_path, env_name + ".py"))
         if os.path.exists(video_file):
             docs_text = ensure_figure(docs_text, env_name)
         else:
@@ -99,12 +97,12 @@ if __name__ == "__main__":
 ```
 """
         docs_env_path = os.path.join(
-                docs_dir,
-                "environments",
-                env_name + ".md",
-            )
+            docs_dir,
+            "environments",
+            env_name + ".md",
+        )
         create_docs_md(
-                docs_env_path,
-                docs_text,
-                frontmatter_options,
-            )
+            docs_env_path,
+            docs_text,
+            frontmatter_options,
+        )

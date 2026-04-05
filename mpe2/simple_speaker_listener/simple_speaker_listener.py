@@ -4,7 +4,7 @@
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
-| Import               |      `from mpe2 import simple_speaker_listener_v4`      |         
+| Import               |      `from mpe2 import simple_speaker_listener_v4`      |
 |----------------------|---------------------------------------------------------|
 | Actions              | Discrete/Continuous                                     |
 | Parallel API         | Yes                                                     |

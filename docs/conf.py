@@ -16,9 +16,9 @@
 
 # -- Project information -----------------------------------------------------
 import os
-from typing import Any, Dict
-import mpe2
 import sys
+
+import mpe2
 
 sys.path.insert(0, os.path.abspath(".."))
 

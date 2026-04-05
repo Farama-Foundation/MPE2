@@ -190,9 +190,7 @@ class raw_env(SimpleEnv, EzPickle):
 
         # Build the list of entities that are currently visible in the world.
         visible = [
-            e
-            for e in self.world.entities
-            if not (hasattr(e, "alive") and not e.alive)
+            e for e in self.world.entities if not (hasattr(e, "alive") and not e.alive)
         ]
         if not visible:
             return
@@ -417,7 +415,9 @@ class Scenario(BaseScenario):
         return self._cached_global_deposit
 
     def _global_reward(self, world):
-        return self._global_collecting_reward(world) + self._global_deposit_reward(world)
+        return self._global_collecting_reward(world) + self._global_deposit_reward(
+            world
+        )
 
     def reward(self, agent, world):
         if agent.collector:
