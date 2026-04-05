@@ -13,8 +13,7 @@ import numpy as np
 
 
 def nearest_entities(agent, entities, n):
-    """Return up to *n* entities nearest to *agent*, sorted closest-first.
-    """
+    """Return up to *n* entities nearest to *agent*, sorted closest-first."""
     if n is None:
         return list(entities)
     if not entities:
@@ -27,8 +26,7 @@ def nearest_entities(agent, entities, n):
 
 
 def padded_relative_positions(agent, entities, n, dim_p=2):
-    """Relative positions of the *n* nearest entities, zero-padded to *n* slots.
-    """
+    """Relative positions of the *n* nearest entities, zero-padded to *n* slots."""
     if n is None:
         return [e.state.p_pos - agent.state.p_pos for e in entities]
     selected = nearest_entities(agent, entities, n)
@@ -39,8 +37,7 @@ def padded_relative_positions(agent, entities, n, dim_p=2):
 
 
 def padded_velocities(agent, entities, n, predicate=None, dim_p=2):
-    """Velocities of the *n* nearest entities, zero-padded to *n* slots.
-    """
+    """Velocities of the *n* nearest entities, zero-padded to *n* slots."""
     if n is None:
         # Full-observability path: respect predicate-based filtering
         if predicate is None:
@@ -61,8 +58,7 @@ def padded_velocities(agent, entities, n, predicate=None, dim_p=2):
 
 
 def padded_comms(agent, entities, n, dim_c):
-    """Communication signals of the *n* nearest agents, zero-padded to *n* slots.
-    """
+    """Communication signals of the *n* nearest agents, zero-padded to *n* slots."""
     if n is None:
         return [e.state.c.copy() for e in entities]
     selected = nearest_entities(agent, entities, n)

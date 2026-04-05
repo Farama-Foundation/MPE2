@@ -252,15 +252,14 @@ def test_module(env_module, kwargs):
 
 @pytest.mark.parametrize(["env_module", "kwargs"], partial_obs_envs)
 def test_partial_observability(env_module, kwargs):
-    """Verify that partial-observability configurations satisfy PettingZoo API.
-    """
+    """Verify that partial-observability configurations satisfy PettingZoo API."""
     _env = env_module.env(**kwargs)
     api_test(_env)
     parallel_api_test(env_module.parallel_env(**kwargs))
     seed_test(lambda: env_module.env(**kwargs), 500)
     parallel_seed_test(lambda: env_module.parallel_env(**kwargs), 500)
     state_test(env_module.env(**kwargs), env_module.parallel_env(**kwargs))
-    
+
     _env = env_module.env(**kwargs)
     _env.reset(seed=0)
     for agent in _env.agents:

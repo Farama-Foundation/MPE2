@@ -156,8 +156,7 @@ class Scenario(BaseScenario):
         N = len(world.agents)
         ideal_sep = self.TOTAL_SEP / (N - 1) if N > 1 else 0.0
         self._expected_positions = [
-            world.landmarks[0].state.p_pos + i * ideal_sep * direction
-            for i in range(N)
+            world.landmarks[0].state.p_pos + i * ideal_sep * direction for i in range(N)
         ]
 
         self._delta_dists = None

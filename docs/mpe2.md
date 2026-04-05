@@ -58,5 +58,3 @@ The action space is a continuous action space representing the movements and com
 ## Rendering
 
 Rendering displays the scene in a window that automatically grows if agents wander beyond its border. Communication is rendered at the bottom of the scene. The `render()` method also returns the pixel map of the rendered area.
-
-

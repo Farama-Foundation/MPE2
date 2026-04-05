@@ -178,16 +178,22 @@ class Scenario(BaseScenario):
     # Prey (good agents) start slow, making them easier to catch.
     # Each stage increases prey speed toward full difficulty.
     CURRICULUM_STAGES = [
-        {"prey_speed_factor": 0.5},   # Stage 0: prey at 50% speed — easy
+        {"prey_speed_factor": 0.5},  # Stage 0: prey at 50% speed — easy
         {"prey_speed_factor": 0.75},  # Stage 1: prey at 75% speed — moderate
-        {"prey_speed_factor": 1.0},   # Stage 2: prey at 100% speed — full difficulty
+        {"prey_speed_factor": 1.0},  # Stage 2: prey at 100% speed — full difficulty
     ]
 
     # Base kinematic values for prey (good agents)
     _PREY_BASE_MAX_SPEED = 1.3
     _PREY_BASE_ACCEL = 4.0
 
-    def __init__(self, curriculum=False, terminate_on_success=False, num_agent_neighbors=None, num_landmark_neighbors=None,):
+    def __init__(
+        self,
+        curriculum=False,
+        terminate_on_success=False,
+        num_agent_neighbors=None,
+        num_landmark_neighbors=None,
+    ):
         self.curriculum = curriculum
         self.curriculum_stage = 0
         self.terminate_on_success = terminate_on_success
@@ -274,7 +280,9 @@ class Scenario(BaseScenario):
                 landmark.state.p_vel = np.zeros(world.dim_p)
         # Apply curriculum speed scaling to prey (good agents).
         if self.curriculum:
-            speed_factor = self.CURRICULUM_STAGES[self.curriculum_stage]["prey_speed_factor"]
+            speed_factor = self.CURRICULUM_STAGES[self.curriculum_stage][
+                "prey_speed_factor"
+            ]
             for agent in world.agents:
                 if not agent.adversary:
                     agent.max_speed = self._PREY_BASE_MAX_SPEED * speed_factor

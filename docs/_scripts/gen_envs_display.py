@@ -28,9 +28,7 @@ def create_grid_cell(type_id, env_id, base_path):
     gif_file = f"{type_id}_{env_id}.gif"
     abs_path = os.path.join(GIF_ABS_DIR, gif_file)
     gif_tag = (
-        f'<img src="{GIF_REL_DIR}/{gif_file}">'
-        if os.path.exists(abs_path)
-        else ""
+        f'<img src="{GIF_REL_DIR}/{gif_file}">' if os.path.exists(abs_path) else ""
     )
     return f"""
             <a href="/environments/{env_id}">
