@@ -238,7 +238,9 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def benchmark_data(self, agent: Agent, world: World) -> tuple[float, int, float, int]:
+    def benchmark_data(
+        self, agent: Agent, world: World
+    ) -> tuple[float, int, float, int]:
         rew = 0
         collisions = 0
         occupied_landmarks = 0

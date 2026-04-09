@@ -230,7 +230,9 @@ class Scenario(BaseScenario):
                 return False
         return True
 
-    def make_world(self, num_good: int = 1, num_adversaries: int = 3, num_obstacles: int = 2) -> World:
+    def make_world(
+        self, num_good: int = 1, num_adversaries: int = 3, num_obstacles: int = 2
+    ) -> World:
         world = World()
         # set any world properties first
         world.dim_c = 2

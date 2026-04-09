@@ -235,7 +235,9 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def make_world(self, num_collectors: int = 6, num_deposits: int = 2, num_treasures: int = 6) -> World:
+    def make_world(
+        self, num_collectors: int = 6, num_deposits: int = 2, num_treasures: int = 6
+    ) -> World:
         if num_deposits < 1:
             raise ValueError("num_deposits must be >= 1")
         if num_collectors < 1:
@@ -305,7 +307,9 @@ class Scenario(BaseScenario):
     def treasures(self, world: World) -> list[Landmark]:
         return world.landmarks
 
-    def _is_collision(self, entity1: Agent | Landmark, entity2: Agent | Landmark) -> bool:
+    def _is_collision(
+        self, entity1: Agent | Landmark, entity2: Agent | Landmark
+    ) -> bool:
         delta = entity1.state.p_pos - entity2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta)))
         return dist < (entity1.size + entity2.size)
@@ -476,7 +480,9 @@ class Scenario(BaseScenario):
         rew += self._global_reward(world)
         return rew
 
-    def benchmark_data(self, agent: Agent, world: World) -> tuple[int | None, int] | tuple[int, int]:
+    def benchmark_data(
+        self, agent: Agent, world: World
+    ) -> tuple[int | None, int] | tuple[int, int]:
         num_alive = sum(1 for lm in world.landmarks if lm.alive)
         if agent.collector:
             return (agent.holding, num_alive)

@@ -10,11 +10,17 @@ class BaseScenario:  # defines scenario upon which the world is built
     def make_world(self) -> World:  # create elements of the world
         raise NotImplementedError()
 
-    def reset_world(self, world: World, np_random: Any) -> None:  # create initial conditions of the world
+    def reset_world(
+        self, world: World, np_random: Any
+    ) -> None:  # create initial conditions of the world
         raise NotImplementedError()
 
-    def benchmark_data(self, agent: Agent, world: World) -> Any:  # return benchmark metrics for evaluation
+    def benchmark_data(
+        self, agent: Agent, world: World
+    ) -> Any:  # return benchmark metrics for evaluation
         return {}
 
-    def is_terminal(self, world: World) -> bool:  # return True to end the episode early on success
+    def is_terminal(
+        self, world: World
+    ) -> bool:  # return True to end the episode early on success
         return False

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
 
 import gymnasium
 import numpy as np
@@ -159,7 +159,9 @@ class SimpleEnv(AECEnv):
         )
         return np.concatenate(states, axis=None)
 
-    def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> None:
+    def reset(
+        self, seed: int | None = None, options: dict[str, Any] | None = None
+    ) -> None:
         if seed is not None:
             self._seed(seed=seed)
         self.scenario.reset_world(self.world, self.np_random)
