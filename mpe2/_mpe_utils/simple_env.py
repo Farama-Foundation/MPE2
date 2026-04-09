@@ -300,6 +300,7 @@ class SimpleEnv(AECEnv):
             return
 
         self.enable_render(self.render_mode)
+        pygame.event.pump()  # prevent OS from marking window as unresponsive on Windows
 
         self.draw()
         if self.render_mode == "rgb_array":
