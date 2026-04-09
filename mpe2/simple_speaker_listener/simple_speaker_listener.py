@@ -45,6 +45,8 @@ simple_speaker_listener_v4.env(max_cycles=25, continuous_actions=False, dynamic_
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -57,12 +59,12 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             max_cycles=max_cycles,
@@ -90,7 +92,7 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def make_world(self):
+    def make_world(self) -> World:
         world = World()
         # set any world properties first
         world.dim_c = 3
@@ -115,7 +117,7 @@ class Scenario(BaseScenario):
             landmark.size = 0.04
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # assign goals to agents
         for agent in world.agents:
             agent.goal_a = None
@@ -143,17 +145,17 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def benchmark_data(self, agent, world):
+    def benchmark_data(self, agent: Agent, world: World) -> float:
         # returns data for benchmarking purposes
         return self.reward(agent, world)
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         # squared distance from listener to landmark
         a = world.agents[0]
         dist2 = np.sum(np.square(a.goal_a.state.p_pos - a.goal_b.state.p_pos))
         return -dist2
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         # goal color
         goal_color = np.zeros(world.dim_color)
         if agent.goal_b is not None:

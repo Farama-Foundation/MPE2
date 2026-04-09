@@ -9,10 +9,19 @@ Currently used by simple_spread, simple_tag, and simple_adversary. Can be
 extended to other environments as needed.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Callable
+
 import numpy as np
 
+if TYPE_CHECKING:
+    from mpe2._mpe_utils.core import Agent, Entity
 
-def nearest_entities(agent, entities, n):
+
+def nearest_entities(
+    agent: Agent, entities: list[Entity], n: int | None
+) -> list[Entity]:
     """Return up to *n* entities nearest to *agent*, sorted closest-first."""
     if n is None:
         return list(entities)
@@ -25,7 +34,9 @@ def nearest_entities(agent, entities, n):
     return [entities[i] for i in order]
 
 
-def padded_relative_positions(agent, entities, n, dim_p=2):
+def padded_relative_positions(
+    agent: Agent, entities: list[Entity], n: int | None, dim_p: int = 2
+) -> list[np.ndarray]:
     """Relative positions of the *n* nearest entities, zero-padded to *n* slots."""
     if n is None:
         return [e.state.p_pos - agent.state.p_pos for e in entities]
@@ -36,7 +47,13 @@ def padded_relative_positions(agent, entities, n, dim_p=2):
     return positions
 
 
-def padded_velocities(agent, entities, n, predicate=None, dim_p=2):
+def padded_velocities(
+    agent: Agent,
+    entities: list[Entity],
+    n: int | None,
+    predicate: Callable[[Entity], bool] | None = None,
+    dim_p: int = 2,
+) -> list[np.ndarray]:
     """Velocities of the *n* nearest entities, zero-padded to *n* slots."""
     if n is None:
         # Full-observability path: respect predicate-based filtering
@@ -57,7 +74,9 @@ def padded_velocities(agent, entities, n, predicate=None, dim_p=2):
     return velocities
 
 
-def padded_comms(agent, entities, n, dim_c):
+def padded_comms(
+    agent: Agent, entities: list[Entity], n: int | None, dim_c: int
+) -> list[np.ndarray]:
     """Communication signals of the *n* nearest agents, zero-padded to *n* slots."""
     if n is None:
         return [e.state.c.copy() for e in entities]

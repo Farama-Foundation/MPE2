@@ -45,6 +45,8 @@ simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_on_su
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -58,14 +60,14 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        N=4,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-        terminate_on_success=False,
-    ):
+        N: int = 4,
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+        terminate_on_success: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             N=N,
@@ -101,13 +103,13 @@ class Scenario(BaseScenario):
     # Line endpoints are separated by total_sep; agents fill the interior evenly.
     TOTAL_SEP = 1.25
 
-    def __init__(self, terminate_on_success=False):
+    def __init__(self, terminate_on_success: bool = False) -> None:
         self.terminate_on_success = terminate_on_success
-        self._expected_positions = None
-        self._delta_dists = None
-        self._joint_reward = 0.0
+        self._expected_positions: list[np.ndarray] | None = None
+        self._delta_dists: np.ndarray | None = None
+        self._joint_reward: float = 0.0
 
-    def make_world(self, N=4):
+    def make_world(self, N: int = 4) -> World:
         world = World()
         world.dim_c = 0
         world.agents = [Agent() for _ in range(N)]
@@ -124,7 +126,7 @@ class Scenario(BaseScenario):
             landmark.size = 0.02
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         for agent in world.agents:
             agent.color = np.array([0.35, 0.35, 0.85])
         for landmark in world.landmarks:
@@ -162,7 +164,7 @@ class Scenario(BaseScenario):
         self._delta_dists = None
         self._joint_reward = 0.0
 
-    def _compute_line(self, world):
+    def _compute_line(self, world: World) -> None:
         """Compute bipartite matching distances against ideal line positions."""
         dists = np.array(
             [
@@ -177,20 +179,20 @@ class Scenario(BaseScenario):
         self._delta_dists = dists[ri, ci]
         self._joint_reward = -float(np.mean(np.clip(self._delta_dists, 0, 2)))
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         return 0.0
 
-    def global_reward(self, world):
+    def global_reward(self, world: World) -> float:
         self._compute_line(world)
         return self._joint_reward
 
-    def is_terminal(self, world):
+    def is_terminal(self, world: World) -> bool:
         if not self.terminate_on_success:
             return False
         if self._delta_dists is None:
             return False
         return bool(np.all(self._delta_dists < self.DIST_THRESHOLD))
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
         return np.concatenate([agent.state.p_vel, agent.state.p_pos] + entity_pos)

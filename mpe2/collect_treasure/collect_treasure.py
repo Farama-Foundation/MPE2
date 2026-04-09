@@ -83,6 +83,8 @@ size
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -103,7 +105,7 @@ _TYPE_COLORS = [
 ]
 
 
-def _color_palette(n):
+def _color_palette(n: int) -> list[np.ndarray]:
     if n > len(_TYPE_COLORS):
         raise ValueError(
             f"At most {len(_TYPE_COLORS)} deposit types are supported; got {n}."
@@ -114,15 +116,15 @@ def _color_palette(n):
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        num_collectors=6,
-        num_deposits=2,
-        num_treasures=6,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        num_collectors: int = 6,
+        num_deposits: int = 2,
+        num_treasures: int = 6,
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             num_collectors=num_collectors,
@@ -153,7 +155,7 @@ class raw_env(SimpleEnv, EzPickle):
     # and reward computation.  The original SimpleEnv has no hook for
     # this, so we replicate the action-setup and reward logic here.
     # ------------------------------------------------------------------
-    def _execute_world_step(self):
+    def _execute_world_step(self) -> None:
         for i, agent in enumerate(self.world.agents):
             action = self.current_actions[i]
             scenario_action = []
@@ -183,7 +185,7 @@ class raw_env(SimpleEnv, EzPickle):
     # Override draw to skip non-alive landmarks (picked-up treasures are
     # teleported to [-999, -999] so we must not try to render them).
     # ------------------------------------------------------------------
-    def draw(self):
+    def draw(self) -> None:
         import pygame
 
         self.screen.fill((255, 255, 255))
@@ -233,7 +235,9 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def make_world(self, num_collectors=6, num_deposits=2, num_treasures=6):
+    def make_world(
+        self, num_collectors: int = 6, num_deposits: int = 2, num_treasures: int = 6
+    ) -> World:
         if num_deposits < 1:
             raise ValueError("num_deposits must be >= 1")
         if num_collectors < 1:
@@ -294,21 +298,23 @@ class Scenario(BaseScenario):
     # Helpers
     # ------------------------------------------------------------------
 
-    def collectors(self, world):
+    def collectors(self, world: World) -> list[Agent]:
         return [a for a in world.agents if a.collector]
 
-    def deposits(self, world):
+    def deposits(self, world: World) -> list[Agent]:
         return [a for a in world.agents if not a.collector]
 
-    def treasures(self, world):
+    def treasures(self, world: World) -> list[Landmark]:
         return world.landmarks
 
-    def _is_collision(self, entity1, entity2):
+    def _is_collision(
+        self, entity1: Agent | Landmark, entity2: Agent | Landmark
+    ) -> bool:
         delta = entity1.state.p_pos - entity2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta)))
         return dist < (entity1.size + entity2.size)
 
-    def _get_agent_encoding(self, agent, world):
+    def _get_agent_encoding(self, agent: Agent, world: World) -> np.ndarray:
         """Return a 2*n_types vector: [deposit_type_enc | holding_type_enc]."""
         n = len(world.treasure_types)
         if agent.collector:
@@ -323,7 +329,7 @@ class Scenario(BaseScenario):
     # Reset
     # ------------------------------------------------------------------
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # Store the seeded RNG so post_step can use it for reproducible respawns.
         world.np_random = np_random
 
@@ -348,7 +354,7 @@ class Scenario(BaseScenario):
     # Called after physics (world.step) but before reward computation.
     # ------------------------------------------------------------------
 
-    def post_step(self, world):
+    def post_step(self, world: World) -> None:
         self._reset_cached_rewards()
         np_random = world.np_random
 
@@ -387,11 +393,11 @@ class Scenario(BaseScenario):
     # Reward
     # ------------------------------------------------------------------
 
-    def _reset_cached_rewards(self):
-        self._cached_global_collecting = None
-        self._cached_global_deposit = None
+    def _reset_cached_rewards(self) -> None:
+        self._cached_global_collecting: float | None = None
+        self._cached_global_deposit: float | None = None
 
-    def _global_collecting_reward(self, world):
+    def _global_collecting_reward(self, world: World) -> float:
         """+5 for each collector currently touching a live treasure (not holding)."""
         if self._cached_global_collecting is None:
             rew = 0.0
@@ -403,7 +409,7 @@ class Scenario(BaseScenario):
             self._cached_global_collecting = rew
         return self._cached_global_collecting
 
-    def _global_deposit_reward(self, world):
+    def _global_deposit_reward(self, world: World) -> float:
         """+5 for each collector currently touching its matching deposit."""
         if self._cached_global_deposit is None:
             rew = 0.0
@@ -414,17 +420,17 @@ class Scenario(BaseScenario):
             self._cached_global_deposit = rew
         return self._cached_global_deposit
 
-    def _global_reward(self, world):
+    def _global_reward(self, world: World) -> float:
         return self._global_collecting_reward(world) + self._global_deposit_reward(
             world
         )
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         if agent.collector:
             return self._collector_reward(agent, world)
         return self._deposit_reward(agent, world)
 
-    def _collector_reward(self, agent, world):
+    def _collector_reward(self, agent: Agent, world: World) -> float:
         rew = 0.0
 
         # Penalise overlaps between collectors (ghost physics, handled here).
@@ -451,7 +457,7 @@ class Scenario(BaseScenario):
         rew += self._global_reward(world)
         return rew
 
-    def _deposit_reward(self, agent, world):
+    def _deposit_reward(self, agent: Agent, world: World) -> float:
         rew = 0.0
 
         # Collectors carrying this deposit's treasure type.
@@ -474,7 +480,9 @@ class Scenario(BaseScenario):
         rew += self._global_reward(world)
         return rew
 
-    def benchmark_data(self, agent, world):
+    def benchmark_data(
+        self, agent: Agent, world: World
+    ) -> tuple[int | None, int] | tuple[int, int]:
         num_alive = sum(1 for lm in world.landmarks if lm.alive)
         if agent.collector:
             return (agent.holding, num_alive)
@@ -488,7 +496,7 @@ class Scenario(BaseScenario):
     # Observation
     # ------------------------------------------------------------------
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         n_types = len(world.treasure_types)
 
         obs = [agent.state.p_pos.copy(), agent.state.p_vel.copy()]

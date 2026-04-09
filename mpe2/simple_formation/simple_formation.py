@@ -43,6 +43,8 @@ simple_formation_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -53,7 +55,7 @@ from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
 
-def _find_angle(pose):
+def _find_angle(pose: np.ndarray) -> float:
     """Return angle of a 2D vector in [0, 2π)."""
     angle = np.arctan2(pose[1], pose[0])
     if angle < 0:
@@ -64,14 +66,14 @@ def _find_angle(pose):
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        N=4,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-        terminate_on_success=False,
-    ):
+        N: int = 4,
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+        terminate_on_success: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             N=N,
@@ -106,12 +108,12 @@ class Scenario(BaseScenario):
     TARGET_RADIUS = 0.5
     DIST_THRESHOLD = 0.05
 
-    def __init__(self, terminate_on_success=False):
+    def __init__(self, terminate_on_success: bool = False) -> None:
         self.terminate_on_success = terminate_on_success
-        self._delta_dists = None
-        self._joint_reward = 0.0
+        self._delta_dists: np.ndarray | None = None
+        self._joint_reward: float = 0.0
 
-    def make_world(self, N=4):
+    def make_world(self, N: int = 4) -> World:
         world = World()
         world.dim_c = 0
         world.agents = [Agent() for _ in range(N)]
@@ -127,7 +129,7 @@ class Scenario(BaseScenario):
         world.landmarks[0].size = 0.03
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         for agent in world.agents:
             agent.color = np.array([0.35, 0.35, 0.85])
         world.landmarks[0].color = np.array([0.25, 0.25, 0.25])
@@ -140,7 +142,7 @@ class Scenario(BaseScenario):
         self._delta_dists = None
         self._joint_reward = 0.0
 
-    def _compute_formation(self, world):
+    def _compute_formation(self, world: World) -> None:
         """Compute target circle positions and bipartite matching distances."""
         N = len(world.agents)
         ideal_sep = (2 * np.pi) / N
@@ -168,20 +170,20 @@ class Scenario(BaseScenario):
         self._delta_dists = dists[ri, ci]
         self._joint_reward = -float(np.mean(np.clip(self._delta_dists, 0, 2)))
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         return 0.0
 
-    def global_reward(self, world):
+    def global_reward(self, world: World) -> float:
         self._compute_formation(world)
         return self._joint_reward
 
-    def is_terminal(self, world):
+    def is_terminal(self, world: World) -> bool:
         if not self.terminate_on_success:
             return False
         if self._delta_dists is None:
             return False
         return bool(np.all(self._delta_dists < self.DIST_THRESHOLD))
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
         return np.concatenate([agent.state.p_vel, agent.state.p_pos] + entity_pos)

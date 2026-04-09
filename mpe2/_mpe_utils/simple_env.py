@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+from typing import TYPE_CHECKING, Any, Callable
 
 import gymnasium
 import numpy as np
@@ -11,11 +14,15 @@ from pettingzoo.utils.agent_selector import AgentSelector
 
 from mpe2._mpe_utils.core import Agent
 
+if TYPE_CHECKING:
+    from mpe2._mpe_utils.core import World
+    from mpe2._mpe_utils.scenario import BaseScenario
+
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
-def make_env(raw_env):
-    def env(**kwargs):
+def make_env(raw_env: type[SimpleEnv]) -> Callable[..., AECEnv]:
+    def env(**kwargs: Any) -> AECEnv:
         env = raw_env(**kwargs)
         if env.continuous_actions:
             env = wrappers.ClipOutOfBoundsWrapper(env)
@@ -36,15 +43,15 @@ class SimpleEnv(AECEnv):
 
     def __init__(
         self,
-        scenario,
-        world,
-        max_cycles,
-        render_mode=None,
-        continuous_actions=False,
-        local_ratio=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        scenario: BaseScenario,
+        world: World,
+        max_cycles: int,
+        render_mode: str | None = None,
+        continuous_actions: bool = False,
+        local_ratio: float | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         super().__init__()
 
         self.render_mode = render_mode
@@ -82,8 +89,8 @@ class SimpleEnv(AECEnv):
         self._agent_selector = AgentSelector(self.agents)
 
         # set spaces
-        self.action_spaces = dict()
-        self.observation_spaces = dict()
+        self.action_spaces: dict[str, spaces.Space] = dict()
+        self.observation_spaces: dict[str, spaces.Space] = dict()
         state_dim = 0
         for agent in self.world.agents:
             if agent.movable:
@@ -127,23 +134,23 @@ class SimpleEnv(AECEnv):
 
         self.steps = 0
 
-        self.current_actions = [None] * self.num_agents
+        self.current_actions: list[Any] = [None] * self.num_agents
 
-    def observation_space(self, agent):
+    def observation_space(self, agent: str) -> spaces.Space:
         return self.observation_spaces[agent]
 
-    def action_space(self, agent):
+    def action_space(self, agent: str) -> spaces.Space:
         return self.action_spaces[agent]
 
-    def _seed(self, seed=None):
+    def _seed(self, seed: int | None = None) -> None:
         self.np_random, seed = seeding.np_random(seed)
 
-    def observe(self, agent):
+    def observe(self, agent: str) -> np.ndarray:
         return self.scenario.observation(
             self.world.agents[self._index_map[agent]], self.world
         ).astype(np.float32)
 
-    def state(self):
+    def state(self) -> np.ndarray:
         states = tuple(
             self.scenario.observation(
                 self.world.agents[self._index_map[agent]], self.world
@@ -152,7 +159,9 @@ class SimpleEnv(AECEnv):
         )
         return np.concatenate(states, axis=None)
 
-    def reset(self, seed=None, options=None):
+    def reset(
+        self, seed: int | None = None, options: dict[str, Any] | None = None
+    ) -> None:
         if seed is not None:
             self._seed(seed=seed)
         self.scenario.reset_world(self.world, self.np_random)
@@ -162,14 +171,14 @@ class SimpleEnv(AECEnv):
         self._cumulative_rewards = {name: 0.0 for name in self.agents}
         self.terminations = {name: False for name in self.agents}
         self.truncations = {name: False for name in self.agents}
-        self.infos = {name: {} for name in self.agents}
+        self.infos: dict[str, Any] = {name: {} for name in self.agents}
 
         self.agent_selection = self._agent_selector.reset()
         self.steps = 0
 
         self.current_actions = [None] * self.num_agents
 
-    def _populate_benchmark_data(self):
+    def _populate_benchmark_data(self) -> None:
         """Populate self.infos with scenario benchmark_data for each agent, if enabled."""
         if not self.benchmark_data:
             return
@@ -178,7 +187,7 @@ class SimpleEnv(AECEnv):
                 "benchmark_data": self.scenario.benchmark_data(agent, self.world)
             }
 
-    def _execute_world_step(self):
+    def _execute_world_step(self) -> None:
         # set action for each agent
         for i, agent in enumerate(self.world.agents):
             action = self.current_actions[i]
@@ -216,7 +225,13 @@ class SimpleEnv(AECEnv):
         self._populate_benchmark_data()
 
     # set env action for a particular agent
-    def _set_action(self, action, agent, action_space, time=None):
+    def _set_action(
+        self,
+        action: Any,
+        agent: Agent,
+        action_space: spaces.Space,
+        time: Any = None,
+    ) -> None:
         agent.action.u = np.zeros(self.world.dim_p)
         agent.action.c = np.zeros(self.world.dim_c)
 
@@ -254,7 +269,7 @@ class SimpleEnv(AECEnv):
         # make sure we used all elements of action
         assert len(action) == 0
 
-    def step(self, action):
+    def step(self, action: Any) -> None:
         if (
             self.terminations[self.agent_selection]
             or self.truncations[self.agent_selection]
@@ -286,13 +301,13 @@ class SimpleEnv(AECEnv):
         if self.render_mode == "human":
             self.render()
 
-    def enable_render(self, mode="human"):
+    def enable_render(self, mode: str = "human") -> None:
         if not self.renderOn and mode == "human":
             self.screen = pygame.display.set_mode(self.screen.get_size())
             self.clock = pygame.time.Clock()
             self.renderOn = True
 
-    def render(self):
+    def render(self) -> np.ndarray | None:
         if self.render_mode is None:
             gymnasium.logger.warn(
                 "You are calling render method without specifying any render mode."
@@ -311,7 +326,7 @@ class SimpleEnv(AECEnv):
             self.clock.tick(self.metadata["render_fps"])
             return
 
-    def draw(self):
+    def draw(self) -> None:
         # clear screen
         self.screen.fill((255, 255, 255))
 
@@ -371,7 +386,7 @@ class SimpleEnv(AECEnv):
                 )
                 text_line += 1
 
-    def close(self):
+    def close(self) -> None:
         if self.screen is not None:
             pygame.quit()
             self.screen = None

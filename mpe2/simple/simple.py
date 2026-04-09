@@ -39,6 +39,8 @@ simple_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -51,12 +53,12 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             max_cycles=max_cycles,
@@ -84,7 +86,7 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def make_world(self):
+    def make_world(self) -> World:
         world = World()
         # add agents
         world.agents = [Agent() for i in range(1)]
@@ -100,7 +102,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -117,11 +119,11 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos))
         return -dist2
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         for entity in world.landmarks:

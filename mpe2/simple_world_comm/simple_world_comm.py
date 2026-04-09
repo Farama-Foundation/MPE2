@@ -70,6 +70,8 @@ simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -82,17 +84,17 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        num_good=2,
-        num_adversaries=4,
-        num_obstacles=1,
-        num_food=2,
-        max_cycles=25,
-        num_forests=2,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        num_good: int = 2,
+        num_adversaries: int = 4,
+        num_obstacles: int = 1,
+        num_food: int = 2,
+        max_cycles: int = 25,
+        num_forests: int = 2,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             num_good=num_good,
@@ -129,12 +131,12 @@ parallel_env = parallel_wrapper_fn(env)
 class Scenario(BaseScenario):
     def make_world(
         self,
-        num_good_agents=2,
-        num_adversaries=4,
-        num_landmarks=1,
-        num_food=2,
-        num_forests=2,
-    ):
+        num_good_agents: int = 2,
+        num_adversaries: int = 4,
+        num_landmarks: int = 1,
+        num_food: int = 2,
+        num_forests: int = 2,
+    ) -> World:
         world = World()
         # set any world properties first
         world.dim_c = 4
@@ -189,7 +191,7 @@ class Scenario(BaseScenario):
         # world boundaries now penalized with negative reward
         return world
 
-    def set_boundaries(self, world):
+    def set_boundaries(self, world: World) -> list[Landmark]:
         boundary_list = []
         landmark_size = 1
         edge = 1 + landmark_size
@@ -217,7 +219,7 @@ class Scenario(BaseScenario):
 
         return boundary_list
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = (
@@ -250,7 +252,7 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-0.9, +0.9, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def benchmark_data(self, agent, world):
+    def benchmark_data(self, agent: Agent, world: World) -> int:
         if agent.adversary:
             collisions = 0
             for a in self.good_agents(world):
@@ -260,21 +262,21 @@ class Scenario(BaseScenario):
         else:
             return 0
 
-    def is_collision(self, agent1, agent2):
+    def is_collision(self, agent1: Agent, agent2: Agent) -> bool:
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
     # return all agents that are not adversaries
-    def good_agents(self, world):
+    def good_agents(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world):
+    def adversaries(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         # boundary_reward = -10 if self.outside_boundary(agent) else 0
         main_reward = (
@@ -284,7 +286,7 @@ class Scenario(BaseScenario):
         )
         return main_reward
 
-    def outside_boundary(self, agent):
+    def outside_boundary(self, agent: Agent) -> bool:
         if (
             agent.state.p_pos[0] > 1
             or agent.state.p_pos[0] < -1
@@ -295,7 +297,7 @@ class Scenario(BaseScenario):
         else:
             return False
 
-    def agent_reward(self, agent, world):
+    def agent_reward(self, agent: Agent, world: World) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         rew = 0
         shape = False
@@ -331,7 +333,7 @@ class Scenario(BaseScenario):
 
         return rew
 
-    def adversary_reward(self, agent, world):
+    def adversary_reward(self, agent: Agent, world: World) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         rew = 0
         shape = True
@@ -349,7 +351,7 @@ class Scenario(BaseScenario):
                         rew += 5
         return rew
 
-    def observation2(self, agent, world):
+    def observation2(self, agent: Agent, world: World) -> np.ndarray:
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         for entity in world.landmarks:
@@ -379,7 +381,7 @@ class Scenario(BaseScenario):
             + other_vel
         )
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         for entity in world.landmarks:
