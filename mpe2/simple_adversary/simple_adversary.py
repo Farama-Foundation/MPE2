@@ -69,6 +69,8 @@ regardless of this setting (it is private, 2-D information, not a positional slo
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -82,15 +84,15 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        N=2,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-        num_agent_neighbors=None,
-        num_landmark_neighbors=None,
-    ):
+        N: int = 2,
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+    ) -> None:
         assert num_agent_neighbors is None or (
             isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
         ), "num_agent_neighbors must be a positive integer or None."
@@ -130,11 +132,15 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def __init__(self, num_agent_neighbors=None, num_landmark_neighbors=None):
+    def __init__(
+        self,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+    ) -> None:
         self.num_agent_neighbors = num_agent_neighbors
         self.num_landmark_neighbors = num_landmark_neighbors
 
-    def make_world(self, N=2):
+    def make_world(self, N: int = 2) -> World:
         world = World()
         # set any world properties first
         world.dim_c = 2
@@ -161,7 +167,7 @@ class Scenario(BaseScenario):
             landmark.size = 0.08
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # random properties for agents
         world.agents[0].color = np.array([0.85, 0.35, 0.35])
         for i in range(1, world.num_agents):
@@ -183,7 +189,7 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def benchmark_data(self, agent, world):
+    def benchmark_data(self, agent: Agent, world: World) -> float | tuple[float, ...]:
         # returns data for benchmarking purposes
         if agent.adversary:
             return np.sum(np.square(agent.state.p_pos - agent.goal_a.state.p_pos))
@@ -197,14 +203,14 @@ class Scenario(BaseScenario):
             return tuple(dists)
 
     # return all agents that are not adversaries
-    def good_agents(self, world):
+    def good_agents(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world):
+    def adversaries(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         return (
             self.adversary_reward(agent, world)
@@ -212,7 +218,7 @@ class Scenario(BaseScenario):
             else self.agent_reward(agent, world)
         )
 
-    def agent_reward(self, agent, world):
+    def agent_reward(self, agent: Agent, world: World) -> float:
         # Rewarded based on how close any good agent is to the goal landmark, and how far the adversary is from it
         shaped_reward = True
         shaped_adv_reward = True
@@ -256,7 +262,7 @@ class Scenario(BaseScenario):
             )
         return pos_rew + adv_rew
 
-    def adversary_reward(self, agent, world):
+    def adversary_reward(self, agent: Agent, world: World) -> float:
         # Rewarded based on proximity to the goal landmark
         shaped_reward = True
         if shaped_reward:  # distance-based reward
@@ -272,7 +278,7 @@ class Scenario(BaseScenario):
                 adv_rew += 5
             return adv_rew
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         """Return the observation vector for *agent*.
 
         Good-agent structure:

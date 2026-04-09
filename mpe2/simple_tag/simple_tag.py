@@ -87,6 +87,8 @@ simultaneously caught (colliding with at least one adversary).
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -103,19 +105,19 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        num_good=1,
-        num_adversaries=3,
-        num_obstacles=2,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-        curriculum=False,
-        terminate_on_success=False,
-        num_agent_neighbors=None,
-        num_landmark_neighbors=None,
-    ):
+        num_good: int = 1,
+        num_adversaries: int = 3,
+        num_obstacles: int = 2,
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+        curriculum: bool = False,
+        terminate_on_success: bool = False,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+    ) -> None:
         assert num_agent_neighbors is None or (
             isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
         ), "num_agent_neighbors must be a positive integer or None."
@@ -156,15 +158,15 @@ class raw_env(SimpleEnv, EzPickle):
         self.metadata["name"] = "simple_tag_v3"
 
     @property
-    def curriculum_stage(self):
+    def curriculum_stage(self) -> int:
         """Current curriculum stage (0-indexed). Only meaningful when curriculum=True."""
         return self.scenario.curriculum_stage
 
-    def advance_curriculum(self):
+    def advance_curriculum(self) -> None:
         """Advance to the next curriculum stage. Takes effect on the next env.reset()."""
         self.scenario.advance_curriculum()
 
-    def set_curriculum_stage(self, stage):
+    def set_curriculum_stage(self, stage: int) -> None:
         """Jump to a specific curriculum stage (0-indexed, clamped to valid range). Takes effect on the next env.reset()."""
         self.scenario.set_curriculum_stage(stage)
 
@@ -189,29 +191,29 @@ class Scenario(BaseScenario):
 
     def __init__(
         self,
-        curriculum=False,
-        terminate_on_success=False,
-        num_agent_neighbors=None,
-        num_landmark_neighbors=None,
-    ):
+        curriculum: bool = False,
+        terminate_on_success: bool = False,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+    ) -> None:
         self.curriculum = curriculum
         self.curriculum_stage = 0
         self.terminate_on_success = terminate_on_success
         self.num_agent_neighbors = num_agent_neighbors
         self.num_landmark_neighbors = num_landmark_neighbors
 
-    def advance_curriculum(self):
+    def advance_curriculum(self) -> None:
         """Move to the next curriculum stage. No-op at the final stage."""
         max_stage = len(self.CURRICULUM_STAGES) - 1
         if self.curriculum_stage < max_stage:
             self.curriculum_stage += 1
 
-    def set_curriculum_stage(self, stage):
+    def set_curriculum_stage(self, stage: int) -> None:
         """Set curriculum stage directly (clamped to valid range)."""
         max_stage = len(self.CURRICULUM_STAGES) - 1
         self.curriculum_stage = max(0, min(stage, max_stage))
 
-    def is_terminal(self, world):
+    def is_terminal(self, world: World) -> bool:
         """Return True when every good agent is simultaneously caught by an adversary.
 
         Only active when terminate_on_success=True. A good agent is considered caught
@@ -228,7 +230,7 @@ class Scenario(BaseScenario):
                 return False
         return True
 
-    def make_world(self, num_good=1, num_adversaries=3, num_obstacles=2):
+    def make_world(self, num_good: int = 1, num_adversaries: int = 3, num_obstacles: int = 2) -> World:
         world = World()
         # set any world properties first
         world.dim_c = 2
@@ -258,7 +260,7 @@ class Scenario(BaseScenario):
             landmark.boundary = False
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = (
@@ -288,7 +290,7 @@ class Scenario(BaseScenario):
                     agent.max_speed = self._PREY_BASE_MAX_SPEED * speed_factor
                     agent.accel = self._PREY_BASE_ACCEL * speed_factor
 
-    def benchmark_data(self, agent, world):
+    def benchmark_data(self, agent: Agent, world: World) -> int:
         # returns data for benchmarking purposes
         if agent.adversary:
             collisions = 0
@@ -299,21 +301,21 @@ class Scenario(BaseScenario):
         else:
             return 0
 
-    def is_collision(self, agent1, agent2):
+    def is_collision(self, agent1: Agent, agent2: Agent) -> bool:
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
     # return all agents that are not adversaries
-    def good_agents(self, world):
+    def good_agents(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world):
+    def adversaries(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         main_reward = (
             self.adversary_reward(agent, world)
@@ -322,7 +324,7 @@ class Scenario(BaseScenario):
         )
         return main_reward
 
-    def agent_reward(self, agent, world):
+    def agent_reward(self, agent: Agent, world: World) -> float:
         # Agents are negatively rewarded if caught by adversaries
         rew = 0
         shape = False
@@ -353,7 +355,7 @@ class Scenario(BaseScenario):
 
         return rew
 
-    def adversary_reward(self, agent, world):
+    def adversary_reward(self, agent: Agent, world: World) -> float:
         # Adversaries are rewarded for collisions with agents
         rew = 0
         shape = False
@@ -374,7 +376,7 @@ class Scenario(BaseScenario):
                         rew += 10
         return rew
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         """Return the observation vector for *agent*.
 
         * ``self_vel``       – agent's own velocity (dim_p,)

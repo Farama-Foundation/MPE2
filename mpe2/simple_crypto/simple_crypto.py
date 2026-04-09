@@ -53,6 +53,8 @@ simple_crypto_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -72,12 +74,12 @@ adversary to goal. Adversary is rewarded for its distance to the goal.
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             max_cycles=max_cycles,
@@ -105,13 +107,13 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class CryptoAgent(Agent):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.key = None
+        self.key: np.ndarray | None = None
 
 
 class Scenario(BaseScenario):
-    def make_world(self):
+    def make_world(self) -> World:
         world = World()
         # set any world properties first
         num_agents = 3
@@ -137,7 +139,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -168,32 +170,32 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def benchmark_data(self, agent, world):
+    def benchmark_data(self, agent: Agent, world: World) -> tuple[np.ndarray, np.ndarray]:
         # returns data for benchmarking purposes
         return (agent.state.c, agent.goal_a.color)
 
     # return all agents that are not adversaries
-    def good_listeners(self, world):
+    def good_listeners(self, world: World) -> list[Agent]:
         return [
             agent for agent in world.agents if not agent.adversary and not agent.speaker
         ]
 
     # return all agents that are not adversaries
-    def good_agents(self, world):
+    def good_agents(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world):
+    def adversaries(self, world: World) -> list[Agent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         return (
             self.adversary_reward(agent, world)
             if agent.adversary
             else self.agent_reward(agent, world)
         )
 
-    def agent_reward(self, agent, world):
+    def agent_reward(self, agent: Agent, world: World) -> float:
         # Agents rewarded if Bob can reconstruct message, but adversary (Eve) cannot
         good_listeners = self.good_listeners(world)
         adversaries = self.adversaries(world)
@@ -212,14 +214,14 @@ class Scenario(BaseScenario):
                 adv_rew += adv_l1
         return adv_rew + good_rew
 
-    def adversary_reward(self, agent, world):
+    def adversary_reward(self, agent: Agent, world: World) -> float:
         # Adversary (Eve) is rewarded if it can reconstruct original goal
         rew = 0
         if not (agent.state.c == np.zeros(world.dim_c)).all():
             rew -= np.sum(np.square(agent.state.c - agent.goal_a.color))
         return rew
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         # goal color
         goal_color = np.zeros(world.dim_color)
         if agent.goal_a is not None:

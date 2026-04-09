@@ -50,6 +50,8 @@ simple_reference_v3.env(local_ratio=0.5, max_cycles=25, continuous_actions=False
 
 """
 
+from __future__ import annotations
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
@@ -62,13 +64,13 @@ from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 class raw_env(SimpleEnv, EzPickle):
     def __init__(
         self,
-        local_ratio=0.5,
-        max_cycles=25,
-        continuous_actions=False,
-        render_mode=None,
-        dynamic_rescaling=False,
-        benchmark_data=False,
-    ):
+        local_ratio: float = 0.5,
+        max_cycles: int = 25,
+        continuous_actions: bool = False,
+        render_mode: str | None = None,
+        dynamic_rescaling: bool = False,
+        benchmark_data: bool = False,
+    ) -> None:
         EzPickle.__init__(
             self,
             local_ratio=local_ratio,
@@ -101,7 +103,7 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def make_world(self):
+    def make_world(self) -> World:
         world = World()
         # set any world properties first
         world.dim_c = 10
@@ -119,7 +121,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world, np_random):
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         # assign goals to agents
         for agent in world.agents:
             agent.goal_a = None
@@ -148,7 +150,7 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent, world):
+    def reward(self, agent: Agent, world: World) -> float:
         if agent.goal_a is None or agent.goal_b is None:
             agent_reward = 0.0
         else:
@@ -157,11 +159,11 @@ class Scenario(BaseScenario):
             )
         return -agent_reward
 
-    def global_reward(self, world):
+    def global_reward(self, world: World) -> float:
         all_rewards = sum(self.reward(agent, world) for agent in world.agents)
         return all_rewards / len(world.agents)
 
-    def observation(self, agent, world):
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         # goal color
         goal_color = [np.zeros(world.dim_color), np.zeros(world.dim_color)]
         if agent.goal_b is not None:
