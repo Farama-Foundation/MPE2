@@ -3,8 +3,20 @@ name: Linux tests
 
 on:
     push:
+        paths:
+        - '.github/workflows/linux-test.yml'
+        - 'mpe2/**'
+        - 'test/**'
+        - 'setup.py'
+        - 'pyproject.toml'
         branches: [main]
     pull_request:
+        paths:
+        - '.github/workflows/linux-test.yml'
+        - 'mpe2/**'
+        - 'test/**'
+        - 'setup.py'
+        - 'pyproject.toml'
         branches: [main]
 
 permissions:
