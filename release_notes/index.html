@@ -191,7 +191,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -280,7 +280,7 @@
                 </svg>
               </button>
             </div>
-            <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <label class="toc-overlay-icon toc-content-icon" for="__toc">
               <div class="visually-hidden">Toggle table of contents sidebar</div>
               <i class="icon"><svg>
                   <use href="#svg-toc"></use>
@@ -291,10 +291,56 @@
             
             <section class="tex2jax_ignore mathjax_ignore" id="release-notes">
 <h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Changelog was not built because no GitHub authentication token was found. An access token can be provided using the <code class="docutils literal notranslate"><span class="pre">SPHINX_GITHUB_CHANGELOG_TOKEN</span></code> environment variable or the <code class="docutils literal notranslate"><span class="pre">sphinx_github_changelog_token</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">conf.py</span></code>, or it can be automatically located from a configured git credential helper.</p>
-</div>
+<section id="release-v1-0-0">
+<h2>MPE2 v1.0.0 <a class="headerlink" href="#release-v1-0-0" title="Link to this heading">¶</a></h2>
+<p><em>Released on 2026-04-03 - <a class="reference external" href="https://github.com/Farama-Foundation/MPE2/releases/tag/v1.0.0">GitHub</a> - <a class="reference external" href="https://pypi.org/project/mpe2/v1.0.0/">PyPI</a></em></p>
+<h1>Multi Particle Environments 2 (MPE2) v1.0.0 Release Notes</h1>
+<p>Multiple landmark changes have been made to MPE2, warranting a major release since the original release of the multi-particle environments. These changes are documented below.</p>
+<h2>New Environments</h2>
+<p>Two new environments were added. These environments are described below, with additional documentation in their files and the MPE2 documentation website.</p>
+<h3>Collect Treasure Environment</h3>
+<p>This was inspired by the collect treasure environment from <a href="https://github.com/shariqiqbal2810/MAAC/blob/master/envs/mpe_scenarios/fullobs_collect_treasure.py">https://github.com/shariqiqbal2810/MAAC/blob/master/envs/mpe_scenarios/fullobs_collect_treasure.py</a>.</p>
+<p>It is a cooperative multi-agent task in which collector agents must pick up treasures and deliver them to the matching deposit agent. It consists of two types of agents: collectors and depositors. Treasures are landmarks that appear at random positions. When a collector touches a treasure (is within collision distance), the collector picks it up and the treasure disappears. The treasure then respawns at a new random location on the next step. When a collector carrying a treasure touches the matching deposit agent, the treasure is delivered, the collector's inventory is cleared, and it turns grey again.</p>
+<h3>Formation Control Environments</h3>
+<p>This is inspired by the formation control environments from <a href="https://github.com/sumitsk/marl_transfer/tree/master/mape/multiagent/scenarios">https://github.com/sumitsk/marl_transfer/tree/master/mape/multiagent/scenarios</a>.</p>
+<p>These environments are integral MARL environments, and were a natural addition to MPE. In these environments, the different agents are required to arrange themselves in a formation.</p>
+<p>Two environments were added: simple_line and simple_formation. In simple_formation N agents must arrange themselves in a circle of radius 0.5 around a central landmark. In simple_line N agents must arrange themselves in a line between two landmarks.</p>
+<h2>Partial Observability</h2>
+<p>Two types of partial observability support was added to select MPE environments: N-nearest landmarks and N-closest agents. They were added in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="4030541322" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/29" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/29/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/29">#29</a> using a helper script, allowing for easier extension to other MPE environments as needed.</p>
+<h2>Curriculum Training Support</h2>
+<p>Support for curriculum training was added to select environments in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="4013934389" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/27" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/27/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/27">#27</a>. This is an environment dependent feature, with different environments requiring different types of curriculum.<br>
+Simple_spread: Agents learn to capture the landmark first, and then learn to avoid collisions. Gradually, increase number of agents, landmarks to solve this task.<br>
+simple_tag: Preys are slower at the start and start to increase velocity, similarly, number of agents can be increased as environments progresses.</p>
+<h2>Termination Calls</h2>
+<p>With the addition of the above curriculum training, agents must have termination calls. Additionally, for environments that have the goal of capturing a landmark, having termination calls on a successful capture aids learning</p>
+<p>These termination calls were added in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="4018035484" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/28" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/28/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/28">#28</a></p>
+<h2>Benchmark Data</h2>
+<p>Benchmark data is now part of the infos. A new argument: benchmark_data=False is available on every environment's constructor. It is off by default so it doesn't consume resources during training. This was added since, rewards in general for MPEs do not state how effective the policy is, we need additional information (such as number of landmark captures/preys etc.).</p>
+<h2>Other changes:</h2>
+<h3>CI Changes</h3>
+<p>Multiple CI changes, including OIDC support for publishing to PyPI made in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="3966720412" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/24" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/24/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/24">#24</a></p>
+<h3>Heuristic Testing of Environments</h3>
+<p>Additional testing of environments was conducted to test scaling and training</p>
+<h3>Codebase Complexity</h3>
+<p>Codebase complexity was evaluated, and accounted for in future changes added.</p>
+<h3>Action spaces</h3>
+<p>The original MPE environments were continuous actions spaces. MPE2 included discrete action spaces. This is an older MPE2 change, not performed in this major release but accounted for in all related changes.</p>
+<h2>New Contributors</h2>
+<ul>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/BolunDai0216/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/BolunDai0216">@BolunDai0216</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2433959941" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/4" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/4/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/4">#4</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mgoulao/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mgoulao">@mgoulao</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2808952333" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/10" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/10/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/10">#10</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/David-GERARD/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/David-GERARD">@David-GERARD</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="2908487909" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/15" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/15/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/15">#15</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/daimm2000/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/daimm2000">@daimm2000</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="3230123750" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/20" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/20/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/20">#20</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/RushivArora/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/RushivArora">@RushivArora</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="3966720412" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/24" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/24/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/24">#24</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mwydmuch/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mwydmuch">@mwydmuch</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="4039420552" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/31" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/31/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/31">#31</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/Farama-Foundation/MPE2/commits/v1.0.0">https://github.com/Farama-Foundation/MPE2/commits/v1.0.0</a></p></section>
+<section id="release-v1-0-0rc1">
+<h2>MPE2 v1.0.0rc1<a class="headerlink" href="#release-v1-0-0rc1" title="Link to this heading">¶</a></h2>
+<p><em>Released on 2026-03-29 - <a class="reference external" href="https://github.com/Farama-Foundation/MPE2/releases/tag/v1.0.0rc1">GitHub</a> - <a class="reference external" href="https://pypi.org/project/mpe2/v1.0.0rc1/">PyPI</a></em></p>
+<h1>Multi Particle Environments 2 (MPE2) v1.0.0rc1 Release Notes</h1>
+<p>Same as v1.0.0 release</p>
+<p><strong>Full Changelog</strong>: <a href="https://github.com/Farama-Foundation/MPE2/commits/v1.0.0rc1">https://github.com/Farama-Foundation/MPE2/commits/v1.0.0rc1</a></p></section>
 </section>
 
           </article>
@@ -332,8 +378,28 @@
           
         </footer>
       </div>
-      <aside class="toc-drawer no-toc">
+      <aside class="toc-drawer">
         
+        
+        <div class="toc-sticky toc-scroll">
+          <div class="toc-title-container">
+            <span class="toc-title">
+              On this page
+            </span>
+          </div>
+          <div class="toc-tree-container">
+            <div class="toc-tree">
+              <ul>
+<li><a class="reference internal" href="#">Release Notes</a><ul>
+<li><a class="reference internal" href="#release-v1-0-0">MPE2 v1.0.0 </a></li>
+<li><a class="reference internal" href="#release-v1-0-0rc1">MPE2 v1.0.0rc1</a></li>
+</ul>
+</li>
+</ul>
+
+            </div>
+          </div>
+        </div>
         
         
       </aside>
