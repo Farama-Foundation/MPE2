@@ -51,7 +51,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -91,15 +91,45 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
+class ExtendedAgent(Agent):
+    def __init__(self) -> None:
+        super().__init__()
+        self._goal_a: ExtendedAgent | None = None
+        self._goal_b: Landmark | None = None
+
+    @property
+    def goal_a(self) -> ExtendedAgent:
+        return _require_initialized(self._goal_a, "ExtendedAgent.goal_a")
+
+    @goal_a.setter
+    def goal_a(self, value: ExtendedAgent | None) -> None:
+        self._goal_a = value
+
+    @property
+    def goal_b(self) -> Landmark:
+        return _require_initialized(self._goal_b, "ExtendedAgent.goal_b")
+
+    @goal_b.setter
+    def goal_b(self, value: Landmark | None) -> None:
+        self._goal_b = value
+
+
+class ExtendedWorld(World):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[ExtendedAgent] = []
+        self.collaborative: bool = False
+
+
 class Scenario(BaseScenario):
-    def make_world(self) -> World:
-        world = World()
+    def make_world(self) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         world.dim_c = 3
         num_landmarks = 3
         world.collaborative = True
         # add agents
-        world.agents = [Agent() for i in range(2)]
+        world.agents = [ExtendedAgent() for i in range(2)]
         for i, agent in enumerate(world.agents):
             agent.name = "speaker_0" if i == 0 else "listener_0"
             agent.collide = False
@@ -117,14 +147,16 @@ class Scenario(BaseScenario):
             landmark.size = 0.04
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # assign goals to agents
         for agent in world.agents:
             agent.goal_a = None
             agent.goal_b = None
         # want listener to go to the goal landmark
         world.agents[0].goal_a = world.agents[1]
-        world.agents[0].goal_b = np_random.choice(world.landmarks)
+        world.agents[0].goal_b = world.landmarks[
+            int(np_random.integers(len(world.landmarks)))
+        ]
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -145,20 +177,20 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def benchmark_data(self, agent: Agent, world: World) -> float:
+    def benchmark_data(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # returns data for benchmarking purposes
         return self.reward(agent, world)
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # squared distance from listener to landmark
         a = world.agents[0]
         dist2 = np.sum(np.square(a.goal_a.state.p_pos - a.goal_b.state.p_pos))
         return -dist2
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         # goal color
         goal_color = np.zeros(world.dim_color)
-        if agent.goal_b is not None:
+        if agent._goal_b is not None:
             goal_color = agent.goal_b.color
 
         # get positions of all entities in this agent's reference frame
@@ -179,3 +211,4 @@ class Scenario(BaseScenario):
         # listener
         if agent.silent:
             return np.concatenate([agent.state.p_vel] + entity_pos + comm)
+        raise RuntimeError(f"Unhandled agent role for {agent.name}.")

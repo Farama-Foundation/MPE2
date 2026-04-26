@@ -1,16 +1,39 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, TypeVar, cast
 
 import numpy as np
+
+_T = TypeVar("_T")
+
+
+def _require_initialized(value: _T | None, name: str) -> _T:
+    assert value is not None, f"{name} has not been initialized."
+    return value
 
 
 class EntityState:  # physical/external base state of all entities
     def __init__(self) -> None:
         # physical position
-        self.p_pos: np.ndarray | None = None
+        self._p_pos: np.ndarray | None = None
         # physical velocity
-        self.p_vel: np.ndarray | None = None
+        self._p_vel: np.ndarray | None = None
+
+    @property
+    def p_pos(self) -> np.ndarray:
+        return _require_initialized(self._p_pos, "EntityState.p_pos")
+
+    @p_pos.setter
+    def p_pos(self, value: np.ndarray | None) -> None:
+        self._p_pos = value
+
+    @property
+    def p_vel(self) -> np.ndarray:
+        return _require_initialized(self._p_vel, "EntityState.p_vel")
+
+    @p_vel.setter
+    def p_vel(self, value: np.ndarray | None) -> None:
+        self._p_vel = value
 
 
 class AgentState(
@@ -19,15 +42,39 @@ class AgentState(
     def __init__(self) -> None:
         super().__init__()
         # communication utterance
-        self.c: np.ndarray | None = None
+        self._c: np.ndarray | None = None
+
+    @property
+    def c(self) -> np.ndarray:
+        return _require_initialized(self._c, "AgentState.c")
+
+    @c.setter
+    def c(self, value: np.ndarray | None) -> None:
+        self._c = value
 
 
 class Action:  # action of the agent
     def __init__(self) -> None:
         # physical action
-        self.u: np.ndarray | None = None
+        self._u: np.ndarray | None = None
         # communication action
-        self.c: np.ndarray | None = None
+        self._c: np.ndarray | None = None
+
+    @property
+    def u(self) -> np.ndarray:
+        return _require_initialized(self._u, "Action.u")
+
+    @u.setter
+    def u(self, value: np.ndarray | None) -> None:
+        self._u = value
+
+    @property
+    def c(self) -> np.ndarray:
+        return _require_initialized(self._c, "Action.c")
+
+    @c.setter
+    def c(self, value: np.ndarray | None) -> None:
+        self._c = value
 
 
 class Entity:  # properties and state of physical world entity
@@ -43,7 +90,7 @@ class Entity:  # properties and state of physical world entity
         # material density (affects mass)
         self.density: float = 25.0
         # color
-        self.color: np.ndarray | None = None
+        self._color: np.ndarray | None = None
         # max speed and accel
         self.max_speed: float | None = None
         self.accel: float | None = None
@@ -56,10 +103,13 @@ class Entity:  # properties and state of physical world entity
     def mass(self) -> float:
         return self.initial_mass
 
+    @property
+    def color(self) -> np.ndarray:
+        return _require_initialized(self._color, "Entity.color")
 
-class Landmark(Entity):  # properties of landmark entities
-    def __init__(self) -> None:
-        super().__init__()
+    @color.setter
+    def color(self, value: np.ndarray | None) -> None:
+        self._color = value
 
 
 class Agent(Entity):  # properties of agent entities
@@ -85,6 +135,11 @@ class Agent(Entity):  # properties of agent entities
         self.action_callback: Callable[[Agent, World], Action] | None = None
 
 
+class Landmark(Entity):  # properties of landmark entities
+    def __init__(self) -> None:
+        super().__init__()
+
+
 class World:  # multi-agent world
     def __init__(self) -> None:
         # list of agents and entities (can change at execution-time!)
@@ -107,7 +162,7 @@ class World:  # multi-agent world
     # return all entities in the world
     @property
     def entities(self) -> list[Entity]:
-        return self.agents + self.landmarks
+        return cast(list[Entity], self.agents + self.landmarks)
 
     # return all agents controllable by external policies
     @property
@@ -123,7 +178,8 @@ class World:  # multi-agent world
     def step(self) -> None:
         # set actions for scripted agents
         for agent in self.scripted_agents:
-            agent.action = agent.action_callback(agent, self)
+            if agent.action_callback is not None:
+                agent.action = agent.action_callback(agent, self)
         # gather forces applied to entities
         p_force: list[np.ndarray | float | None] = [None] * len(self.entities)
         # apply agent physical controls
@@ -178,8 +234,9 @@ class World:  # multi-agent world
                 continue
             entity.state.p_pos += entity.state.p_vel * self.dt
             entity.state.p_vel = entity.state.p_vel * (1 - self.damping)
-            if p_force[i] is not None:
-                entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
+            force = p_force[i]
+            if force is not None:
+                entity.state.p_vel += (force / entity.mass) * self.dt
             if entity.max_speed is not None:
                 speed = np.sqrt(
                     np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1])

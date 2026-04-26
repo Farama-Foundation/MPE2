@@ -47,3 +47,11 @@ line-length = 88
 atomic = true
 profile = "black"
 src_paths = ["mpe2", "test"]
+
+[tool.pyright]
+include = [
+    "mpe2/",
+]
+verboseOutput = true
+typeCheckingMode = "basic"
+reportMissingImports = false
