@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                              |
 | Manual Control     | No                                               |
 | Agents             | `agents= [agent_0, agent_1]`                     |
-| Agent Count        | 2                                                |
+| ExtendedAgent Count        | 2                                                |
 | Action Shape       | (5)                                              |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (5))                   |
 | Observation Shape  | (8),(10)                                         |
@@ -23,13 +23,13 @@ This environment has 2 agents and 3 landmarks of different colors. Each agent wa
 
 Locally, the agents are rewarded by their distance to their target landmark. Globally, all agents are rewarded by the average distance of all the agents to their respective landmarks. The relative weight of these rewards is controlled by the `local_ratio` parameter.
 
-Agent observation space: `[self_vel, all_landmark_rel_positions, landmark_ids, goal_id, communication]`
+ExtendedAgent observation space: `[self_vel, all_landmark_rel_positions, landmark_ids, goal_id, communication]`
 
-Agent discrete action space: `[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9] X [no_action, move_left, move_right, move_down, move_up]`
+ExtendedAgent discrete action space: `[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9] X [no_action, move_left, move_right, move_down, move_up]`
 
 Where X is the Cartesian product (giving a total action space of 50).
 
-Agent continuous action space: `[no_action, move_left, move_right, move_down, move_up, say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9]`
+ExtendedAgent continuous action space: `[no_action, move_left, move_right, move_down, move_up, say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9]`
 
 ### Arguments
 
@@ -56,7 +56,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
+from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -102,51 +102,44 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class Agent(BaseAgent):
+class ExtendedAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
-        self._goal_a: Agent | None = None
+        self._goal_a: ExtendedAgent | None = None
         self._goal_b: Landmark | None = None
 
     @property
-    def goal_a(self) -> Agent:
-        assert self._goal_a is not None, "Agent.goal_a has not been initialized."
-        return self._goal_a
+    def goal_a(self) -> ExtendedAgent:
+        return _require_initialized(self._goal_a, "ExtendedAgent.goal_a")
 
     @goal_a.setter
-    def goal_a(self, value: Agent | None) -> None:
+    def goal_a(self, value: ExtendedAgent | None) -> None:
         self._goal_a = value
 
     @property
     def goal_b(self) -> Landmark:
-        assert self._goal_b is not None, "Agent.goal_b has not been initialized."
-        return self._goal_b
+        return _require_initialized(self._goal_b, "ExtendedAgent.goal_b")
 
     @goal_b.setter
     def goal_b(self, value: Landmark | None) -> None:
         self._goal_b = value
 
 
-class Landmark(BaseLandmark):
-    pass
-
-
-class World(BaseWorld):
+class ExtendedWorld(World):
     def __init__(self) -> None:
         super().__init__()
-        self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
+        self.agents: list[ExtendedAgent] = []
         self.collaborative: bool = False
 
 
 class Scenario(BaseScenario):
-    def make_world(self) -> World:
-        world = World()
+    def make_world(self) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         world.dim_c = 10
         world.collaborative = True  # whether agents share rewards
         # add agents
-        world.agents = [Agent() for i in range(2)]
+        world.agents = [ExtendedAgent() for i in range(2)]
         for i, agent in enumerate(world.agents):
             agent.name = f"agent_{i}"
             agent.collide = False
@@ -158,7 +151,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # assign goals to agents
         for agent in world.agents:
             agent.goal_a = None
@@ -187,7 +180,7 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         if agent.goal_a is None or agent.goal_b is None:
             agent_reward = 0.0
         else:
@@ -196,11 +189,11 @@ class Scenario(BaseScenario):
             )
         return -agent_reward
 
-    def global_reward(self, world: World) -> float:
+    def global_reward(self, world: ExtendedWorld) -> float:
         all_rewards = sum(self.reward(agent, world) for agent in world.agents)
         return all_rewards / len(world.agents)
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         # goal color
         goal_color = [np.zeros(world.dim_color), np.zeros(world.dim_color)]
         if agent.goal_b is not None:

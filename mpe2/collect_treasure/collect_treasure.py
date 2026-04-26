@@ -10,7 +10,7 @@ This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE envir
 | Parallel API         | Yes                                                                       |
 | Manual Control       | No                                                                        |
 | Agents               | `agents= [collector_0, ..., collector_5, deposit_0, deposit_1]`           |
-| Agent Count          | 8 (default: 6 collectors + 2 deposits)                                    |
+| ExtendedAgent Count          | 8 (default: 6 collectors + 2 deposits)                                    |
 | Action Shape         | (5,)                                                                      |
 | Action Values        | Discrete(5)/Box(0.0, 1.0, (5,))                                           |
 | Observation Shape    | (86,) for collectors, (84,) for deposits (default config)                 |
@@ -53,7 +53,7 @@ observes all treasures sorted by distance, each described by relative position a
 type encoding. Dead (just-picked-up) treasures are shown with zero relative position and
 zero type encoding.
 
-**Agent action space:** `[no_action, move_left, move_right, move_down, move_up]`
+**ExtendedAgent action space:** `[no_action, move_left, move_right, move_down, move_up]`
 
 ### Arguments
 
@@ -85,13 +85,13 @@ size
 
 from __future__ import annotations
 
-from typing import cast
+import copy
 
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld, Entity
+from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -197,7 +197,7 @@ class raw_env(SimpleEnv, EzPickle):
         visible = [
             e
             for e in self.world.entities
-            if not (isinstance(e, Landmark) and not e.alive)
+            if not (isinstance(e, ExtendedLandmark) and not e.alive)
         ]
         if not visible:
             return
@@ -234,7 +234,7 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class Agent(BaseAgent):
+class ExtendedAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
         self.collector: bool = False
@@ -242,7 +242,7 @@ class Agent(BaseAgent):
         self.d_i: int = 0
 
 
-class Landmark(BaseLandmark):
+class ExtendedLandmark(Landmark):
     def __init__(self) -> None:
         super().__init__()
         self.respawn_prob: float = 1.0
@@ -250,11 +250,11 @@ class Landmark(BaseLandmark):
         self.alive: bool = True
 
 
-class World(BaseWorld):
+class ExtendedWorld(World):
     def __init__(self) -> None:
         super().__init__()
-        self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
+        self.agents: list[ExtendedAgent] = []
+        self.landmarks: list[ExtendedLandmark] = []
         self.num_collectors: int = 0
         self.num_deposits: int = 0
         self.treasure_types: list[int] = []
@@ -262,17 +262,15 @@ class World(BaseWorld):
         self._np_random: np.random.Generator | None = None
 
     @property
-    def entities(self) -> list[Entity]:
-        return cast(list[Entity], self.agents + self.landmarks)
-
-    @property
     def np_random(self) -> np.random.Generator:
-        assert self._np_random is not None, "World.np_random has not been initialized."
+        assert (
+            self._np_random is not None
+        ), "ExtendedWorld.np_random has not been initialized."
         return self._np_random
 
     @np_random.setter
     def np_random(self, value: np.random.Generator | None) -> None:
-        self._np_random = value
+        self._np_random = copy.deepcopy(value) if value is not None else None
 
 
 # ---------------------------------------------------------------------------
@@ -283,7 +281,7 @@ class World(BaseWorld):
 class Scenario(BaseScenario):
     def make_world(
         self, num_collectors: int = 6, num_deposits: int = 2, num_treasures: int = 6
-    ) -> World:
+    ) -> ExtendedWorld:
         if num_deposits < 1:
             raise ValueError("num_deposits must be >= 1")
         if num_collectors < 1:
@@ -291,7 +289,7 @@ class Scenario(BaseScenario):
         if num_treasures < 1:
             raise ValueError("num_treasures must be >= 1")
 
-        world = World()
+        world = ExtendedWorld()
         world.dim_c = 2  # communication channels (unused; kept for compatibility)
 
         world.num_collectors = num_collectors
@@ -302,7 +300,7 @@ class Scenario(BaseScenario):
         num_agents = num_collectors + num_deposits
 
         # ---- Agents: collectors first, then deposits ----
-        world.agents = [Agent() for _ in range(num_agents)]
+        world.agents = [ExtendedAgent() for _ in range(num_agents)]
         for i, agent in enumerate(world.agents):
             is_collector = i < num_collectors
             agent.collector = is_collector
@@ -327,7 +325,7 @@ class Scenario(BaseScenario):
                 agent.color = world.treasure_colors[agent.d_i] * 0.35
 
         # ---- Landmarks: treasures ----
-        world.landmarks = [Landmark() for _ in range(num_treasures)]
+        world.landmarks = [ExtendedLandmark() for _ in range(num_treasures)]
         for i, lm in enumerate(world.landmarks):
             lm.name = f"treasure_{i}"
             lm.respawn_prob = 1.0
@@ -344,23 +342,27 @@ class Scenario(BaseScenario):
     # Helpers
     # ------------------------------------------------------------------
 
-    def collectors(self, world: World) -> list[Agent]:
+    def collectors(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [a for a in world.agents if a.collector]
 
-    def deposits(self, world: World) -> list[Agent]:
+    def deposits(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [a for a in world.agents if not a.collector]
 
-    def treasures(self, world: World) -> list[Landmark]:
+    def treasures(self, world: ExtendedWorld) -> list[ExtendedLandmark]:
         return world.landmarks
 
     def _is_collision(
-        self, entity1: Agent | Landmark, entity2: Agent | Landmark
+        self,
+        entity1: ExtendedAgent | ExtendedLandmark,
+        entity2: ExtendedAgent | ExtendedLandmark,
     ) -> bool:
         delta = entity1.state.p_pos - entity2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta)))
         return dist < (entity1.size + entity2.size)
 
-    def _get_agent_encoding(self, agent: Agent, world: World) -> np.ndarray:
+    def _get_agent_encoding(
+        self, agent: ExtendedAgent, world: ExtendedWorld
+    ) -> np.ndarray:
         """Return a 2*n_types vector: [deposit_type_enc | holding_type_enc]."""
         n = len(world.treasure_types)
         if agent.collector:
@@ -375,7 +377,7 @@ class Scenario(BaseScenario):
     # Reset
     # ------------------------------------------------------------------
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # Store the seeded RNG so post_step can use it for reproducible respawns.
         world.np_random = np_random
 
@@ -400,7 +402,7 @@ class Scenario(BaseScenario):
     # Called after physics (world.step) but before reward computation.
     # ------------------------------------------------------------------
 
-    def post_step(self, world: World) -> None:
+    def post_step(self, world: ExtendedWorld) -> None:
         self._reset_cached_rewards()
         np_random = world.np_random
 
@@ -443,7 +445,7 @@ class Scenario(BaseScenario):
         self._cached_global_collecting: float | None = None
         self._cached_global_deposit: float | None = None
 
-    def _global_collecting_reward(self, world: World) -> float:
+    def _global_collecting_reward(self, world: ExtendedWorld) -> float:
         """+5 for each collector currently touching a live treasure (not holding)."""
         if self._cached_global_collecting is None:
             rew = 0.0
@@ -455,7 +457,7 @@ class Scenario(BaseScenario):
             self._cached_global_collecting = rew
         return self._cached_global_collecting
 
-    def _global_deposit_reward(self, world: World) -> float:
+    def _global_deposit_reward(self, world: ExtendedWorld) -> float:
         """+5 for each collector currently touching its matching deposit."""
         if self._cached_global_deposit is None:
             rew = 0.0
@@ -466,17 +468,17 @@ class Scenario(BaseScenario):
             self._cached_global_deposit = rew
         return self._cached_global_deposit
 
-    def _global_reward(self, world: World) -> float:
+    def _global_reward(self, world: ExtendedWorld) -> float:
         return self._global_collecting_reward(world) + self._global_deposit_reward(
             world
         )
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         if agent.collector:
             return self._collector_reward(agent, world)
         return self._deposit_reward(agent, world)
 
-    def _collector_reward(self, agent: Agent, world: World) -> float:
+    def _collector_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         rew = 0.0
 
         # Penalise overlaps between collectors (ghost physics, handled here).
@@ -503,7 +505,7 @@ class Scenario(BaseScenario):
         rew += self._global_reward(world)
         return rew
 
-    def _deposit_reward(self, agent: Agent, world: World) -> float:
+    def _deposit_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         rew: float = 0.0
 
         # Collectors carrying this deposit's treasure type.
@@ -527,7 +529,7 @@ class Scenario(BaseScenario):
         return rew
 
     def benchmark_data(
-        self, agent: Agent, world: World
+        self, agent: ExtendedAgent, world: ExtendedWorld
     ) -> tuple[int | None, int] | tuple[int, int]:
         num_alive = sum(1 for lm in world.landmarks if lm.alive)
         if agent.collector:
@@ -542,7 +544,7 @@ class Scenario(BaseScenario):
     # Observation
     # ------------------------------------------------------------------
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         n_types = len(world.treasure_types)
 
         obs = [agent.state.p_pos.copy(), agent.state.p_vel.copy()]

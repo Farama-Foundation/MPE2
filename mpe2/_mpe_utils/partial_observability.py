@@ -16,13 +16,13 @@ from typing import TYPE_CHECKING, Callable, Sequence, TypeVar
 import numpy as np
 
 if TYPE_CHECKING:
-    from mpe2._mpe_utils.core import BaseAgent, Entity
+    from mpe2._mpe_utils.core import Agent, Entity
 
 _EntityT = TypeVar("_EntityT", bound="Entity")
 
 
 def nearest_entities(
-    agent: BaseAgent, entities: Sequence[_EntityT], n: int | None
+    agent: Agent, entities: Sequence[_EntityT], n: int | None
 ) -> list[_EntityT]:
     """Return up to *n* entities nearest to *agent*, sorted closest-first."""
     if n is None:
@@ -37,7 +37,7 @@ def nearest_entities(
 
 
 def padded_relative_positions(
-    agent: BaseAgent, entities: Sequence[Entity], n: int | None, dim_p: int = 2
+    agent: Agent, entities: Sequence[Entity], n: int | None, dim_p: int = 2
 ) -> list[np.ndarray]:
     """Relative positions of the *n* nearest entities, zero-padded to *n* slots."""
     if n is None:
@@ -50,7 +50,7 @@ def padded_relative_positions(
 
 
 def padded_velocities(
-    agent: BaseAgent,
+    agent: Agent,
     entities: Sequence[_EntityT],
     n: int | None,
     predicate: Callable[[_EntityT], bool] | None = None,
@@ -77,7 +77,7 @@ def padded_velocities(
 
 
 def padded_comms(
-    agent: BaseAgent, entities: Sequence[BaseAgent], n: int | None, dim_c: int
+    agent: Agent, entities: Sequence[Agent], n: int | None, dim_c: int
 ) -> list[np.ndarray]:
     """Communication signals of the *n* nearest agents, zero-padded to *n* slots."""
     if n is None:

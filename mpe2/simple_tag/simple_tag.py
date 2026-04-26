@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                                        |
 | Manual Control     | No                                                         |
 | Agents             | `agents= [adversary_0, adversary_1, adversary_2, agent_0]` |
-| Agent Count        | 4                                                          |
+| ExtendedAgent Count        | 4                                                          |
 | Action Shape       | (5)                                                        |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (50))                            |
 | Observation Shape  | (14),(16)                                                  |
@@ -33,9 +33,9 @@ def bound(x):
       return min(np.exp(2 * x - 2), 10)
 ```
 
-Agent and adversary observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities]`
+ExtendedAgent and adversary observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities]`
 
-Agent and adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
+ExtendedAgent and adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 
 ### Arguments
 
@@ -93,7 +93,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
+from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.partial_observability import (
     padded_relative_positions,
     padded_velocities,
@@ -175,23 +175,23 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class Agent(BaseAgent):
+class ExtendedAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
         self.adversary: bool = False
 
 
-class Landmark(BaseLandmark):
+class ExtendedLandmark(Landmark):
     def __init__(self) -> None:
         super().__init__()
         self.boundary: bool = False
 
 
-class World(BaseWorld):
+class ExtendedWorld(World):
     def __init__(self) -> None:
         super().__init__()
-        self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
+        self.agents: list[ExtendedAgent] = []
+        self.landmarks: list[ExtendedLandmark] = []
 
 
 class Scenario(BaseScenario):
@@ -232,7 +232,7 @@ class Scenario(BaseScenario):
         max_stage = len(self.CURRICULUM_STAGES) - 1
         self.curriculum_stage = max(0, min(stage, max_stage))
 
-    def is_terminal(self, world: World) -> bool:
+    def is_terminal(self, world: ExtendedWorld) -> bool:
         """Return True when every good agent is simultaneously caught by an adversary.
 
         Only active when terminate_on_success=True. A good agent is considered caught
@@ -251,8 +251,8 @@ class Scenario(BaseScenario):
 
     def make_world(
         self, num_good: int = 1, num_adversaries: int = 3, num_obstacles: int = 2
-    ) -> World:
-        world = World()
+    ) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         world.dim_c = 2
         num_good_agents = num_good
@@ -260,7 +260,7 @@ class Scenario(BaseScenario):
         num_agents = num_adversaries + num_good_agents
         num_landmarks = num_obstacles
         # add agents
-        world.agents = [Agent() for i in range(num_agents)]
+        world.agents = [ExtendedAgent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.adversary = True if i < num_adversaries else False
             base_name = "adversary" if agent.adversary else "agent"
@@ -272,7 +272,7 @@ class Scenario(BaseScenario):
             agent.accel = 3.0 if agent.adversary else 4.0
             agent.max_speed = 1.0 if agent.adversary else 1.3
         # add landmarks
-        world.landmarks = [Landmark() for i in range(num_landmarks)]
+        world.landmarks = [ExtendedLandmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
             landmark.name = "landmark %d" % i
             landmark.collide = True
@@ -281,7 +281,7 @@ class Scenario(BaseScenario):
             landmark.boundary = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = (
@@ -311,7 +311,7 @@ class Scenario(BaseScenario):
                     agent.max_speed = self._PREY_BASE_MAX_SPEED * speed_factor
                     agent.accel = self._PREY_BASE_ACCEL * speed_factor
 
-    def benchmark_data(self, agent: Agent, world: World) -> int:
+    def benchmark_data(self, agent: ExtendedAgent, world: ExtendedWorld) -> int:
         # returns data for benchmarking purposes
         if agent.adversary:
             collisions = 0
@@ -322,21 +322,21 @@ class Scenario(BaseScenario):
         else:
             return 0
 
-    def is_collision(self, agent1: Agent, agent2: Agent) -> bool:
+    def is_collision(self, agent1: ExtendedAgent, agent2: ExtendedAgent) -> bool:
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
     # return all agents that are not adversaries
-    def good_agents(self, world: World) -> list[Agent]:
+    def good_agents(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world: World) -> list[Agent]:
+    def adversaries(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         main_reward = (
             self.adversary_reward(agent, world)
@@ -345,7 +345,7 @@ class Scenario(BaseScenario):
         )
         return main_reward
 
-    def agent_reward(self, agent: Agent, world: World) -> float:
+    def agent_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Agents are negatively rewarded if caught by adversaries
         rew = 0
         shape = False
@@ -376,7 +376,7 @@ class Scenario(BaseScenario):
 
         return rew
 
-    def adversary_reward(self, agent: Agent, world: World) -> float:
+    def adversary_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Adversaries are rewarded for collisions with agents
         rew = 0
         shape = False
@@ -397,7 +397,7 @@ class Scenario(BaseScenario):
                         rew += 10
         return rew
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         """Return the observation vector for *agent*.
 
         * ``self_vel``       – agent's own velocity (dim_p,)

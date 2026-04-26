@@ -22,11 +22,11 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 This environment has 1 good agent, 1 adversary, and 1 landmark. The good agent is rewarded based on the distance to the landmark. The adversary is rewarded if it is close to the landmark, and if the agent is far from the landmark (the difference of the distances). Thus the adversary must learn to
 push the good agent away from the landmark.
 
-Agent observation space: `[self_vel, goal_rel_position, goal_landmark_id, all_landmark_rel_positions, landmark_ids, other_agent_rel_positions]`
+ExtendedAgent observation space: `[self_vel, goal_rel_position, goal_landmark_id, all_landmark_rel_positions, landmark_ids, other_agent_rel_positions]`
 
 Adversary observation space: `[self_vel, all_landmark_rel_positions, other_agent_rel_positions]`
 
-Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
+ExtendedAgent action space: `[no_action, move_left, move_right, move_down, move_up]`
 
 Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 
@@ -51,7 +51,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
+from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -91,45 +91,44 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class Landmark(BaseLandmark):
+class ExtendedLandmark(Landmark):
     def __init__(self) -> None:
         super().__init__()
         self.index: int = 0
 
 
-class Agent(BaseAgent):
+class ExtendedAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
         self.adversary: bool = False
-        self._goal_a: Landmark | None = None
+        self._goal_a: ExtendedLandmark | None = None
 
     @property
-    def goal_a(self) -> Landmark:
-        assert self._goal_a is not None, "Agent.goal_a has not been initialized."
-        return self._goal_a
+    def goal_a(self) -> ExtendedLandmark:
+        return _require_initialized(self._goal_a, "ExtendedAgent.goal_a")
 
     @goal_a.setter
-    def goal_a(self, value: Landmark | None) -> None:
+    def goal_a(self, value: ExtendedLandmark | None) -> None:
         self._goal_a = value
 
 
-class World(BaseWorld):
+class ExtendedWorld(World):
     def __init__(self) -> None:
         super().__init__()
-        self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
+        self.agents: list[ExtendedAgent] = []
+        self.landmarks: list[ExtendedLandmark] = []
 
 
 class Scenario(BaseScenario):
-    def make_world(self) -> World:
-        world = World()
+    def make_world(self) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         world.dim_c = 2
         num_agents = 2
         num_adversaries = 1
         num_landmarks = 2
         # add agents
-        world.agents = [Agent() for i in range(num_agents)]
+        world.agents = [ExtendedAgent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.adversary = True if i < num_adversaries else False
             base_name = "adversary" if agent.adversary else "agent"
@@ -138,14 +137,14 @@ class Scenario(BaseScenario):
             agent.collide = True
             agent.silent = True
         # add landmarks
-        world.landmarks = [Landmark() for i in range(num_landmarks)]
+        world.landmarks = [ExtendedLandmark() for i in range(num_landmarks)]
         for i, landmark in enumerate(world.landmarks):
             landmark.name = "landmark %d" % i
             landmark.collide = False
             landmark.movable = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # random properties for landmarks
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.1, 0.1, 0.1])
@@ -170,7 +169,7 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark
         return (
             self.adversary_reward(agent, world)
@@ -178,11 +177,11 @@ class Scenario(BaseScenario):
             else self.agent_reward(agent, world)
         )
 
-    def agent_reward(self, agent: Agent, world: World) -> float:
+    def agent_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # the distance to the goal
         return -np.sqrt(np.sum(np.square(agent.state.p_pos - agent.goal_a.state.p_pos)))
 
-    def adversary_reward(self, agent: Agent, world: World) -> float:
+    def adversary_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # keep the nearest good agents away from the goal
         agent_dist = [
             np.sqrt(np.sum(np.square(a.state.p_pos - a.goal_a.state.p_pos)))
@@ -198,7 +197,7 @@ class Scenario(BaseScenario):
         # neg_rew = sum([np.sqrt(np.sum(np.square(a.state.p_pos - agent.state.p_pos))) for a in world.good_agents])
         return pos_rew - neg_rew
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         for entity in world.landmarks:  # world.entities:

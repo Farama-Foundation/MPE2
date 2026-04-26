@@ -52,7 +52,7 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 from scipy.optimize import linear_sum_assignment
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
+from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -109,16 +109,16 @@ class Scenario(BaseScenario):
         self._delta_dists: np.ndarray | None = None
         self._joint_reward: float = 0.0
 
-    def make_world(self, N: int = 4) -> BaseWorld:
-        world = BaseWorld()
+    def make_world(self, N: int = 4) -> World:
+        world = World()
         world.dim_c = 0
-        world.agents = [BaseAgent() for _ in range(N)]
+        world.agents = [Agent() for _ in range(N)]
         for i, agent in enumerate(world.agents):
             agent.name = f"agent_{i}"
             agent.collide = True
             agent.silent = True
             agent.size = 0.03
-        world.landmarks = [BaseLandmark(), BaseLandmark()]
+        world.landmarks = [Landmark(), Landmark()]
         for i, landmark in enumerate(world.landmarks):
             landmark.name = f"landmark_{i}"
             landmark.collide = False
@@ -126,7 +126,7 @@ class Scenario(BaseScenario):
             landmark.size = 0.02
         return world
 
-    def reset_world(self, world: BaseWorld, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
         for agent in world.agents:
             agent.color = np.array([0.35, 0.35, 0.85])
         for landmark in world.landmarks:
@@ -164,7 +164,7 @@ class Scenario(BaseScenario):
         self._delta_dists = None
         self._joint_reward = 0.0
 
-    def _compute_line(self, world: BaseWorld) -> None:
+    def _compute_line(self, world: World) -> None:
         """Compute bipartite matching distances against ideal line positions."""
         assert self._expected_positions is not None
         dists = np.array(
@@ -180,20 +180,20 @@ class Scenario(BaseScenario):
         self._delta_dists = dists[ri, ci]
         self._joint_reward = -float(np.mean(np.clip(self._delta_dists, 0, 2)))
 
-    def reward(self, agent: BaseAgent, world: BaseWorld) -> float:
+    def reward(self, agent: Agent, world: World) -> float:
         return 0.0
 
-    def global_reward(self, world: BaseWorld) -> float:
+    def global_reward(self, world: World) -> float:
         self._compute_line(world)
         return self._joint_reward
 
-    def is_terminal(self, world: BaseWorld) -> bool:
+    def is_terminal(self, world: World) -> bool:
         if not self.terminate_on_success:
             return False
         if self._delta_dists is None:
             return False
         return bool(np.all(self._delta_dists < self.DIST_THRESHOLD))
 
-    def observation(self, agent: BaseAgent, world: BaseWorld) -> np.ndarray:
+    def observation(self, agent: Agent, world: World) -> np.ndarray:
         entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
         return np.concatenate([agent.state.p_vel, agent.state.p_pos] + entity_pos)

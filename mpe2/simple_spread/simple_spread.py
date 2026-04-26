@@ -80,7 +80,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
+from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.partial_observability import (
     padded_comms,
     padded_relative_positions,
@@ -164,15 +164,10 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-Agent = BaseAgent
-Landmark = BaseLandmark
-
-
-class World(BaseWorld):
+class ExtendedWorld(World):
     def __init__(self) -> None:
         super().__init__()
         self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
         self.collaborative: bool = False
 
 
@@ -212,8 +207,8 @@ class Scenario(BaseScenario):
         max_stage = len(self.CURRICULUM_STAGES) - 1
         self.curriculum_stage = max(0, min(stage, max_stage))
 
-    def make_world(self, N: int = 3) -> World:
-        world = World()
+    def make_world(self, N: int = 3) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         world.dim_c = 2
         num_agents = N
@@ -234,7 +229,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.35, 0.35, 0.85])
@@ -251,7 +246,7 @@ class Scenario(BaseScenario):
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(
-        self, agent: Agent, world: World
+        self, agent: Agent, world: ExtendedWorld
     ) -> tuple[float, int, float, int]:
         rew = 0
         collisions = 0
@@ -279,7 +274,7 @@ class Scenario(BaseScenario):
         dist_min = agent1.size + agent2.size
         return True if dist < dist_min else False
 
-    def is_terminal(self, world: World) -> bool:
+    def is_terminal(self, world: ExtendedWorld) -> bool:
         """Return True when every landmark is covered by at least one agent.
 
         Only active when terminate_on_success=True. The capture radius matches
@@ -296,7 +291,7 @@ class Scenario(BaseScenario):
                 return False
         return True
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: Agent, world: ExtendedWorld) -> float:
         # Agents are rewarded based on minimum agent distance to each landmark, penalized for collisions.
         # In curriculum stage 0, the collision penalty is suppressed so agents first learn to reach landmarks.
         rew = 0
@@ -309,7 +304,7 @@ class Scenario(BaseScenario):
                 rew -= 1.0 * (self.is_collision(a, agent) and a != agent)
         return rew
 
-    def global_reward(self, world: World) -> float:
+    def global_reward(self, world: ExtendedWorld) -> float:
         rew = 0
         for lm in world.landmarks:
             dists = [
@@ -319,7 +314,7 @@ class Scenario(BaseScenario):
             rew -= min(dists)
         return rew
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: Agent, world: ExtendedWorld) -> np.ndarray:
         """Return the observation vector for *agent*.
 
         Full observability (``num_*_neighbors=None``, default):

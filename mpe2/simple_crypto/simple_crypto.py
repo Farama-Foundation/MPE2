@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                           |
 | Manual Control     | No                                            |
 | Agents             | `agents= [eve_0, bob_0, alice_0]`             |
-| Agent  Count       | 2                                             |
+| ExtendedAgent  Count       | 2                                             |
 | Action Shape       | (4)                                           |
 | Action Values      | Discrete(4)/Box(0.0, 1.0, (4))                |
 | Observation Shape  | (4),(8)                                       |
@@ -59,7 +59,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
+from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -106,11 +106,7 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class Landmark(BaseLandmark):
-    pass
-
-
-class Agent(BaseAgent):
+class ExtendedAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
         self.adversary: bool = False
@@ -120,8 +116,7 @@ class Agent(BaseAgent):
 
     @property
     def goal_a(self) -> Landmark:
-        assert self._goal_a is not None, "Agent.goal_a has not been initialized."
-        return self._goal_a
+        return _require_initialized(self._goal_a, "ExtendedAgent.goal_a")
 
     @goal_a.setter
     def goal_a(self, value: Landmark | None) -> None:
@@ -129,31 +124,29 @@ class Agent(BaseAgent):
 
     @property
     def key(self) -> np.ndarray:
-        assert self._key is not None, "Agent.key has not been initialized."
-        return self._key
+        return _require_initialized(self._key, "ExtendedAgent.key")
 
     @key.setter
     def key(self, value: np.ndarray | None) -> None:
         self._key = value
 
 
-class World(BaseWorld):
+class ExtendedWorld(World):
     def __init__(self) -> None:
         super().__init__()
-        self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
+        self.agents: list[ExtendedAgent] = []
 
 
 class Scenario(BaseScenario):
-    def make_world(self) -> World:
-        world = World()
+    def make_world(self) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         num_agents = 3
         num_adversaries = 1
         num_landmarks = 2
         world.dim_c = 4
         # add agents
-        world.agents = [Agent() for i in range(num_agents)]
+        world.agents = [ExtendedAgent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.adversary = True if i < num_adversaries else False
             agent.collide = False
@@ -171,7 +164,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -203,33 +196,33 @@ class Scenario(BaseScenario):
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(
-        self, agent: Agent, world: World
+        self, agent: ExtendedAgent, world: ExtendedWorld
     ) -> tuple[np.ndarray, np.ndarray]:
         # returns data for benchmarking purposes
         return (agent.state.c, agent.goal_a.color)
 
     # return all agents that are not adversaries
-    def good_listeners(self, world: World) -> list[Agent]:
+    def good_listeners(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [
             agent for agent in world.agents if not agent.adversary and not agent.speaker
         ]
 
     # return all agents that are not adversaries
-    def good_agents(self, world: World) -> list[Agent]:
+    def good_agents(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world: World) -> list[Agent]:
+    def adversaries(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         return (
             self.adversary_reward(agent, world)
             if agent.adversary
             else self.agent_reward(agent, world)
         )
 
-    def agent_reward(self, agent: Agent, world: World) -> float:
+    def agent_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Agents rewarded if Bob can reconstruct message, but adversary (Eve) cannot
         good_listeners = self.good_listeners(world)
         adversaries = self.adversaries(world)
@@ -248,14 +241,14 @@ class Scenario(BaseScenario):
                 adv_rew += adv_l1
         return adv_rew + good_rew
 
-    def adversary_reward(self, agent: Agent, world: World) -> float:
+    def adversary_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Adversary (Eve) is rewarded if it can reconstruct original goal
         rew = 0
         if not (agent.state.c == np.zeros(world.dim_c)).all():
             rew -= np.sum(np.square(agent.state.c - agent.goal_a.color))
         return rew
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         # goal color
         goal_color = np.zeros(world.dim_color)
         if agent.goal_a is not None:

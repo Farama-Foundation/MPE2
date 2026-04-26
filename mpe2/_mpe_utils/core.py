@@ -110,7 +110,7 @@ class Entity:  # properties and state of physical world entity
         self._color = value
 
 
-class BaseAgent(Entity):  # properties of agent entities
+class Agent(Entity):  # properties of agent entities
     def __init__(self) -> None:
         super().__init__()
         # agents are movable by default
@@ -130,19 +130,19 @@ class BaseAgent(Entity):  # properties of agent entities
         # action
         self.action: Action = Action()
         # script behavior to execute
-        self.action_callback: Callable[[BaseAgent, BaseWorld], Action] | None = None
+        self.action_callback: Callable[[Agent, World], Action] | None = None
 
 
-class BaseLandmark(Entity):  # properties of landmark entities
+class Landmark(Entity):  # properties of landmark entities
     def __init__(self) -> None:
         super().__init__()
 
 
-class BaseWorld:  # multi-agent world
+class World:  # multi-agent world
     def __init__(self) -> None:
         # list of agents and entities (can change at execution-time!)
-        self.agents: list[BaseAgent] = []
-        self.landmarks: list[BaseLandmark] = []
+        self.agents: list[Agent] = []
+        self.landmarks: list[Landmark] = []
         # communication channel dimensionality
         self.dim_c: int = 0
         # position dimensionality
@@ -164,12 +164,12 @@ class BaseWorld:  # multi-agent world
 
     # return all agents controllable by external policies
     @property
-    def policy_agents(self) -> list[BaseAgent]:
+    def policy_agents(self) -> list[Agent]:
         return [agent for agent in self.agents if agent.action_callback is None]
 
     # return all agents controlled by world scripts
     @property
-    def scripted_agents(self) -> list[BaseAgent]:
+    def scripted_agents(self) -> list[Agent]:
         return [agent for agent in self.agents if agent.action_callback is not None]
 
     # update state of the world
@@ -249,7 +249,7 @@ class BaseWorld:  # multi-agent world
                         * entity.max_speed
                     )
 
-    def update_agent_state(self, agent: BaseAgent) -> None:
+    def update_agent_state(self, agent: Agent) -> None:
         # set communication state (directly for now)
         if agent.silent:
             agent.state.c = np.zeros(self.dim_c)
@@ -281,9 +281,3 @@ class BaseWorld:  # multi-agent world
         force_a = +force if entity_a.movable else None
         force_b = -force if entity_b.movable else None
         return [force_a, force_b]
-
-
-# Backwards-compatible aliases for external users importing these from core.
-Agent = BaseAgent
-Landmark = BaseLandmark
-World = BaseWorld
