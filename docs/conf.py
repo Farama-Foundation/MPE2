@@ -78,7 +78,7 @@ html_theme_options = {
     "light_logo": "img/mpe2-black.svg",
     "dark_logo": "img/mpe2-white.svg",
     "gtag": "G-6H9C8TWXZ8",
-    "description": "mpe2 DESCRIPTION",
+    "description": "Multi Particle Environments 2 (MPE2) is collection of environments where particle agents can (sometimes) move, communicate, see each other, push each other around, and interact with fixed landmarks.",
     "image": "img/mpe2-github.png",
     "versioning": True,
     "source_repository": "https://github.com/Farama-Foundation/MPE2/",

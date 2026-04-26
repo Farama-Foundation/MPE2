@@ -37,7 +37,6 @@ jobs:
             - name: Install dependencies
               run: |
                   sudo apt-get install python3-opengl xvfb
-                  pip install git+https://github.com/Farama-Foundation/PettingZoo.git@master
                   pip install -e .[testing]
             - name: Source distribution test
               run: |
@@ -46,4 +45,4 @@ jobs:
                   pip install dist/*.tar.gz
             - name: Release Test
               run: |
-                  xvfb-run -s "-screen 0 1024x768x24" pytest -v --cov=mpe --cov-report term
+                  xvfb-run -s "-screen 0 1024x768x24" pytest -v --cov=mpe2 --cov-report term
