@@ -20,10 +20,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     'Intended Audience :: Science/Research',
     'Topic :: Scientific/Engineering :: Artificial Intelligence',
 ]
-dependencies = ["pettingzoo>=1.24.3", "pygame>=2.6.0", "scipy>=1.7.0"]
+dependencies = ["pettingzoo>=1.24.3", "pygame-ce>=2.3.0", "scipy>=1.7.0"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
