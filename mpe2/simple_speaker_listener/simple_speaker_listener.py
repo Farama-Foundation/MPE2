@@ -190,7 +190,7 @@ class Scenario(BaseScenario):
     def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         # goal color
         goal_color = np.zeros(world.dim_color)
-        if agent.goal_b is not None:
+        if agent._goal_b is not None:
             goal_color = agent.goal_b.color
 
         # get positions of all entities in this agent's reference frame

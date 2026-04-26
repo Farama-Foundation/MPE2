@@ -506,7 +506,7 @@ class Scenario(BaseScenario):
         return rew
 
     def _deposit_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
-        rew: float = 0.0
+        rew = 0.0
 
         # Collectors carrying this deposit's treasure type.
         relevant = [c for c in self.collectors(world) if c.holding == agent.d_i]
