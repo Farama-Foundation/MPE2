@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, cast
 
 import numpy as np
 
@@ -107,7 +107,7 @@ class World:  # multi-agent world
     # return all entities in the world
     @property
     def entities(self) -> list[Entity]:
-        return self.agents + self.landmarks
+        return cast(list[Entity], self.agents + self.landmarks)
 
     # return all agents controllable by external policies
     @property
@@ -123,7 +123,8 @@ class World:  # multi-agent world
     def step(self) -> None:
         # set actions for scripted agents
         for agent in self.scripted_agents:
-            agent.action = agent.action_callback(agent, self)
+            if agent.action_callback is not None:
+                agent.action = agent.action_callback(agent, self)
         # gather forces applied to entities
         p_force: list[np.ndarray | float | None] = [None] * len(self.entities)
         # apply agent physical controls
