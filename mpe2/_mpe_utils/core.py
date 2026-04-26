@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Callable, cast
+from typing import Callable, TypeVar, cast
 
 import numpy as np
 
+_T = TypeVar("_T")
 
-def _require_initialized(value: np.ndarray | None, name: str) -> np.ndarray:
+
+def _require_initialized(value: _T | None, name: str) -> _T:
     assert value is not None, f"{name} has not been initialized."
     return value
 

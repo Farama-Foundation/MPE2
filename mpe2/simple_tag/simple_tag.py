@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                                        |
 | Manual Control     | No                                                         |
 | Agents             | `agents= [adversary_0, adversary_1, adversary_2, agent_0]` |
-| ExtendedAgent Count        | 4                                                          |
+| Agent Count        | 4                                                          |
 | Action Shape       | (5)                                                        |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (50))                            |
 | Observation Shape  | (14),(16)                                                  |
@@ -33,9 +33,9 @@ def bound(x):
       return min(np.exp(2 * x - 2), 10)
 ```
 
-ExtendedAgent and adversary observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities]`
+Agent and adversary observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities]`
 
-ExtendedAgent and adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
+Agent and adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 
 ### Arguments
 

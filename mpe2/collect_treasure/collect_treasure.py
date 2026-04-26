@@ -10,7 +10,7 @@ This environment is part of the <a href='http://mpe2.farama.org/mpe2/'>MPE envir
 | Parallel API         | Yes                                                                       |
 | Manual Control       | No                                                                        |
 | Agents               | `agents= [collector_0, ..., collector_5, deposit_0, deposit_1]`           |
-| ExtendedAgent Count          | 8 (default: 6 collectors + 2 deposits)                                    |
+| Agent Count          | 8 (default: 6 collectors + 2 deposits)                                    |
 | Action Shape         | (5,)                                                                      |
 | Action Values        | Discrete(5)/Box(0.0, 1.0, (5,))                                           |
 | Observation Shape    | (86,) for collectors, (84,) for deposits (default config)                 |
@@ -53,7 +53,7 @@ observes all treasures sorted by distance, each described by relative position a
 type encoding. Dead (just-picked-up) treasures are shown with zero relative position and
 zero type encoding.
 
-**ExtendedAgent action space:** `[no_action, move_left, move_right, move_down, move_up]`
+**Agent action space:** `[no_action, move_left, move_right, move_down, move_up]`
 
 ### Arguments
 
@@ -523,7 +523,7 @@ class Scenario(BaseScenario):
             all_c = self.collectors(world)
             if all_c:
                 centroid = np.mean([c.state.p_pos for c in all_c], axis=0)
-                rew -= 0.1 * np.linalg.norm(centroid - agent.state.p_pos)
+                rew -= 0.1 * float(np.linalg.norm(centroid - agent.state.p_pos))
 
         rew += self._global_reward(world)
         return rew

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Callable
 import gymnasium
 import numpy as np
 import pygame
+import pygame.freetype as pygame_freetype
 from gymnasium import spaces
 from gymnasium.utils import seeding
 from pettingzoo import AECEnv
@@ -61,7 +62,7 @@ class SimpleEnv(AECEnv):
         self.height = 700
         self.screen = pygame.Surface([self.width, self.height])
         self.max_size = 1
-        self.game_font = pygame.freetype.Font(
+        self.game_font = pygame_freetype.Font(
             os.path.join(os.path.dirname(__file__), "secrcode.ttf"), 24
         )
 
@@ -320,6 +321,7 @@ class SimpleEnv(AECEnv):
 
         self.draw()
         if self.render_mode == "rgb_array":
+            assert self.screen is not None
             observation = np.array(pygame.surfarray.pixels3d(self.screen))
             return np.transpose(observation, axes=(1, 0, 2))
         elif self.render_mode == "human":

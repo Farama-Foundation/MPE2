@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API         | Yes                                                     |
 | Manual Control       | No                                                      |
 | Agents               | `agents=[speaker_0, listener_0]`                        |
-| ExtendedAgent Count          | 2                                                       |
+| Agent Count          | 2                                                       |
 | Action Shape         | (3),(5)                                                 |
 | Action Values        | Discrete(3),(5)/Box(0.0, 1.0, (3)), Box(0.0, 1.0, (5))  |
 | Observation Shape    | (3),(11)                                                |
@@ -154,7 +154,9 @@ class Scenario(BaseScenario):
             agent.goal_b = None
         # want listener to go to the goal landmark
         world.agents[0].goal_a = world.agents[1]
-        world.agents[0].goal_b = np_random.choice(world.landmarks)
+        world.agents[0].goal_b = world.landmarks[
+            int(np_random.integers(len(world.landmarks)))
+        ]
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -209,3 +211,4 @@ class Scenario(BaseScenario):
         # listener
         if agent.silent:
             return np.concatenate([agent.state.p_vel] + entity_pos + comm)
+        raise RuntimeError(f"Unhandled agent role for {agent.name}.")

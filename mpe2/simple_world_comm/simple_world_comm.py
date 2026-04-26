@@ -1,6 +1,6 @@
 # noqa: D212, D415
 """
-# Simple ExtendedWorld Comm
+# Simple World Comm
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE environments</a>. Please read that page first for general information.
 
@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                                                                 |
 | Manual Control     | No                                                                                  |
 | Agents             | `agents=[leadadversary_0, adversary_0, adversary_1, adversary_3, agent_0, agent_1]` |
-| ExtendedAgent Count        | 6                                                                                   |
+| Agent Count        | 6                                                                                   |
 | Action Shape       | (5),(20)                                                                            |
 | Action Values      | Discrete(5),(20)/Box(0.0, 1.0, (5)), Box(0.0, 1.0, (9))                             |
 | Observation Shape  | (28),(34)                                                                           |

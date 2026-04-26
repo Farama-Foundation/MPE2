@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                           |
 | Manual Control     | No                                            |
 | Agents             | `agents= [eve_0, bob_0, alice_0]`             |
-| ExtendedAgent  Count       | 2                                             |
+| Agent  Count       | 2                                             |
 | Action Shape       | (4)                                           |
 | Action Values      | Discrete(4)/Box(0.0, 1.0, (4))                |
 | Observation Shape  | (4),(8)                                       |
@@ -178,10 +178,12 @@ class Scenario(BaseScenario):
         for color, landmark in zip(color_list, world.landmarks):
             landmark.color = color
         # set goal landmark
-        goal = np_random.choice(world.landmarks)
+        goal = world.landmarks[int(np_random.integers(len(world.landmarks)))]
 
         world.agents[1].color = goal.color
-        world.agents[2].key = np_random.choice(world.landmarks).color
+        world.agents[2].key = world.landmarks[
+            int(np_random.integers(len(world.landmarks)))
+        ].color
 
         for agent in world.agents:
             agent.goal_a = goal
@@ -288,3 +290,4 @@ class Scenario(BaseScenario):
             #     print(agent.state.c)
             #     print(np.concatenate(comm))
             return np.concatenate(comm)
+        raise RuntimeError(f"Unhandled agent role for {agent.name}.")

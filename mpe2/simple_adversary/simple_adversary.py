@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                              |
 | Manual Control     | No                                               |
 | Agents             | `agents= [adversary_0, agent_0,agent_1]`         |
-| ExtendedAgent  Count       | 3                                                |
+| Agent  Count       | 3                                                |
 | Action Shape       | (5)                                              |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (5))                   |
 | Observation Shape  | (8),(10)                                         |
@@ -23,11 +23,11 @@ In this environment, there is 1 adversary (red), N good agents (green), N landma
 target landmark, but negatively rewarded based on how close the adversary is to the target landmark. The adversary is rewarded based on distance to the target, but it doesn't know which landmark is the target landmark. All rewards are unscaled Euclidean distance (see main MPE documentation for
 average distance). This means good agents have to learn to 'split up' and cover all landmarks to deceive the adversary.
 
-ExtendedAgent observation space: `[goal_rel_position, landmark_rel_position, other_agent_rel_positions]`
+Agent observation space: `[goal_rel_position, landmark_rel_position, other_agent_rel_positions]`
 
 Adversary observation space: `[landmark_rel_position, other_agents_rel_positions]`
 
-ExtendedAgent action space: `[no_action, move_left, move_right, move_down, move_up]`
+Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 
 Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 
@@ -198,7 +198,7 @@ class Scenario(BaseScenario):
         for i, landmark in enumerate(world.landmarks):
             landmark.color = np.array([0.15, 0.15, 0.15])
         # set goal landmark
-        goal = np_random.choice(world.landmarks)
+        goal = world.landmarks[int(np_random.integers(len(world.landmarks)))]
         goal.color = np.array([0.15, 0.65, 0.15])
         for agent in world.agents:
             agent.goal_a = goal

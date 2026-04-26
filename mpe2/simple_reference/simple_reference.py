@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE envi
 | Parallel API       | Yes                                              |
 | Manual Control     | No                                               |
 | Agents             | `agents= [agent_0, agent_1]`                     |
-| ExtendedAgent Count        | 2                                                |
+| Agent Count        | 2                                                |
 | Action Shape       | (5)                                              |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (5))                   |
 | Observation Shape  | (8),(10)                                         |
@@ -23,13 +23,13 @@ This environment has 2 agents and 3 landmarks of different colors. Each agent wa
 
 Locally, the agents are rewarded by their distance to their target landmark. Globally, all agents are rewarded by the average distance of all the agents to their respective landmarks. The relative weight of these rewards is controlled by the `local_ratio` parameter.
 
-ExtendedAgent observation space: `[self_vel, all_landmark_rel_positions, landmark_ids, goal_id, communication]`
+Agent observation space: `[self_vel, all_landmark_rel_positions, landmark_ids, goal_id, communication]`
 
-ExtendedAgent discrete action space: `[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9] X [no_action, move_left, move_right, move_down, move_up]`
+Agent discrete action space: `[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9] X [no_action, move_left, move_right, move_down, move_up]`
 
 Where X is the Cartesian product (giving a total action space of 50).
 
-ExtendedAgent continuous action space: `[no_action, move_left, move_right, move_down, move_up, say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9]`
+Agent continuous action space: `[no_action, move_left, move_right, move_down, move_up, say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9]`
 
 ### Arguments
 
@@ -158,9 +158,13 @@ class Scenario(BaseScenario):
             agent.goal_b = None
         # want other agent to go to the goal landmark
         world.agents[0].goal_a = world.agents[1]
-        world.agents[0].goal_b = np_random.choice(world.landmarks)
+        world.agents[0].goal_b = world.landmarks[
+            int(np_random.integers(len(world.landmarks)))
+        ]
         world.agents[1].goal_a = world.agents[0]
-        world.agents[1].goal_b = np_random.choice(world.landmarks)
+        world.agents[1].goal_b = world.landmarks[
+            int(np_random.integers(len(world.landmarks)))
+        ]
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
