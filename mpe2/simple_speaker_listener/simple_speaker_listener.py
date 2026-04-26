@@ -51,7 +51,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -89,6 +89,43 @@ class raw_env(SimpleEnv, EzPickle):
 
 env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
+
+
+class Agent(BaseAgent):
+    def __init__(self) -> None:
+        super().__init__()
+        self._goal_a: Agent | None = None
+        self._goal_b: Landmark | None = None
+
+    @property
+    def goal_a(self) -> Agent:
+        assert self._goal_a is not None, "Agent.goal_a has not been initialized."
+        return self._goal_a
+
+    @goal_a.setter
+    def goal_a(self, value: Agent | None) -> None:
+        self._goal_a = value
+
+    @property
+    def goal_b(self) -> Landmark:
+        assert self._goal_b is not None, "Agent.goal_b has not been initialized."
+        return self._goal_b
+
+    @goal_b.setter
+    def goal_b(self, value: Landmark | None) -> None:
+        self._goal_b = value
+
+
+class Landmark(BaseLandmark):
+    pass
+
+
+class World(BaseWorld):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[Agent] = []
+        self.landmarks: list[Landmark] = []
+        self.collaborative: bool = False
 
 
 class Scenario(BaseScenario):

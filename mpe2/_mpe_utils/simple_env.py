@@ -12,10 +12,10 @@ from pettingzoo import AECEnv
 from pettingzoo.utils import wrappers
 from pettingzoo.utils.agent_selector import AgentSelector
 
-from mpe2._mpe_utils.core import Agent
+from mpe2._mpe_utils.core import BaseAgent
 
 if TYPE_CHECKING:
-    from mpe2._mpe_utils.core import World
+    from mpe2._mpe_utils.core import BaseWorld
     from mpe2._mpe_utils.scenario import BaseScenario
 
 alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -44,7 +44,7 @@ class SimpleEnv(AECEnv):
     def __init__(
         self,
         scenario: BaseScenario,
-        world: World,
+        world: BaseWorld,
         max_cycles: int,
         render_mode: str | None = None,
         continuous_actions: bool = False,
@@ -228,7 +228,7 @@ class SimpleEnv(AECEnv):
     def _set_action(
         self,
         action: Any,
-        agent: Agent,
+        agent: BaseAgent,
         action_space: spaces.Space,
         time: Any = None,
     ) -> None:
@@ -303,6 +303,7 @@ class SimpleEnv(AECEnv):
 
     def enable_render(self, mode: str = "human") -> None:
         if not self.renderOn and mode == "human":
+            assert self.screen is not None
             self.screen = pygame.display.set_mode(self.screen.get_size())
             self.clock = pygame.time.Clock()
             self.renderOn = True
@@ -328,6 +329,7 @@ class SimpleEnv(AECEnv):
 
     def draw(self) -> None:
         # clear screen
+        assert self.screen is not None
         self.screen.fill((255, 255, 255))
 
         # update bounds to center around agent
@@ -366,7 +368,7 @@ class SimpleEnv(AECEnv):
             ), f"Coordinates {(x, y)} are out of bounds."
 
             # text
-            if isinstance(entity, Agent):
+            if isinstance(entity, BaseAgent):
                 if entity.silent:
                     continue
                 if np.all(entity.state.c == 0):

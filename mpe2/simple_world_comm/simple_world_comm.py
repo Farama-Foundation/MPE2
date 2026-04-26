@@ -76,7 +76,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld, Entity
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -126,6 +126,28 @@ class raw_env(SimpleEnv, EzPickle):
 
 env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
+
+
+class Agent(BaseAgent):
+    def __init__(self) -> None:
+        super().__init__()
+        self.adversary: bool = False
+        self.leader: bool = False
+
+
+class Landmark(BaseLandmark):
+    def __init__(self) -> None:
+        super().__init__()
+        self.boundary: bool = False
+
+
+class World(BaseWorld):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[Agent] = []
+        self.landmarks: list[Landmark] = []
+        self.food: list[Landmark] = []
+        self.forests: list[Landmark] = []
 
 
 class Scenario(BaseScenario):
@@ -262,7 +284,7 @@ class Scenario(BaseScenario):
         else:
             return 0
 
-    def is_collision(self, agent1: Agent, agent2: Agent) -> bool:
+    def is_collision(self, agent1: Entity, agent2: Entity) -> bool:
         delta_pos = agent1.state.p_pos - agent2.state.p_pos
         dist = np.sqrt(np.sum(np.square(delta_pos)))
         dist_min = agent1.size + agent2.size

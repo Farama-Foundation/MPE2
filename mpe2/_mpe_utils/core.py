@@ -5,12 +5,33 @@ from typing import Callable, cast
 import numpy as np
 
 
+def _require_initialized(value: np.ndarray | None, name: str) -> np.ndarray:
+    assert value is not None, f"{name} has not been initialized."
+    return value
+
+
 class EntityState:  # physical/external base state of all entities
     def __init__(self) -> None:
         # physical position
-        self.p_pos: np.ndarray | None = None
+        self._p_pos: np.ndarray | None = None
         # physical velocity
-        self.p_vel: np.ndarray | None = None
+        self._p_vel: np.ndarray | None = None
+
+    @property
+    def p_pos(self) -> np.ndarray:
+        return _require_initialized(self._p_pos, "EntityState.p_pos")
+
+    @p_pos.setter
+    def p_pos(self, value: np.ndarray | None) -> None:
+        self._p_pos = value
+
+    @property
+    def p_vel(self) -> np.ndarray:
+        return _require_initialized(self._p_vel, "EntityState.p_vel")
+
+    @p_vel.setter
+    def p_vel(self, value: np.ndarray | None) -> None:
+        self._p_vel = value
 
 
 class AgentState(
@@ -19,15 +40,39 @@ class AgentState(
     def __init__(self) -> None:
         super().__init__()
         # communication utterance
-        self.c: np.ndarray | None = None
+        self._c: np.ndarray | None = None
+
+    @property
+    def c(self) -> np.ndarray:
+        return _require_initialized(self._c, "AgentState.c")
+
+    @c.setter
+    def c(self, value: np.ndarray | None) -> None:
+        self._c = value
 
 
 class Action:  # action of the agent
     def __init__(self) -> None:
         # physical action
-        self.u: np.ndarray | None = None
+        self._u: np.ndarray | None = None
         # communication action
-        self.c: np.ndarray | None = None
+        self._c: np.ndarray | None = None
+
+    @property
+    def u(self) -> np.ndarray:
+        return _require_initialized(self._u, "Action.u")
+
+    @u.setter
+    def u(self, value: np.ndarray | None) -> None:
+        self._u = value
+
+    @property
+    def c(self) -> np.ndarray:
+        return _require_initialized(self._c, "Action.c")
+
+    @c.setter
+    def c(self, value: np.ndarray | None) -> None:
+        self._c = value
 
 
 class Entity:  # properties and state of physical world entity
@@ -43,7 +88,7 @@ class Entity:  # properties and state of physical world entity
         # material density (affects mass)
         self.density: float = 25.0
         # color
-        self.color: np.ndarray | None = None
+        self._color: np.ndarray | None = None
         # max speed and accel
         self.max_speed: float | None = None
         self.accel: float | None = None
@@ -56,13 +101,16 @@ class Entity:  # properties and state of physical world entity
     def mass(self) -> float:
         return self.initial_mass
 
+    @property
+    def color(self) -> np.ndarray:
+        return _require_initialized(self._color, "Entity.color")
 
-class Landmark(Entity):  # properties of landmark entities
-    def __init__(self) -> None:
-        super().__init__()
+    @color.setter
+    def color(self, value: np.ndarray | None) -> None:
+        self._color = value
 
 
-class Agent(Entity):  # properties of agent entities
+class BaseAgent(Entity):  # properties of agent entities
     def __init__(self) -> None:
         super().__init__()
         # agents are movable by default
@@ -82,14 +130,19 @@ class Agent(Entity):  # properties of agent entities
         # action
         self.action: Action = Action()
         # script behavior to execute
-        self.action_callback: Callable[[Agent, World], Action] | None = None
+        self.action_callback: Callable[[BaseAgent, BaseWorld], Action] | None = None
 
 
-class World:  # multi-agent world
+class BaseLandmark(Entity):  # properties of landmark entities
+    def __init__(self) -> None:
+        super().__init__()
+
+
+class BaseWorld:  # multi-agent world
     def __init__(self) -> None:
         # list of agents and entities (can change at execution-time!)
-        self.agents: list[Agent] = []
-        self.landmarks: list[Landmark] = []
+        self.agents: list[BaseAgent] = []
+        self.landmarks: list[BaseLandmark] = []
         # communication channel dimensionality
         self.dim_c: int = 0
         # position dimensionality
@@ -111,12 +164,12 @@ class World:  # multi-agent world
 
     # return all agents controllable by external policies
     @property
-    def policy_agents(self) -> list[Agent]:
+    def policy_agents(self) -> list[BaseAgent]:
         return [agent for agent in self.agents if agent.action_callback is None]
 
     # return all agents controlled by world scripts
     @property
-    def scripted_agents(self) -> list[Agent]:
+    def scripted_agents(self) -> list[BaseAgent]:
         return [agent for agent in self.agents if agent.action_callback is not None]
 
     # update state of the world
@@ -179,8 +232,9 @@ class World:  # multi-agent world
                 continue
             entity.state.p_pos += entity.state.p_vel * self.dt
             entity.state.p_vel = entity.state.p_vel * (1 - self.damping)
-            if p_force[i] is not None:
-                entity.state.p_vel += (p_force[i] / entity.mass) * self.dt
+            force = p_force[i]
+            if force is not None:
+                entity.state.p_vel += (force / entity.mass) * self.dt
             if entity.max_speed is not None:
                 speed = np.sqrt(
                     np.square(entity.state.p_vel[0]) + np.square(entity.state.p_vel[1])
@@ -195,7 +249,7 @@ class World:  # multi-agent world
                         * entity.max_speed
                     )
 
-    def update_agent_state(self, agent: Agent) -> None:
+    def update_agent_state(self, agent: BaseAgent) -> None:
         # set communication state (directly for now)
         if agent.silent:
             agent.state.c = np.zeros(self.dim_c)
@@ -227,3 +281,9 @@ class World:  # multi-agent world
         force_a = +force if entity_a.movable else None
         force_b = -force if entity_b.movable else None
         return [force_a, force_b]
+
+
+# Backwards-compatible aliases for external users importing these from core.
+Agent = BaseAgent
+Landmark = BaseLandmark
+World = BaseWorld

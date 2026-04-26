@@ -45,7 +45,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -86,23 +86,23 @@ parallel_env = parallel_wrapper_fn(env)
 
 
 class Scenario(BaseScenario):
-    def make_world(self) -> World:
-        world = World()
+    def make_world(self) -> BaseWorld:
+        world = BaseWorld()
         # add agents
-        world.agents = [Agent() for i in range(1)]
+        world.agents = [BaseAgent() for i in range(1)]
         for i, agent in enumerate(world.agents):
             agent.name = f"agent_{i}"
             agent.collide = False
             agent.silent = True
         # add landmarks
-        world.landmarks = [Landmark() for i in range(1)]
+        world.landmarks = [BaseLandmark() for i in range(1)]
         for i, landmark in enumerate(world.landmarks):
             landmark.name = "landmark %d" % i
             landmark.collide = False
             landmark.movable = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: BaseWorld, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -119,11 +119,11 @@ class Scenario(BaseScenario):
             landmark.state.p_pos = np_random.uniform(-1, +1, world.dim_p)
             landmark.state.p_vel = np.zeros(world.dim_p)
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: BaseAgent, world: BaseWorld) -> float:
         dist2 = np.sum(np.square(agent.state.p_pos - world.landmarks[0].state.p_pos))
         return -dist2
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: BaseAgent, world: BaseWorld) -> np.ndarray:
         # get positions of all entities in this agent's reference frame
         entity_pos = []
         for entity in world.landmarks:

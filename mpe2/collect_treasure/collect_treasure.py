@@ -85,11 +85,13 @@ size
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld, Entity
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -188,11 +190,14 @@ class raw_env(SimpleEnv, EzPickle):
     def draw(self) -> None:
         import pygame
 
+        assert self.screen is not None
         self.screen.fill((255, 255, 255))
 
         # Build the list of entities that are currently visible in the world.
         visible = [
-            e for e in self.world.entities if not (hasattr(e, "alive") and not e.alive)
+            e
+            for e in self.world.entities
+            if not (isinstance(e, Landmark) and not e.alive)
         ]
         if not visible:
             return
@@ -227,6 +232,47 @@ class raw_env(SimpleEnv, EzPickle):
 
 env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
+
+
+class Agent(BaseAgent):
+    def __init__(self) -> None:
+        super().__init__()
+        self.collector: bool = False
+        self.holding: int | None = None
+        self.d_i: int = 0
+
+
+class Landmark(BaseLandmark):
+    def __init__(self) -> None:
+        super().__init__()
+        self.respawn_prob: float = 1.0
+        self.type: int = 0
+        self.alive: bool = True
+
+
+class World(BaseWorld):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[Agent] = []
+        self.landmarks: list[Landmark] = []
+        self.num_collectors: int = 0
+        self.num_deposits: int = 0
+        self.treasure_types: list[int] = []
+        self.treasure_colors: list[np.ndarray] = []
+        self._np_random: np.random.Generator | None = None
+
+    @property
+    def entities(self) -> list[Entity]:
+        return cast(list[Entity], self.agents + self.landmarks)
+
+    @property
+    def np_random(self) -> np.random.Generator:
+        assert self._np_random is not None, "World.np_random has not been initialized."
+        return self._np_random
+
+    @np_random.setter
+    def np_random(self, value: np.random.Generator | None) -> None:
+        self._np_random = value
 
 
 # ---------------------------------------------------------------------------

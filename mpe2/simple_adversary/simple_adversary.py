@@ -75,7 +75,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
 from mpe2._mpe_utils.partial_observability import padded_relative_positions
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
@@ -129,6 +129,34 @@ class raw_env(SimpleEnv, EzPickle):
 
 env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
+
+
+class Landmark(BaseLandmark):
+    pass
+
+
+class Agent(BaseAgent):
+    def __init__(self) -> None:
+        super().__init__()
+        self.adversary: bool = False
+        self._goal_a: Landmark | None = None
+
+    @property
+    def goal_a(self) -> Landmark:
+        assert self._goal_a is not None, "Agent.goal_a has not been initialized."
+        return self._goal_a
+
+    @goal_a.setter
+    def goal_a(self, value: Landmark | None) -> None:
+        self._goal_a = value
+
+
+class World(BaseWorld):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[Agent] = []
+        self.landmarks: list[Landmark] = []
+        self.num_agents: int = 0
 
 
 class Scenario(BaseScenario):

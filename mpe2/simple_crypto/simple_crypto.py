@@ -59,7 +59,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import BaseAgent, BaseLandmark, BaseWorld
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -106,10 +106,42 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class CryptoAgent(Agent):
+class Landmark(BaseLandmark):
+    pass
+
+
+class Agent(BaseAgent):
     def __init__(self) -> None:
         super().__init__()
-        self.key: np.ndarray | None = None
+        self.adversary: bool = False
+        self.speaker: bool = False
+        self._goal_a: Landmark | None = None
+        self._key: np.ndarray | None = None
+
+    @property
+    def goal_a(self) -> Landmark:
+        assert self._goal_a is not None, "Agent.goal_a has not been initialized."
+        return self._goal_a
+
+    @goal_a.setter
+    def goal_a(self, value: Landmark | None) -> None:
+        self._goal_a = value
+
+    @property
+    def key(self) -> np.ndarray:
+        assert self._key is not None, "Agent.key has not been initialized."
+        return self._key
+
+    @key.setter
+    def key(self, value: np.ndarray | None) -> None:
+        self._key = value
+
+
+class World(BaseWorld):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[Agent] = []
+        self.landmarks: list[Landmark] = []
 
 
 class Scenario(BaseScenario):
@@ -121,7 +153,7 @@ class Scenario(BaseScenario):
         num_landmarks = 2
         world.dim_c = 4
         # add agents
-        world.agents = [CryptoAgent() for i in range(num_agents)]
+        world.agents = [Agent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.adversary = True if i < num_adversaries else False
             agent.collide = False
