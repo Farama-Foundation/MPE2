@@ -166,6 +166,7 @@ class Scenario(BaseScenario):
 
     def _compute_line(self, world: World) -> None:
         """Compute bipartite matching distances against ideal line positions."""
+        assert self._expected_positions is not None
         dists = np.array(
             [
                 [

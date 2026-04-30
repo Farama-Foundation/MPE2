@@ -59,7 +59,7 @@ import numpy as np
 from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
-from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -106,22 +106,47 @@ env = make_env(raw_env)
 parallel_env = parallel_wrapper_fn(env)
 
 
-class CryptoAgent(Agent):
+class ExtendedAgent(Agent):
     def __init__(self) -> None:
         super().__init__()
-        self.key: np.ndarray | None = None
+        self.adversary: bool = False
+        self.speaker: bool = False
+        self._goal_a: Landmark | None = None
+        self._key: np.ndarray | None = None
+
+    @property
+    def goal_a(self) -> Landmark:
+        return _require_initialized(self._goal_a, "ExtendedAgent.goal_a")
+
+    @goal_a.setter
+    def goal_a(self, value: Landmark | None) -> None:
+        self._goal_a = value
+
+    @property
+    def key(self) -> np.ndarray:
+        return _require_initialized(self._key, "ExtendedAgent.key")
+
+    @key.setter
+    def key(self, value: np.ndarray | None) -> None:
+        self._key = value
+
+
+class ExtendedWorld(World):
+    def __init__(self) -> None:
+        super().__init__()
+        self.agents: list[ExtendedAgent] = []
 
 
 class Scenario(BaseScenario):
-    def make_world(self) -> World:
-        world = World()
+    def make_world(self) -> ExtendedWorld:
+        world = ExtendedWorld()
         # set any world properties first
         num_agents = 3
         num_adversaries = 1
         num_landmarks = 2
         world.dim_c = 4
         # add agents
-        world.agents = [CryptoAgent() for i in range(num_agents)]
+        world.agents = [ExtendedAgent() for i in range(num_agents)]
         for i, agent in enumerate(world.agents):
             agent.adversary = True if i < num_adversaries else False
             agent.collide = False
@@ -139,7 +164,7 @@ class Scenario(BaseScenario):
             landmark.movable = False
         return world
 
-    def reset_world(self, world: World, np_random: np.random.Generator) -> None:
+    def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # random properties for agents
         for i, agent in enumerate(world.agents):
             agent.color = np.array([0.25, 0.25, 0.25])
@@ -153,10 +178,12 @@ class Scenario(BaseScenario):
         for color, landmark in zip(color_list, world.landmarks):
             landmark.color = color
         # set goal landmark
-        goal = np_random.choice(world.landmarks)
+        goal = world.landmarks[int(np_random.integers(len(world.landmarks)))]
 
         world.agents[1].color = goal.color
-        world.agents[2].key = np_random.choice(world.landmarks).color
+        world.agents[2].key = world.landmarks[
+            int(np_random.integers(len(world.landmarks)))
+        ].color
 
         for agent in world.agents:
             agent.goal_a = goal
@@ -171,33 +198,33 @@ class Scenario(BaseScenario):
             landmark.state.p_vel = np.zeros(world.dim_p)
 
     def benchmark_data(
-        self, agent: Agent, world: World
+        self, agent: ExtendedAgent, world: ExtendedWorld
     ) -> tuple[np.ndarray, np.ndarray]:
         # returns data for benchmarking purposes
         return (agent.state.c, agent.goal_a.color)
 
     # return all agents that are not adversaries
-    def good_listeners(self, world: World) -> list[Agent]:
+    def good_listeners(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [
             agent for agent in world.agents if not agent.adversary and not agent.speaker
         ]
 
     # return all agents that are not adversaries
-    def good_agents(self, world: World) -> list[Agent]:
+    def good_agents(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [agent for agent in world.agents if not agent.adversary]
 
     # return all adversarial agents
-    def adversaries(self, world: World) -> list[Agent]:
+    def adversaries(self, world: ExtendedWorld) -> list[ExtendedAgent]:
         return [agent for agent in world.agents if agent.adversary]
 
-    def reward(self, agent: Agent, world: World) -> float:
+    def reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         return (
             self.adversary_reward(agent, world)
             if agent.adversary
             else self.agent_reward(agent, world)
         )
 
-    def agent_reward(self, agent: Agent, world: World) -> float:
+    def agent_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Agents rewarded if Bob can reconstruct message, but adversary (Eve) cannot
         good_listeners = self.good_listeners(world)
         adversaries = self.adversaries(world)
@@ -216,14 +243,14 @@ class Scenario(BaseScenario):
                 adv_rew += adv_l1
         return adv_rew + good_rew
 
-    def adversary_reward(self, agent: Agent, world: World) -> float:
+    def adversary_reward(self, agent: ExtendedAgent, world: ExtendedWorld) -> float:
         # Adversary (Eve) is rewarded if it can reconstruct original goal
         rew = 0
         if not (agent.state.c == np.zeros(world.dim_c)).all():
             rew -= np.sum(np.square(agent.state.c - agent.goal_a.color))
         return rew
 
-    def observation(self, agent: Agent, world: World) -> np.ndarray:
+    def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
         # goal color
         goal_color = np.zeros(world.dim_color)
         if agent.goal_a is not None:
@@ -263,3 +290,4 @@ class Scenario(BaseScenario):
             #     print(agent.state.c)
             #     print(np.concatenate(comm))
             return np.concatenate(comm)
+        raise RuntimeError(f"Unhandled agent role for {agent.name}.")
