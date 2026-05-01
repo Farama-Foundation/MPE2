@@ -1,4 +1,5 @@
 ---
+hide-toc: true
 firstpage:
 lastpage:
 ---
