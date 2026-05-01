@@ -1,7 +1,3 @@
----
-title: Release Notes
----
-
 # Release Notes
 
 ```{eval-rst}
