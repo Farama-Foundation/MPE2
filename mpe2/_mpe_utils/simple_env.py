@@ -56,7 +56,13 @@ class SimpleEnv(AECEnv):
         super().__init__()
 
         self.render_mode = render_mode
-        pygame.init()
+        # Only the freetype subsystem is needed to build the offscreen surface and
+        # draw agent labels; a full pygame.init() also starts the audio/joystick
+        # subsystems, which can take several seconds on some platforms (e.g.
+        # enumerating audio devices on Windows). The display subsystem is lazily
+        # initialized by pygame.display.set_mode() in enable_render() for human
+        # mode. See https://github.com/Farama-Foundation/MPE2/issues/53
+        pygame_freetype.init()
         self.viewer = None
         self.width = 700
         self.height = 700
@@ -317,7 +323,6 @@ class SimpleEnv(AECEnv):
             return
 
         self.enable_render(self.render_mode)
-        pygame.event.pump()  # prevent OS from marking window as unresponsive on Windows
 
         self.draw()
         if self.render_mode == "rgb_array":
@@ -325,6 +330,11 @@ class SimpleEnv(AECEnv):
             observation = np.array(pygame.surfarray.pixels3d(self.screen))
             return np.transpose(observation, axes=(1, 0, 2))
         elif self.render_mode == "human":
+            # Pumping events (and the display subsystem generally) is only
+            # meaningful once a window exists, i.e. in human mode. Doing it in
+            # rgb_array mode would require the video subsystem to be initialized
+            # even though nothing is displayed.
+            pygame.event.pump()  # prevent OS from marking window as unresponsive on Windows
             pygame.display.flip()
             self.clock.tick(self.metadata["render_fps"])
             return
