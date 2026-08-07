@@ -380,6 +380,7 @@ class Scenario(BaseScenario):
     def reset_world(self, world: ExtendedWorld, np_random: np.random.Generator) -> None:
         # Store the seeded RNG so post_step can use it for reproducible respawns.
         world.np_random = np_random
+        self._reset_cached_rewards()
 
         for agent in world.agents:
             agent.state.p_pos = np_random.uniform(-1.0, 1.0, world.dim_p)
@@ -405,12 +406,15 @@ class Scenario(BaseScenario):
     def post_step(self, world: ExtendedWorld) -> None:
         self._reset_cached_rewards()
         np_random = world.np_random
+        collecting_reward = 0.0
+        deposit_reward = 0.0
 
         # --- Treasure pickup ---
         for lm in world.landmarks:
             if lm.alive:
                 for collector in self.collectors(world):
                     if collector.holding is None and self._is_collision(lm, collector):
+                        collecting_reward += 5.0
                         lm.alive = False
                         collector.holding = lm.type
                         collector.color = 0.85 * lm.color
@@ -433,9 +437,15 @@ class Scenario(BaseScenario):
                     if deposit.d_i == collector.holding and self._is_collision(
                         collector, deposit
                     ):
+                        deposit_reward += 5.0
                         collector.holding = None
                         collector.color = np.array([0.85, 0.85, 0.85])
                         break
+
+        # Pickup and delivery mutate the conditions used to recognize those events.
+        # Preserve their rewards for the reward calls that follow post_step().
+        self._cached_global_collecting = collecting_reward
+        self._cached_global_deposit = deposit_reward
 
     # ------------------------------------------------------------------
     # Reward
@@ -446,7 +456,7 @@ class Scenario(BaseScenario):
         self._cached_global_deposit: float | None = None
 
     def _global_collecting_reward(self, world: ExtendedWorld) -> float:
-        """+5 for each collector currently touching a live treasure (not holding)."""
+        """+5 for each treasure pickup in the current world step."""
         if self._cached_global_collecting is None:
             rew = 0.0
             for lm in self.treasures(world):
@@ -458,7 +468,7 @@ class Scenario(BaseScenario):
         return self._cached_global_collecting
 
     def _global_deposit_reward(self, world: ExtendedWorld) -> float:
-        """+5 for each collector currently touching its matching deposit."""
+        """+5 for each matching treasure delivery in the current world step."""
         if self._cached_global_deposit is None:
             rew = 0.0
             for d in self.deposits(world):
