@@ -29,7 +29,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_formation_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_on_success=False)
+simple_formation_v1.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, terminate_on_success=False)
 ```
 
 `N`: number of agents
@@ -37,6 +37,8 @@ simple_formation_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_
 `max_cycles`: number of frames until the episode terminates
 
 `continuous_actions`: whether action spaces are discrete (default) or continuous
+
+`dynamic_rescaling`: whether to rescale the size of agents and landmarks based on the screen size
 
 `terminate_on_success`: when True, the episode ends as soon as every agent is within
   0.05 units of its assigned target position.
@@ -70,7 +72,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
         terminate_on_success: bool = False,
     ) -> None:

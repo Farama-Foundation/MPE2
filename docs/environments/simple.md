@@ -35,16 +35,15 @@ Observation space: `[self_vel, landmark_rel_position]`
 ### Arguments
 
 ``` python
-simple_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
 ```
-
-
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple.simple

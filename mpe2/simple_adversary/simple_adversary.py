@@ -34,10 +34,8 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
-
-
 
 `N`:  number of good agents and landmarks
 
@@ -88,7 +86,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,

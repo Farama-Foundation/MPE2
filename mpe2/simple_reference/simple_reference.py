@@ -33,11 +33,9 @@ Agent continuous action space: `[no_action, move_left, move_right, move_down, mo
 
 ### Arguments
 
-
 ``` python
-simple_reference_v3.env(local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_reference_v3.env(local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
 ```
-
 
 
 `local_ratio`:  Weight applied to local reward and global reward. Global reward weight will always be 1 - local reward weight.
@@ -68,7 +66,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         EzPickle.__init__(

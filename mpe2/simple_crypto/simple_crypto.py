@@ -40,10 +40,8 @@ For Bob and Eve, their communication is checked to be the 1 bit of information t
 ### Arguments
 
 ``` python
-simple_crypto_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_crypto_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
 ```
-
-
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
@@ -77,7 +75,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         EzPickle.__init__(

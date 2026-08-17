@@ -22,6 +22,21 @@ from mpe2 import (
     simple_world_comm_v3,
 )
 
+all_envs = [
+    collect_treasure_v1,
+    simple_adversary_v3,
+    simple_crypto_v3,
+    simple_formation_v1,
+    simple_line_v1,
+    simple_push_v3,
+    simple_reference_v3,
+    simple_speaker_listener_v4,
+    simple_spread_v3,
+    simple_tag_v3,
+    simple_v3,
+    simple_world_comm_v3,
+]
+
 partial_obs_envs = [
     # simple_tag: N nearest agents + landmarks (fewer than actual → zero-padding)
     [
@@ -235,6 +250,19 @@ parameterized_envs = [
         dict(N=5, continuous_actions=True, max_cycles=50),
     ],
 ]
+
+
+@pytest.mark.parametrize("env_module", all_envs)
+def test_dynamic_rescaling_defaults_to_true(env_module):
+    default_env = env_module.env(max_cycles=1)
+    disabled_env = env_module.env(max_cycles=1, dynamic_rescaling=False)
+
+    try:
+        assert default_env.unwrapped.dynamic_rescaling is True
+        assert disabled_env.unwrapped.dynamic_rescaling is False
+    finally:
+        default_env.close()
+        disabled_env.close()
 
 
 @pytest.mark.parametrize(["env_module", "kwargs"], parameterized_envs)

@@ -50,7 +50,7 @@ class SimpleEnv(AECEnv):
         render_mode: str | None = None,
         continuous_actions: bool = False,
         local_ratio: float | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         super().__init__()

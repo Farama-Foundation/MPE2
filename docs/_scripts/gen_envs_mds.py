@@ -87,7 +87,8 @@ if __name__ == "__main__":
         else:
             print(f"WARNING: Missing video for '{env_name}': {video_file}")
 
-        docs_text += f"""## API
+        docs_text += f"""
+## API
 ```{{eval-rst}}
 .. currentmodule:: mpe2.{env_name}.{env_name}
 
