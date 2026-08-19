@@ -80,6 +80,13 @@ The observation space of an agent is a vector generally composed of the agent's 
 
 If an agent cannot see or observe the communication of a second agent, then the second agent is not included in the first's observation space, resulting in different agents having different observation space sizes in certain environments.
 
+### Partial Observability
+
+Some environments provide partial-observability variants. Radius-based variants observe only
+entities within a sensing radius, while k-nearest-neighbour variants observe only the nearest
+agents and landmarks. The two filters can also be combined. Visible entities are either packed
+into compact slots, or the original slots are retained and unobserved entities are zeroed.
+
 ### Action Space
 
 Note: [OpenAI's MPE](https://github.com/openai/multiagent-particle-envs) uses continuous action spaces by default.

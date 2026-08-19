@@ -65,6 +65,10 @@ collect_treasure_v1.env(
     max_cycles=25,
     continuous_actions=False,
     dynamic_rescaling=False,
+    num_agent_neighbors=None,
+    num_landmark_neighbors=None,
+    radius=None,
+    knn_mode="compact",
 )
 ```
 
@@ -81,6 +85,16 @@ collect_treasure_v1.env(
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen
 size
 
+`num_agent_neighbors`: Optional nearest-agent cap. Agent position, velocity, and role/inventory
+encoding are filtered together.
+
+`num_landmark_neighbors`: Optional nearest-live-treasure cap. Dead treasures remain zero slots.
+
+`radius`: Optional shared sensing radius for agents and live treasures, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) preserves the existing nearest-first representation;
+``"masked"`` retains stable full agent/treasure slots and zeros unobserved entries.
+
 """
 
 from __future__ import annotations
@@ -92,6 +106,11 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World
+from mpe2._mpe_utils.partial_observability import (
+    KNNMode,
+    observed_entity_slots,
+    validate_partial_observability,
+)
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -126,7 +145,17 @@ class raw_env(SimpleEnv, EzPickle):
         render_mode: str | None = None,
         dynamic_rescaling: bool = False,
         benchmark_data: bool = False,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
+        validate_partial_observability(
+            num_agent_neighbors,
+            num_landmark_neighbors,
+            radius,
+            knn_mode,
+        )
         EzPickle.__init__(
             self,
             num_collectors=num_collectors,
@@ -137,8 +166,17 @@ class raw_env(SimpleEnv, EzPickle):
             render_mode=render_mode,
             dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
-        scenario = Scenario()
+        scenario = Scenario(
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
+        )
         world = scenario.make_world(num_collectors, num_deposits, num_treasures)
         SimpleEnv.__init__(
             self,
@@ -279,6 +317,18 @@ class ExtendedWorld(World):
 
 
 class Scenario(BaseScenario):
+    def __init__(
+        self,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
+    ) -> None:
+        self.num_agent_neighbors = num_agent_neighbors
+        self.num_landmark_neighbors = num_landmark_neighbors
+        self.radius = radius
+        self.knn_mode: KNNMode = knn_mode
+
     def make_world(
         self, num_collectors: int = 6, num_deposits: int = 2, num_treasures: int = 6
     ) -> ExtendedWorld:
@@ -563,28 +613,48 @@ class Scenario(BaseScenario):
         if agent.collector:
             obs.append((np.arange(n_types) == agent.holding).astype(float))
 
-        # All other agents, sorted by distance (closest first).
-        others = sorted(
-            (a for a in world.agents if a is not agent),
-            key=lambda a: np.sqrt(np.sum(np.square(a.state.p_pos - agent.state.p_pos))),
+        others = [a for a in world.agents if a is not agent]
+        agent_cap = (
+            self.num_agent_neighbors
+            if self.num_agent_neighbors is not None
+            else len(others)
         )
-        for other in others:
-            obs.append(other.state.p_pos - agent.state.p_pos)
-            obs.append(other.state.p_vel.copy())
-            obs.append(self._get_agent_encoding(other, world))
-
-        # All treasures, alive ones first (sorted by distance), then dead ones.
-        def _treasure_sort_key(lm):
-            if lm.alive:
-                return np.sqrt(np.sum(np.square(lm.state.p_pos - agent.state.p_pos)))
-            return 1e6  # dead treasures sorted to the end
-
-        for lm in sorted(self.treasures(world), key=_treasure_sort_key):
-            if lm.alive:
-                obs.append(lm.state.p_pos - agent.state.p_pos)
-                obs.append((np.arange(n_types) == lm.type).astype(float))
+        agent_slots = observed_entity_slots(
+            agent,
+            others,
+            agent_cap if self.knn_mode == "compact" else self.num_agent_neighbors,
+            self.radius,
+            self.knn_mode,
+        )
+        for other in agent_slots:
+            if other is not None:
+                obs.append(other.state.p_pos - agent.state.p_pos)
+                obs.append(other.state.p_vel.copy())
+                obs.append(self._get_agent_encoding(other, world))
             else:
-                # Zero-pad dead treasures so the observation size stays fixed.
+                obs.append(np.zeros(world.dim_p))
+                obs.append(np.zeros(world.dim_p))
+                obs.append(np.zeros(2 * n_types))
+
+        treasures = self.treasures(world)
+        alive_treasures = [treasure for treasure in treasures if treasure.alive]
+        treasure_cap = (
+            self.num_landmark_neighbors
+            if self.num_landmark_neighbors is not None
+            else len(treasures)
+        )
+        treasure_slots = observed_entity_slots(
+            agent,
+            alive_treasures if self.knn_mode == "compact" else treasures,
+            treasure_cap if self.knn_mode == "compact" else self.num_landmark_neighbors,
+            self.radius,
+            self.knn_mode,
+        )
+        for treasure in treasure_slots:
+            if treasure is not None and treasure.alive:
+                obs.append(treasure.state.p_pos - agent.state.p_pos)
+                obs.append((np.arange(n_types) == treasure.type).astype(float))
+            else:
                 obs.append(np.zeros(world.dim_p))
                 obs.append(np.zeros(n_types))
 

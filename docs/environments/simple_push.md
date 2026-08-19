@@ -42,7 +42,7 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 
@@ -50,6 +50,17 @@ simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=Fa
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`num_agent_neighbors`: Optional nearest-agent cap. There is only one other agent, so radius is
+the more meaningful agent-visibility control.
+
+`num_landmark_neighbors`: Optional nearest-landmark cap.
+
+`radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) stores visible entities nearest-first; ``"masked"`` keeps
+the full stable entity slots and zeros hidden entities. Landmark colors remain aligned with
+their position slots. The good agent's private goal-relative position is always retained.
 
 ## API
 ```{eval-rst}

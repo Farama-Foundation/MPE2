@@ -107,6 +107,75 @@ partial_obs_envs = [
         simple_adversary_v3,
         dict(N=3, num_agent_neighbors=2, max_cycles=50),
     ],
+    # Masked k-NN keeps full-sized, stable entity slots.
+    [
+        simple_spread_v3,
+        dict(
+            N=4,
+            num_agent_neighbors=2,
+            num_landmark_neighbors=2,
+            knn_mode="masked",
+            max_cycles=50,
+        ),
+    ],
+    # Radius-only PO uses full-capacity compact slots.
+    [
+        simple_tag_v3,
+        dict(
+            num_good=2,
+            num_adversaries=3,
+            num_obstacles=2,
+            radius=0.75,
+            max_cycles=50,
+        ),
+    ],
+    # Radius filtering composes with k-NN caps and masked slots.
+    [
+        simple_adversary_v3,
+        dict(
+            N=3,
+            num_agent_neighbors=2,
+            num_landmark_neighbors=2,
+            radius=1.0,
+            knn_mode="masked",
+            max_cycles=50,
+        ),
+    ],
+    # Collect Treasure: typed agents/treasures remain aligned in compact PO.
+    [
+        collect_treasure_v1,
+        dict(
+            num_collectors=4,
+            num_deposits=2,
+            num_treasures=4,
+            num_agent_neighbors=2,
+            num_landmark_neighbors=2,
+            radius=1.0,
+            max_cycles=50,
+        ),
+    ],
+    # Simple Push: positions and landmark colors are filtered together.
+    [
+        simple_push_v3,
+        dict(
+            num_agent_neighbors=1,
+            num_landmark_neighbors=1,
+            radius=1.0,
+            knn_mode="masked",
+            max_cycles=50,
+        ),
+    ],
+    # World Comm composes distance filtering with forest occlusion.
+    [
+        simple_world_comm_v3,
+        dict(
+            num_agent_neighbors=3,
+            num_landmark_neighbors=3,
+            radius=1.0,
+            knn_mode="masked",
+            max_cycles=50,
+        ),
+    ],
 ]
 
 parameterized_envs = [

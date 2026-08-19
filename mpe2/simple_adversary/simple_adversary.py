@@ -34,7 +34,7 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 
@@ -50,7 +50,8 @@ simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_re
 `num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
 observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
 available count are zero-padded so the observation shape remains fixed.
-``None`` (default) = full observability.
+``None`` (default) disables the k cap; when `radius` is also ``None``, all agents are
+observable.
 
     .. warning::
         **Solvability under PO is not guaranteed for simple_adversary.**
@@ -65,7 +66,16 @@ available count are zero-padded so the observation shape remains fixed.
 observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
 Note: the goal landmark relative position is *always* included in good agents' observations
 regardless of this setting (it is private, 2-D information, not a positional slot).
-``None`` (default) = full observability.
+``None`` (default) disables the k cap; when `radius` is also ``None``, all landmarks are
+observable.
+
+`radius`: Optional shared observation radius for agents and landmarks. Entities outside the
+radius are hidden before applying the optional nearest-neighbour caps. ``None`` (default)
+disables radius filtering. The private goal position remains visible to good agents.
+
+`knn_mode`: Representation used after visibility filtering. ``"compact"`` (default) places
+visible entities in nearest-first slots and pads unused slots. ``"masked"`` retains the full
+observation's stable entity slots and size, replacing unobserved entities with zeros.
 
 """
 
@@ -76,7 +86,11 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
-from mpe2._mpe_utils.partial_observability import padded_relative_positions
+from mpe2._mpe_utils.partial_observability import (
+    KNNMode,
+    padded_relative_positions,
+    validate_partial_observability,
+)
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -92,13 +106,15 @@ class raw_env(SimpleEnv, EzPickle):
         benchmark_data: bool = False,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
-        assert num_agent_neighbors is None or (
-            isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
-        ), "num_agent_neighbors must be a positive integer or None."
-        assert num_landmark_neighbors is None or (
-            isinstance(num_landmark_neighbors, int) and num_landmark_neighbors > 0
-        ), "num_landmark_neighbors must be a positive integer or None."
+        validate_partial_observability(
+            num_agent_neighbors,
+            num_landmark_neighbors,
+            radius,
+            knn_mode,
+        )
         EzPickle.__init__(
             self,
             N=N,
@@ -108,10 +124,14 @@ class raw_env(SimpleEnv, EzPickle):
             benchmark_data=benchmark_data,
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
         scenario = Scenario(
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
         world = scenario.make_world(N)
         SimpleEnv.__init__(
@@ -158,9 +178,13 @@ class Scenario(BaseScenario):
         self,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
         self.num_agent_neighbors = num_agent_neighbors
         self.num_landmark_neighbors = num_landmark_neighbors
+        self.radius = radius
+        self.knn_mode: KNNMode = knn_mode
 
     def make_world(self, N: int = 2) -> ExtendedWorld:
         world = ExtendedWorld()
@@ -318,13 +342,13 @@ class Scenario(BaseScenario):
 
             The adversary does not know which landmark is the goal.
 
-        Full observability (``num_*_neighbors=None``, default):
+        Full observability (``num_*_neighbors=None`` and ``radius=None``, default):
 
         Partial observability:
-            Landmark and other-agent slots are filtered to the N nearest and
-            zero-padded to maintain a *fixed* observation shape.  The goal
-            relative position (good agents only) is *always* included and is
-            not subject to neighbour filtering.
+            Visibility is filtered by radius and/or the N nearest entities.
+            Compact slots are nearest-first; masked slots retain the full
+            entity layout. Unobserved slots are zeroed in either mode. The
+            goal relative position (good agents only) is *always* included.
 
         .. warning::
             simple_adversary may **not be solvable** under strict PO
@@ -335,21 +359,23 @@ class Scenario(BaseScenario):
         """
         others = [other for other in world.agents if other is not agent]
 
-        # lsndmark
-        if self.num_landmark_neighbors is None:
-            entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
-        else:
-            entity_pos = padded_relative_positions(
-                agent, world.landmarks, self.num_landmark_neighbors
-            )
+        # Landmarks
+        entity_pos = padded_relative_positions(
+            agent,
+            world.landmarks,
+            self.num_landmark_neighbors,
+            radius=self.radius,
+            knn_mode=self.knn_mode,
+        )
 
         # Other agents
-        if self.num_agent_neighbors is None:
-            other_pos = [o.state.p_pos - agent.state.p_pos for o in others]
-        else:
-            other_pos = padded_relative_positions(
-                agent, others, self.num_agent_neighbors
-            )
+        other_pos = padded_relative_positions(
+            agent,
+            others,
+            self.num_agent_neighbors,
+            radius=self.radius,
+            knn_mode=self.knn_mode,
+        )
 
         if not agent.adversary:
             # Goal position is always observable by good agents (private info).

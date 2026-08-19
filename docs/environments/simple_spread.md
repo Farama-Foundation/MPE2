@@ -40,7 +40,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 
@@ -73,13 +73,23 @@ training signal than always running to `max_cycles`, and pairs naturally with cu
 `num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
 observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
 available count are zero-padded so the observation shape remains fixed.  Communication signals
-are also filtered to the same N nearest agents.  ``None`` (default) = full observability.
+are also filtered to the same N nearest agents. ``None`` (default) disables the k cap; when
+`radius` is also ``None``, all agents are observable.
 simple_spread is generally solvable under PO – agents can learn locally-greedy covering
 policies without needing global information.
 
 `num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
 observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
-``None`` (default) = full observability.
+``None`` (default) disables the k cap; when `radius` is also ``None``, all landmarks are
+observable.
+
+`radius`: Optional shared observation radius for agents and landmarks. Entities outside the
+radius are hidden before applying the optional nearest-neighbour caps. ``None`` (default)
+disables radius filtering.
+
+`knn_mode`: Representation used after visibility filtering. ``"compact"`` (default) places
+visible entities in nearest-first slots and pads unused slots. ``"masked"`` retains the full
+observation's stable entity slots and size, replacing unobserved entities with zeros.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_spread.simple_spread

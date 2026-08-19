@@ -56,7 +56,9 @@ Adversary leader continuous action space: `[no_action, move_left, move_right, mo
 
 ``` python
 simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
-                num_food=2, max_cycles=25, num_forests=2, continuous_actions=False, dynamic_rescaling=False)
+                num_food=2, max_cycles=25, num_forests=2, continuous_actions=False,
+                dynamic_rescaling=False, num_agent_neighbors=None,
+                num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 
@@ -76,6 +78,17 @@ simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
 `continuous_actions`: Whether agent action spaces are discrete(default) or continuous
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`num_agent_neighbors`: Optional nearest-agent cap, composed with the environment's existing
+forest occlusion. Forest-hidden agents do not consume the cap.
+
+`num_landmark_neighbors`: Optional nearest-landmark cap across obstacles, food, and forests.
+
+`radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) stores visible entities nearest-first and adds landmark
+color/type features; ``"masked"`` preserves stable full slots and zeros entities hidden by
+range, k, or forest occlusion. The leader's communication remains globally available.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_world_comm.simple_world_comm
