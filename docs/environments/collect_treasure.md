@@ -73,6 +73,10 @@ collect_treasure_v1.env(
     max_cycles=25,
     continuous_actions=False,
     dynamic_rescaling=False,
+    num_agent_neighbors=None,
+    num_landmark_neighbors=None,
+    radius=None,
+    knn_mode="compact",
 )
 ```
 
@@ -88,6 +92,16 @@ collect_treasure_v1.env(
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen
 size
+
+`num_agent_neighbors`: Optional nearest-agent cap. Agent position, velocity, and role/inventory
+encoding are filtered together.
+
+`num_landmark_neighbors`: Optional nearest-live-treasure cap. Dead treasures remain zero slots.
+
+`radius`: Optional shared sensing radius for agents and live treasures, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) preserves the existing nearest-first representation;
+``"masked"`` retains stable full agent/treasure slots and zeros unobserved entries.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.collect_treasure.collect_treasure

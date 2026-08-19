@@ -31,7 +31,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 
@@ -64,13 +64,23 @@ training signal than always running to `max_cycles`, and pairs naturally with cu
 `num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
 observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
 available count are zero-padded so the observation shape remains fixed.  Communication signals
-are also filtered to the same N nearest agents.  ``None`` (default) = full observability.
+are also filtered to the same N nearest agents. ``None`` (default) disables the k cap; when
+`radius` is also ``None``, all agents are observable.
 simple_spread is generally solvable under PO – agents can learn locally-greedy covering
 policies without needing global information.
 
 `num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
 observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
-``None`` (default) = full observability.
+``None`` (default) disables the k cap; when `radius` is also ``None``, all landmarks are
+observable.
+
+`radius`: Optional shared observation radius for agents and landmarks. Entities outside the
+radius are hidden before applying the optional nearest-neighbour caps. ``None`` (default)
+disables radius filtering.
+
+`knn_mode`: Representation used after visibility filtering. ``"compact"`` (default) places
+visible entities in nearest-first slots and pads unused slots. ``"masked"`` retains the full
+observation's stable entity slots and size, replacing unobserved entities with zeros.
 
 """
 
@@ -82,8 +92,10 @@ from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World
 from mpe2._mpe_utils.partial_observability import (
+    KNNMode,
     padded_comms,
     padded_relative_positions,
+    validate_partial_observability,
 )
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
@@ -103,16 +115,18 @@ class raw_env(SimpleEnv, EzPickle):
         terminate_on_success: bool = False,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
         assert (
             0.0 <= local_ratio <= 1.0
         ), "local_ratio is a proportion. Must be between 0 and 1."
-        assert num_agent_neighbors is None or (
-            isinstance(num_agent_neighbors, int) and num_agent_neighbors > 0
-        ), "num_agent_neighbors must be a positive integer or None."
-        assert num_landmark_neighbors is None or (
-            isinstance(num_landmark_neighbors, int) and num_landmark_neighbors > 0
-        ), "num_landmark_neighbors must be a positive integer or None."
+        validate_partial_observability(
+            num_agent_neighbors,
+            num_landmark_neighbors,
+            radius,
+            knn_mode,
+        )
         EzPickle.__init__(
             self,
             N=N,
@@ -125,12 +139,16 @@ class raw_env(SimpleEnv, EzPickle):
             terminate_on_success=terminate_on_success,
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
         scenario = Scenario(
             curriculum=curriculum,
             terminate_on_success=terminate_on_success,
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
         world = scenario.make_world(N)
         SimpleEnv.__init__(
@@ -189,12 +207,16 @@ class Scenario(BaseScenario):
         terminate_on_success: bool = False,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
         self.curriculum = curriculum
         self.curriculum_stage = 0
         self.terminate_on_success = terminate_on_success
         self.num_agent_neighbors = num_agent_neighbors
         self.num_landmark_neighbors = num_landmark_neighbors
+        self.radius = radius
+        self.knn_mode: KNNMode = knn_mode
 
     def advance_curriculum(self) -> None:
         """Move to the next curriculum stage. No-op at the final stage."""
@@ -317,33 +339,42 @@ class Scenario(BaseScenario):
     def observation(self, agent: Agent, world: ExtendedWorld) -> np.ndarray:
         """Return the observation vector for *agent*.
 
-        Full observability (``num_*_neighbors=None``, default):
+        Full observability (``num_*_neighbors=None`` and ``radius=None``, default):
 
         Partial observability:
-            Only the N nearest landmarks / other agents are included.
-            Slots are zero-padded to maintain a *fixed* observation shape.
+            Visibility is filtered by radius and/or the N nearest entities.
+            Compact slots are nearest-first; masked slots retain the full
+            entity layout. Unobserved slots are zeroed in either mode.
             Communication slots are aligned with agent position slots (same
-            N nearest agents).
+            visible agents).
         """
         others = [other for other in world.agents if other is not agent]
 
-        # lsndmarks
-        if self.num_landmark_neighbors is None:
-            entity_pos = [e.state.p_pos - agent.state.p_pos for e in world.landmarks]
-        else:
-            entity_pos = padded_relative_positions(
-                agent, world.landmarks, self.num_landmark_neighbors
-            )
+        # Landmarks
+        entity_pos = padded_relative_positions(
+            agent,
+            world.landmarks,
+            self.num_landmark_neighbors,
+            radius=self.radius,
+            knn_mode=self.knn_mode,
+        )
 
         # Other agents + comm
-        if self.num_agent_neighbors is None:
-            other_pos = [o.state.p_pos - agent.state.p_pos for o in others]
-            comm = [o.state.c for o in others]
-        else:
-            other_pos = padded_relative_positions(
-                agent, others, self.num_agent_neighbors
-            )
-            comm = padded_comms(agent, others, self.num_agent_neighbors, world.dim_c)
+        other_pos = padded_relative_positions(
+            agent,
+            others,
+            self.num_agent_neighbors,
+            radius=self.radius,
+            knn_mode=self.knn_mode,
+        )
+        comm = padded_comms(
+            agent,
+            others,
+            self.num_agent_neighbors,
+            world.dim_c,
+            radius=self.radius,
+            knn_mode=self.knn_mode,
+        )
 
         return np.concatenate(
             [agent.state.p_vel] + [agent.state.p_pos] + entity_pos + other_pos + comm

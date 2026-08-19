@@ -49,7 +49,7 @@ Agent and adversary action space: `[no_action, move_left, move_right, move_down,
 ### Arguments
 
 ``` python
-simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 
@@ -74,14 +74,23 @@ on the next `env.reset()`.
 
 `num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
 observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
-available count are zero-padded so the observation shape remains fixed.  ``None`` (default)
-restores full observability (all agents observed) and preserves backwards-compatibility.
+available count are zero-padded so the observation shape remains fixed. ``None`` (default)
+disables the k cap; when `radius` is also ``None``, all agents are observable.
 Under PO, velocity information is restricted to good agents visible within the neighbour
 window; velocity slots for adversaries or padded slots are zero.
 
 `num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* (obstacles)
 each agent observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed
-size when fewer landmarks are available.  ``None`` (default) = full observability.
+size when fewer landmarks are available. ``None`` (default) disables the k cap; when `radius`
+is also ``None``, all landmarks are observable.
+
+`radius`: Optional shared observation radius for agents and landmarks. Entities outside the
+radius are hidden before applying the optional nearest-neighbour caps. ``None`` (default)
+disables radius filtering.
+
+`knn_mode`: Representation used after visibility filtering. ``"compact"`` (default) places
+visible entities in nearest-first slots and pads unused slots. ``"masked"`` retains the full
+observation's stable entity slots and size, replacing unobserved entities with zeros.
 
 Curriculum stages (prey max_speed / accel as fraction of full speed 1.3 / 4.0):
   - Stage 0: 50% speed — prey is slow and easy to catch.
