@@ -11,11 +11,11 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | Manual Control     | No                                               |
 | Agents             | `agents= [agent_0, agent_1]`                     |
 | Agent Count        | 2                                                |
-| Action Shape       | (5)                                              |
-| Action Values      | Discrete(5)/Box(0.0, 1.0, (5))                   |
-| Observation Shape  | (8),(10)                                         |
+| Action Shape       | (50)                                             |
+| Action Values      | Discrete(50)/Box(0.0, 1.0, (15))                 |
+| Observation Shape  | (21),(21)                                        |
 | Observation Values | (-inf,inf)                                       |
-| State Shape        | (28,)                                            |
+| State Shape        | (42,)                                            |
 | State Values       | (-inf,inf)                                       |
 
 
@@ -23,7 +23,7 @@ This environment has 2 agents and 3 landmarks of different colors. Each agent wa
 
 Locally, the agents are rewarded by their distance to their target landmark. Globally, all agents are rewarded by the average distance of all the agents to their respective landmarks. The relative weight of these rewards is controlled by the `local_ratio` parameter.
 
-Agent observation space: `[self_vel, all_landmark_rel_positions, landmark_ids, goal_id, communication]`
+Agent observation space: `[self_vel, all_landmark_rel_positions, goal_landmark_color, communication]`
 
 Agent discrete action space: `[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9] X [no_action, move_left, move_right, move_down, move_up]`
 
