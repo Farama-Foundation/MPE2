@@ -47,10 +47,8 @@ Adversary leader continuous action space: `[no_action, move_left, move_right, mo
 
 ``` python
 simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
-                num_food=2, max_cycles=25, num_forests=2, continuous_actions=False, dynamic_rescaling=False)
+                num_food=2, max_cycles=25, num_forests=2, continuous_actions=False, dynamic_rescaling=True)
 ```
-
-
 
 `num_good`:  number of good agents
 
@@ -92,7 +90,7 @@ class raw_env(SimpleEnv, EzPickle):
         num_forests: int = 2,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         EzPickle.__init__(
@@ -105,6 +103,7 @@ class raw_env(SimpleEnv, EzPickle):
             num_forests=num_forests,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
         )
         scenario = Scenario()

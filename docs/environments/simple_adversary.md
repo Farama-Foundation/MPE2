@@ -43,10 +43,8 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
-
-
 
 `N`:  number of good agents and landmarks
 
@@ -75,6 +73,7 @@ observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixe
 Note: the goal landmark relative position is *always* included in good agents' observations
 regardless of this setting (it is private, 2-D information, not a positional slot).
 ``None`` (default) = full observability.
+
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_adversary.simple_adversary

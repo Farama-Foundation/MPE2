@@ -33,15 +33,12 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
 ```
-
-
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
-
 
 """
 
@@ -62,7 +59,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         EzPickle.__init__(
@@ -70,6 +67,7 @@ class raw_env(SimpleEnv, EzPickle):
             max_cycles=max_cycles,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
         )
         scenario = Scenario()

@@ -50,7 +50,7 @@ class SimpleEnv(AECEnv):
         render_mode: str | None = None,
         continuous_actions: bool = False,
         local_ratio: float | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         super().__init__()
@@ -172,6 +172,12 @@ class SimpleEnv(AECEnv):
         if seed is not None:
             self._seed(seed=seed)
         self.scenario.reset_world(self.world, self.np_random)
+
+        # Keep rendering deterministic after a seeded reset. The constructor
+        # performs an unseeded reset, so its camera range must not leak into the
+        # first rendered frame of the seeded episode.
+        all_poses = [entity.state.p_pos for entity in self.world.entities]
+        self.original_cam_range = np.max(np.abs(np.array(all_poses)))
 
         self.agents = self.possible_agents[:]
         self.rewards = {name: 0.0 for name in self.agents}
