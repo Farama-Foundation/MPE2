@@ -308,7 +308,7 @@
 <td><p>No</p></td>
 </tr>
 <tr class="row-odd"><td><p>Agents</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">agents=[leadadversary_0,</span> <span class="pre">adversary_0,</span> <span class="pre">adversary_1,</span> <span class="pre">adversary_3,</span> <span class="pre">agent_0,</span> <span class="pre">agent_1]</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">agents=[leadadversary_0,</span> <span class="pre">adversary_0,</span> <span class="pre">adversary_1,</span> <span class="pre">adversary_2,</span> <span class="pre">agent_0,</span> <span class="pre">agent_1]</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Agent Count</p></td>
 <td><p>6</p></td>
@@ -335,7 +335,7 @@
 </table>
 </div>
 <p>This environment is similar to simple_tag, except there is food (small blue balls) that the good agents are rewarded for being near, there are ‘forests’ that hide agents inside from being seen, and there is a ‘leader adversary’ that can see the agents at all times and can communicate with the
-other adversaries to help coordinate the chase. By default, there are 2 good agents, 3 adversaries, 1 obstacles, 2 foods, and 2 forests.</p>
+other adversaries to help coordinate the chase. By default, there are 2 good agents, 4 adversaries, 1 obstacle, 2 foods, and 2 forests.</p>
 <p>In particular, the good agents reward, is -5 for every collision with an adversary, -2 x bound by the <code class="docutils literal notranslate"><span class="pre">bound</span></code> function described in simple_tag, +2 for every collision with a food, and -0.05 x minimum distance to any food. The adversarial agents are rewarded +5 for collisions and -0.1 x minimum
 distance to a good agent. s</p>
 <p>Good agent observations: <code class="docutils literal notranslate"><span class="pre">[self_vel,</span> <span class="pre">self_pos,</span> <span class="pre">landmark_rel_positions,</span> <span class="pre">other_agent_rel_positions,</span> <span class="pre">self_in_forest,</span> <span class="pre">other_agent_velocities]</span></code></p>
@@ -345,7 +345,7 @@ distance to a good agent. s</p>
 <p>Good agent action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
 <p>Normal adversary action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
 <p>Adversary leader discrete action space: <code class="docutils literal notranslate"><span class="pre">[say_0,</span> <span class="pre">say_1,</span> <span class="pre">say_2,</span> <span class="pre">say_3]</span> <span class="pre">X</span> <span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
-<p>Where X is the Cartesian product (giving a total action space of 50).</p>
+<p>Where X is the Cartesian product (giving a total action space of 20).</p>
 <p>Adversary leader continuous action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up,</span> <span class="pre">say_0,</span> <span class="pre">say_1,</span> <span class="pre">say_2,</span> <span class="pre">say_3]</span></code></p>
 <section id="arguments">
 <h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h2>

@@ -335,9 +335,9 @@
 </table>
 </div>
 <p>This environment is similar to simple_reference, except that one agent is the ‘speaker’ (gray) and can speak but cannot move, while the other agent is the listener (cannot speak, but must navigate to correct landmark).</p>
-<p>Speaker observation space: <code class="docutils literal notranslate"><span class="pre">[goal_id]</span></code></p>
+<p>Speaker observation space: <code class="docutils literal notranslate"><span class="pre">[goal_landmark_color]</span></code></p>
 <p>Listener observation space: <code class="docutils literal notranslate"><span class="pre">[self_vel,</span> <span class="pre">all_landmark_rel_positions,</span> <span class="pre">communication]</span></code></p>
-<p>Speaker action space: <code class="docutils literal notranslate"><span class="pre">[say_0,</span> <span class="pre">say_1,</span> <span class="pre">say_2,</span> <span class="pre">say_3,</span> <span class="pre">say_4,</span> <span class="pre">say_5,</span> <span class="pre">say_6,</span> <span class="pre">say_7,</span> <span class="pre">say_8,</span> <span class="pre">say_9]</span></code></p>
+<p>Speaker action space: <code class="docutils literal notranslate"><span class="pre">[say_0,</span> <span class="pre">say_1,</span> <span class="pre">say_2]</span></code></p>
 <p>Listener action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
 <section id="arguments">
 <h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h2>
