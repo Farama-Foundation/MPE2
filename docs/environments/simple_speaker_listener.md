@@ -30,11 +30,11 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 
 This environment is similar to simple_reference, except that one agent is the 'speaker' (gray) and can speak but cannot move, while the other agent is the listener (cannot speak, but must navigate to correct landmark).
 
-Speaker observation space: `[goal_id]`
+Speaker observation space: `[goal_landmark_color]`
 
 Listener observation space: `[self_vel, all_landmark_rel_positions, communication]`
 
-Speaker action space: `[say_0, say_1, say_2, say_3, say_4, say_5, say_6, say_7, say_8, say_9]`
+Speaker action space: `[say_0, say_1, say_2]`
 
 Listener action space: `[no_action, move_left, move_right, move_down, move_up]`
 
