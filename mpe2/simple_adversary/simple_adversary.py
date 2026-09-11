@@ -103,6 +103,7 @@ class raw_env(SimpleEnv, EzPickle):
             max_cycles=max_cycles,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,

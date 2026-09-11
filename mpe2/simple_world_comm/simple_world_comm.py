@@ -103,6 +103,7 @@ class raw_env(SimpleEnv, EzPickle):
             num_forests=num_forests,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
         )
         scenario = Scenario()

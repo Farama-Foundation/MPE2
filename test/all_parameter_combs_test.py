@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import pickle
+
+import numpy as np
 import pytest
 from pettingzoo.test import max_cycles_test, parallel_api_test
 from pettingzoo.test.api_test import api_test
@@ -256,13 +259,39 @@ parameterized_envs = [
 def test_dynamic_rescaling_defaults_to_true(env_module):
     default_env = env_module.env(max_cycles=1)
     disabled_env = env_module.env(max_cycles=1, dynamic_rescaling=False)
+    restored_env = pickle.loads(
+        pickle.dumps(env_module.raw_env(max_cycles=1, dynamic_rescaling=False))
+    )
 
     try:
         assert default_env.unwrapped.dynamic_rescaling is True
         assert disabled_env.unwrapped.dynamic_rescaling is False
+        assert restored_env.dynamic_rescaling is False
     finally:
         default_env.close()
         disabled_env.close()
+        restored_env.close()
+
+
+def test_seeded_render_is_deterministic():
+    env_a = simple_spread_v3.env(render_mode="rgb_array")
+    env_b = simple_spread_v3.env(render_mode="rgb_array")
+
+    try:
+        # Simulate different constructor-time random camera ranges. A seeded reset
+        # must replace both values with the episode's deterministic initial range.
+        env_a.unwrapped.original_cam_range = 0.25
+        env_b.unwrapped.original_cam_range = 0.75
+        env_a.reset(seed=123)
+        env_b.reset(seed=123)
+
+        assert env_a.unwrapped.original_cam_range == pytest.approx(
+            env_b.unwrapped.original_cam_range
+        )
+        assert np.array_equal(env_a.render(), env_b.render())
+    finally:
+        env_a.close()
+        env_b.close()
 
 
 @pytest.mark.parametrize(["env_module", "kwargs"], parameterized_envs)
