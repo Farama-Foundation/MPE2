@@ -74,7 +74,11 @@ if __name__ == "__main__":
 
         frontmatter_options = {}
         if os.path.exists(icon_file):
-            frontmatter_options["env_icon"] = f'"/{ICON_DIR}/{env_name}.png"'
+            # The theme emits env_icon verbatim (not rewritten by Sphinx), so it must be
+            # relative to the rendered page (dirhtml: environments/<env>/); a
+            # root-absolute path makes versioned builds (e.g. /main/) load the root
+            # (stable) release's icon.
+            frontmatter_options["env_icon"] = f'"../../{ICON_DIR}/{env_name}.png"'
         else:
             print(f"WARNING: Skipping env_icon for '{env_name}' (missing {icon_file})")
 
