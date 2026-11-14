@@ -13,7 +13,7 @@ env_icon: "../../_static/icons/simple_spread.png"
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 environments</a>. Please read that page first for general information.
 
-| Import               |      `from mpe2 import simple_spread_v3`      |
+| Import               |      `from mpe2 import simple_spread_v4`      |
 |----------------------|-----------------------------------------------|
 | Actions              | Discrete/Continuous                           |
 | Parallel API         | Yes                                           |
@@ -40,7 +40,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_spread_v3.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_spread_v4.env(N=3, local_ratio=0.5, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 `N`:  number of agents and landmarks
@@ -79,6 +79,11 @@ policies without needing global information.
 observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
 ``None`` (default) = full observability.
 
+### Episode-end version change
+
+`simple_spread_v4` reports success on the final allowed cycle as termination,
+not truncation. `simple_spread_v3` gave the time limit precedence.
+With `terminate_on_success=False`, the time-limit behavior is unchanged.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_spread.simple_spread

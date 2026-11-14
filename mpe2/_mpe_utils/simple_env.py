@@ -299,12 +299,14 @@ class SimpleEnv(AECEnv):
         if next_idx == 0:
             self._execute_world_step()
             self.steps += 1
-            if self.steps >= self.max_cycles:
-                for a in self.agents:
-                    self.truncations[a] = True
-            elif self.scenario.is_terminal(self.world):
+            # Check success first, so an episode that succeeds on its last cycle
+            # terminates rather than being truncated by `max_cycles`.
+            if self.scenario.is_terminal(self.world):
                 for a in self.agents:
                     self.terminations[a] = True
+            elif self.steps >= self.max_cycles:
+                for a in self.agents:
+                    self.truncations[a] = True
         else:
             self._clear_rewards()
 
