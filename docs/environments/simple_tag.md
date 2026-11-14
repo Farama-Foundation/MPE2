@@ -13,7 +13,7 @@ env_icon: "../../_static/icons/simple_tag.png"
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 environments</a>. Please read that page first for general information.
 
-| Import             |              `from mpe2 import simple_tag_v3`              |
+| Import             |              `from mpe2 import simple_tag_v4`              |
 |--------------------|------------------------------------------------------------|
 | Actions            | Discrete/Continuous                                        |
 | Parallel API       | Yes                                                        |
@@ -49,7 +49,7 @@ Agent and adversary action space: `[no_action, move_left, move_right, move_down,
 ### Arguments
 
 ``` python
-simple_tag_v3.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_tag_v4.env(num_good=1, num_adversaries=3, num_obstacles=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, curriculum=False, num_agent_neighbors=None, num_landmark_neighbors=None)
 ```
 
 
@@ -93,6 +93,11 @@ To scale the number of agents across stages, recreate the environment with updat
 `terminate_on_success`: When `True`, the episode terminates as soon as every good agent is
 simultaneously caught (colliding with at least one adversary).
 
+### Episode-end version change
+
+`simple_tag_v4` reports success on the final allowed cycle as termination,
+not truncation. `simple_tag_v3` gave the time limit precedence.
+With `terminate_on_success=False`, the time-limit behavior is unchanged.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_tag.simple_tag
