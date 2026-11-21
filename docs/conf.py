@@ -73,7 +73,7 @@ html_theme = "celshast"
 html_title = "MPE2 Documentation"
 html_baseurl = "https://mpe2.farama.org"
 html_copy_source = False
-html_favicon = "_static/img/favicon.png"
+html_favicon = "_static/img/favicon.svg"
 html_theme_options = {
     "light_logo": "img/mpe2-black.svg",
     "dark_logo": "img/mpe2-white.svg",
