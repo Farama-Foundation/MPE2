@@ -6,6 +6,7 @@ lastpage:
 
 ```{project-logo} _static/img/mpe2-text.png
 :alt: MPE2 Logo
+:class: farama-black-logo-invert
 ```
 
 ```{project-heading}
