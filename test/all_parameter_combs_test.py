@@ -3,6 +3,7 @@ from __future__ import annotations
 import pickle
 
 import numpy as np
+import pettingzoo
 import pytest
 from pettingzoo.test import max_cycles_test, parallel_api_test
 from pettingzoo.test.api_test import api_test
@@ -331,6 +332,22 @@ parameterized_envs = [
         dict(N=5, continuous_actions=True, max_cycles=50),
     ],
 ]
+
+
+@pytest.mark.parametrize("env_module", all_envs)
+@pytest.mark.skipif(not hasattr(pettingzoo, "make"), reason="Requires PettingZoo make")
+@pytest.mark.parametrize("api", ["aec", "parallel"])
+def test_pettingzoo_make(env_module, api):
+    name, version = env_module.__name__.split(".")[-1].rsplit("_v", 1)
+    env = pettingzoo.make(api, f"mpe/{name}-v{version}", max_cycles=2)
+    try:
+        expected_api = pettingzoo.AECEnv if api == "aec" else pettingzoo.ParallelEnv
+        assert isinstance(env, expected_api)
+        assert isinstance(env.unwrapped, env_module.raw_env)
+        assert env.unwrapped.max_cycles == 2
+        env.reset(seed=42)
+    finally:
+        env.close()
 
 
 @pytest.mark.parametrize("env_module", all_envs)
