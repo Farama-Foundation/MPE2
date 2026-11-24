@@ -1,22 +1,23 @@
+import pettingzoo
+
+_register = getattr(pettingzoo, "register", None)
+if _register is not None:
+    from mpe2.all_modules import mpe_environments
+
 __version__ = "1.2.0"
 
 
-def _register_environments() -> None:
+def register_mpe2_envs() -> None:
     """Register the MPE environments on PettingZoo versions that provide a registry."""
-    import pettingzoo
-
-    register = getattr(pettingzoo, "register", None)
-    if register is None:
+    if _register is None:
         return
 
-    from mpe2.all_modules import mpe_environments
-
     for env_id, module in mpe_environments.items():
-        register("aec", env_id, module.env)
-        register("parallel", env_id, module.parallel_env)
+        _register("aec", env_id, module.env)
+        _register("parallel", env_id, module.parallel_env)
 
 
-_register_environments()
+register_mpe2_envs()
 
 try:
     import sys
