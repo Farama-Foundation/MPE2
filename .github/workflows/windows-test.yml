@@ -35,7 +35,7 @@ jobs:
                       architecture: x64
                     - os: windows-11-arm
                       architecture: arm64
-                python-version: ['3.11', '3.15']
+                python-version: ['3.11', '3.14']
         steps:
             - uses: actions/checkout@v7
             - name: Set up Python ${{ matrix.python-version }}
