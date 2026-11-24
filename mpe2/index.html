@@ -11,11 +11,11 @@
 <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Simple" href="../environments/simple/" /><link rel="prev" title="Installation" href="../" />
         <link rel="canonical" href="https://mpe2.farama.org/mpe2.html" />
 
-    <link rel="shortcut icon" href="../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Celshast 0.0.1 -->
+    <link rel="shortcut icon" href="../_static/favicon.svg"/><!-- Generated with Sphinx 7.4.7 and Celshast 0.0.2 -->
         <title>MPE2 - MPE2 Documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast.css?v=9fbfb63d" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast-extensions.css?v=42bfddca" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast.css?v=c1bb3f29" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast-extensions.css?v=88aa31df" />
     
     
 
@@ -454,9 +454,9 @@
 <h2>Key Concepts<a class="headerlink" href="#key-concepts" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Landmarks</strong>: Landmarks are static circular features of the environment that cannot be controlled. In some environments, like Simple, they are destinations that affect the rewards of the agents depending on how close the agents are to them. In other environments, they can be obstacles that block the motion of the agents. These are described in more detail in the documentation for each environment.</p></li>
-<li><p><strong>Visibility</strong>: When an agent is visible to another agent, that other agent’s observation contains the first agent’s relative position (and in Simple World Comm and Simple Tag, the first agent’s velocity). If an agent is temporarily hidden (only possible in Simple World Comm), then the agent’s position and velocity is set to zero.</p></li>
+<li><p><strong>Visibility</strong> determines which other agents and landmarks an agent can observe. Simple World Comm has forests that hide agents. The environments listed under Partial Observability also support distance-based filtering.</p></li>
 <li><p><strong>Communication</strong>: Some agents in some environments can broadcast a message as a part of its action (see action space for more details) which will be transmitted to each agent that is allowed to see that message. In Simple Crypto, this message is used to signal that Bob and Eve have reconstructed the message.</p></li>
-<li><p><strong>Color</strong>: Since all agents are rendered as circles, the agents are only identifiable to a human by their color, so the color of the agents is described in most of the environments. The color is not observed by the agents.</p></li>
+<li><p><strong>Color</strong> helps identify agents and landmarks in the rendered environment. Some observations also encode color, such as the goal and landmark colors seen by the good agent in Simple Push.</p></li>
 <li><p><strong>Distances</strong>: The landmarks and agents typically start out uniformly randomly placed from -1 to 1 on the map. This means they are typically around 1-2 units apart. This is important to keep in mind when reasoning about the scale of the rewards (which often depend on distance) and the observation space, which contains relative and absolute positions.</p></li>
 </ul>
 </section>
@@ -467,7 +467,22 @@
 <section id="observation-space">
 <h2>Observation Space<a class="headerlink" href="#observation-space" title="Link to this heading">¶</a></h2>
 <p>The observation space of an agent is a vector generally composed of the agent’s position and velocity, other agents’ relative positions and velocities, landmarks’ relative positions, landmarks’ and agents’ types, and communications received from other agents. The exact form of this is detailed in the environments’ documentation.</p>
-<p>If an agent cannot see or observe the communication of a second agent, then the second agent is not included in the first’s observation space, resulting in different agents having different observation space sizes in certain environments.</p>
+<p>Observation sizes can differ by role. For example, adversaries in Simple World Comm receive the leader’s communication as an additional part of their observation.</p>
+</section>
+<section id="partial-observability">
+<h2>Partial Observability<a class="headerlink" href="#partial-observability" title="Link to this heading">¶</a></h2>
+<p>Collect Treasure, Simple Adversary, Simple Push, Simple Spread, Simple Tag, and Simple World Comm
+support optional observation filters. Set <code class="docutils literal notranslate"><span class="pre">radius</span></code> to a positive finite distance to include entities
+at or within that Euclidean distance. Then <code class="docutils literal notranslate"><span class="pre">num_agent_neighbors</span></code> and <code class="docutils literal notranslate"><span class="pre">num_landmark_neighbors</span></code>
+can each limit the visible count to a positive integer. All three default to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>For example, <code class="docutils literal notranslate"><span class="pre">simple_spread_v4.env(radius=0.75,</span> <span class="pre">num_agent_neighbors=2,</span> <span class="pre">knn_mode=&quot;masked&quot;)</span></code>
+shows each agent up to two other agents within 0.75 units and every landmark in that radius.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;compact&quot;</span></code> (default) packs each filtered group nearest-first and zero-pads unused slots.
+Its capacity is the configured neighbor cap, or the full group size for a radius alone.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;masked&quot;</span></code> gives each entity a fixed slot and zeros hidden entries. Each agent keeps
+its full observation size as neighbors move in and out of view.</p></li>
+</ul>
 </section>
 <section id="action-space">
 <h2>Action Space<a class="headerlink" href="#action-space" title="Link to this heading">¶</a></h2>
@@ -506,6 +521,7 @@
               <div class="copyright">
                 Copyright &#169; 2026 Farama Foundation
               </div>
+              <script defer src="../_static/farama/copyright-year.js"></script>
               <!--
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -545,6 +561,7 @@
 <li><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
 <li><a class="reference internal" href="#termination">Termination</a></li>
 <li><a class="reference internal" href="#observation-space">Observation Space</a></li>
+<li><a class="reference internal" href="#partial-observability">Partial Observability</a></li>
 <li><a class="reference internal" href="#action-space">Action Space</a></li>
 <li><a class="reference internal" href="#rendering">Rendering</a></li>
 </ul>
@@ -633,185 +650,12 @@
         })()
       </script>
 
-    <script src="../_static/documentation_options.js?v=d8a3a229"></script>
+    <script src="../_static/documentation_options.js?v=151cd43d"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/celshast.js?v=a788a8c6"></script>
+    <script src="../_static/scripts/celshast.js?v=704c8ef9"></script>
     
-    <script>
-
-      const createProjectsList = (projects, displayImages) => {
-        const ulElem = Object.assign(document.createElement('ul'),
-          {
-            className:'farama-header-menu-list',
-          }
-        )
-        for (let project of projects) {
-          const liElem = document.createElement("li");
-          const aElem = Object.assign(document.createElement("a"),
-            {
-              href: project.link
-            }
-          );
-          liElem.appendChild(aElem);
-          if (displayImages) {
-            const imgElem = Object.assign(document.createElement("img"),
-              {
-                src: project.image ? imagesBasepath + project.image : imagesBasepath + "/farama_black.svg",
-                alt: `${project.name} logo`,
-                className: "farama-black-logo-invert"
-              }
-            );
-            aElem.appendChild(imgElem);
-          }
-          aElem.appendChild(document.createTextNode(project.name));
-          ulElem.appendChild(liElem);
-        }
-        return ulElem;
-      }
-
-      // Create menu with Farama projects by using the API at farama.org/api/projects.json
-      const createCORSRequest = (method, url) => {
-        let xhr = new XMLHttpRequest();
-        xhr.responseType = 'json';
-
-        if ("withCredentials" in xhr) {
-          xhr.open(method, url, true);
-        } else if (typeof XDomainRequest != "undefined") {
-          // IE8 & IE9
-          xhr = new XDomainRequest();
-          xhr.open(method, url);
-        } else {
-          // CORS not supported.
-          xhr = null;
-        }
-        return xhr;
-      };
-
-      const url = 'https://farama.org/api/projects.json';
-      const imagesBasepath = "https://farama.org/assets/images"
-      const method = 'GET';
-      let xhr = createCORSRequest(method, url);
-
-      xhr.onload = () => {
-        const jsonResponse = xhr.response;
-        const sections = {
-          "Core Projects": [],
-          "Foundation": [
-            {
-              name: "About",
-              link: "https://farama.org/about"
-            },
-            {
-              name: "Standards",
-              link: "https://farama.org/project_standards",
-            },
-            {
-              name: "Donate",
-              link: "https://farama.org/donations"
-            }
-          ],
-          "Mature Projects": {
-            "Documentation": [],
-          },
-          "Incubating Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          }
-        }
-
-        // Categorize projects
-        Object.keys(jsonResponse).forEach(key => {
-          projectJson = jsonResponse[key];
-          if (projectJson.website !== null) {
-            projectJson.link = projectJson.website;
-          } else {
-            projectJson.link = projectJson.github;
-          }
-          if (projectJson.type === "core") {
-            sections["Core Projects"].push(projectJson)
-          } else if (projectJson.type == "mature") {
-            if (projectJson.website !== null) {
-              sections["Mature Projects"]["Documentation"].push(projectJson)
-            }
-          } else {
-            if (projectJson.website !== null) {
-              sections["Incubating Projects"]["Documentation"].push(projectJson)
-            } else {
-              sections["Incubating Projects"]["Repositories"].push(projectJson)
-            }
-          }
-        })
-
-        const menuContainer = document.querySelector(".farama-header-menu__body");
-
-        const stackedColumnElem = Object.assign(
-          document.createElement('div'), {
-            style: 'display: flex; flex-direction: column;'
-          }
-        );
-        const stackedKeys = new Set(["Core Projects", "Foundation"]);
-
-        Object.keys(sections).forEach((key, i) => {
-          const sectionElem = Object.assign(
-            document.createElement('div'), {
-              className:'farama-header-menu__section',
-            }
-          )
-          sectionElem.appendChild(Object.assign(document.createElement('span'),
-            {
-              className:'farama-header-menu__section-title' ,
-              innerText: key
-            }
-          ))
-          // is not a list
-          if (sections[key].constructor !== Array) {
-            const subSections = sections[key];
-            const subSectionContainerElem = Object.assign(
-                document.createElement('div'), {
-                  className:'farama-header-menu__subsections-container',
-                  style: 'display: flex'
-                }
-            )
-            Object.keys(subSections).forEach((subKey, i) => {
-              const subSectionElem = Object.assign(
-                document.createElement('div'), {
-                  className:'farama-header-menu__subsection',
-                }
-              )
-              subSectionElem.appendChild(Object.assign(document.createElement('span'),
-                {
-                  className:'farama-header-menu__subsection-title' ,
-                  innerText: subKey
-                }
-              ))
-              const ulElem = createProjectsList(subSections[subKey], key !== 'Foundation');
-              subSectionElem.appendChild(ulElem);
-              subSectionContainerElem.appendChild(subSectionElem);
-            })
-            sectionElem.appendChild(subSectionContainerElem);
-          } else {
-            const projects = sections[key];
-            const ulElem = createProjectsList(projects, true);
-            sectionElem.appendChild(ulElem);
-          }
-          if (stackedKeys.has(key)) {
-            if (!stackedColumnElem.parentNode) {
-              menuContainer.appendChild(stackedColumnElem);
-            }
-            stackedColumnElem.appendChild(sectionElem);
-          } else {
-            menuContainer.appendChild(sectionElem);
-          }
-        });
-      }
-
-      xhr.onerror = function() {
-        console.error("Unable to load projects");
-      };
-
-      xhr.send();
-    </script>
+    <script defer src="https://farama.org/assets/docs/shared.js"></script>
 
     
     <script>

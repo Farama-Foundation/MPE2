@@ -11,11 +11,11 @@
 <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="prev" title="Collect Treasure" href="../environments/collect_treasure/" />
         <link rel="canonical" href="https://mpe2.farama.org/release_notes/index.html" />
 
-    <link rel="shortcut icon" href="../_static/favicon.png"/><!-- Generated with Sphinx 7.4.7 and Celshast 0.0.1 -->
+    <link rel="shortcut icon" href="../_static/favicon.svg"/><!-- Generated with Sphinx 7.4.7 and Celshast 0.0.2 -->
         <title>Release Notes - MPE2 Documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=8f2a1f02" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast.css?v=9fbfb63d" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast-extensions.css?v=42bfddca" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast.css?v=c1bb3f29" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/celshast-extensions.css?v=88aa31df" />
     
     
 
@@ -292,6 +292,37 @@
             
             <section class="tex2jax_ignore mathjax_ignore" id="release-notes">
 <h1>Release Notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
+<section id="release-v1-2-0">
+<h2>MPE2 v1.2.0<a class="headerlink" href="#release-v1-2-0" title="Link to this heading">¶</a></h2>
+<p><em>Released on 2026-11-24 - <a class="reference external" href="https://github.com/Farama-Foundation/MPE2/releases/tag/v1.2.0">GitHub</a> - <a class="reference external" href="https://pypi.org/project/mpe2/v1.2.0/">PyPI</a></em></p>
+<h1>Multi Particle Environments 2 (MPE2) v1.2.0 Release Notes</h1>
+<p>This release adds support for new PettingZoo make and more options for partial-observability variants of existing environments.</p>
+<h2>Core changes</h2>
+<ul>
+<li>Add configurable radius and k-NN partial observability by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mwydmuch/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mwydmuch">@mwydmuch</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="5190341240" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/71" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/71/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/71">#71</a></li>
+<li>Support PettingZoo make for all MPE2 environments by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mwydmuch/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mwydmuch">@mwydmuch</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="6592302747" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/83" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/83/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/83">#83</a></li>
+</ul>
+<h2>Bug fixes</h2>
+<ul>
+<li>Terminate episodes that succeed on their last cycle by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/salma2vec/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/salma2vec">@salma2vec</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="6011105006" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/78" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/78/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/78">#78</a></li>
+</ul>
+<h2>CI/CD</h2>
+<ul>
+<li>Drop official Python 3.10 support by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jyotirmaypaliwal/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jyotirmaypaliwal">@jyotirmaypaliwal</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="5773529313" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/76" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/76/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/76">#76</a></li>
+<li>Add native Windows x86_64 and ARM64 CI tests by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/mwydmuch/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/mwydmuch">@mwydmuch</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="6589903031" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/81" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/81/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/81">#81</a></li>
+</ul>
+<h2>Documentation updates</h2>
+<ul>
+<li>Use page-relative env_icon paths by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/BolunDai0216/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/BolunDai0216">@BolunDai0216</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="5704644856" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/75" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/75/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/75">#75</a></li>
+<li>Use SVG favicon so it stays sharp on high-DPI screens by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/BolunDai0216/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/BolunDai0216">@BolunDai0216</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="6535407765" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/79" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/79/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/79">#79</a></li>
+<li>Fix homepage logo visibility in dark mode by <a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jyotirmaypaliwal/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jyotirmaypaliwal">@jyotirmaypaliwal</a> in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="6538829394" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/80" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/80/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/80">#80</a></li>
+</ul>
+<h2>New Contributors</h2>
+<ul>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/jyotirmaypaliwal/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/jyotirmaypaliwal">@jyotirmaypaliwal</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="5773529313" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/76" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/76/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/76">#76</a></li>
+<li><a class="user-mention notranslate" data-hovercard-type="user" data-hovercard-url="/users/salma2vec/hovercard" data-octo-click="hovercard-link-click" data-octo-dimensions="link_type:self" href="https://github.com/salma2vec">@salma2vec</a> made their first contribution in <a class="issue-link js-issue-link" data-error-text="Failed to load title" data-id="6011105006" data-permission-text="Title is private" data-url="https://github.com/Farama-Foundation/MPE2/issues/78" data-hovercard-type="pull_request" data-hovercard-url="/Farama-Foundation/MPE2/pull/78/hovercard" href="https://github.com/Farama-Foundation/MPE2/pull/78">#78</a></li>
+</ul>
+<p><strong>Full Changelog</strong>: <a class="commit-link" href="https://github.com/Farama-Foundation/MPE2/compare/v1.1.1...v1.2.0"><tt>v1.1.1...v1.2.0</tt></a></p></section>
 <section id="release-v1-1-1">
 <h2>MPE2 v1.1.1<a class="headerlink" href="#release-v1-1-1" title="Link to this heading">¶</a></h2>
 <p><em>Released on 2026-09-11 - <a class="reference external" href="https://github.com/Farama-Foundation/MPE2/releases/tag/v1.1.1">GitHub</a> - <a class="reference external" href="https://pypi.org/project/mpe2/v1.1.1/">PyPI</a></em></p>
@@ -396,13 +427,26 @@ simple_tag: Preys are slower at the start and start to increase velocity, simila
           
           <div class="related-pages">
             
-            
+            <a class="prev-page" href="../environments/collect_treasure/">
+              <svg class="furo-related-icon">
+                <use href="#svg-arrow-right"></use>
+              </svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Collect Treasure</div>
+                
+              </div>
+            </a>
           </div>
           <div class="bottom-of-page">
             <div class="left-details">
               <div class="copyright">
                 Copyright &#169; 2026 Farama Foundation
               </div>
+              <script defer src="../_static/farama/copyright-year.js"></script>
               <!--
             Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
             
@@ -438,6 +482,7 @@ simple_tag: Preys are slower at the start and start to increase velocity, simila
             <div class="toc-tree">
               <ul>
 <li><a class="reference internal" href="#">Release Notes</a><ul>
+<li><a class="reference internal" href="#release-v1-2-0">MPE2 v1.2.0</a></li>
 <li><a class="reference internal" href="#release-v1-1-1">MPE2 v1.1.1</a></li>
 <li><a class="reference internal" href="#release-v1-1-0">MPE2 v1.1.0: Mature Farama Release</a></li>
 <li><a class="reference internal" href="#release-v1-0-0">MPE2 v1.0.0 </a></li>
@@ -528,185 +573,12 @@ simple_tag: Preys are slower at the start and start to increase velocity, simila
         })()
       </script>
 
-    <script src="../_static/documentation_options.js?v=d8a3a229"></script>
+    <script src="../_static/documentation_options.js?v=151cd43d"></script>
     <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../_static/scripts/celshast.js?v=a788a8c6"></script>
+    <script src="../_static/scripts/celshast.js?v=704c8ef9"></script>
     
-    <script>
-
-      const createProjectsList = (projects, displayImages) => {
-        const ulElem = Object.assign(document.createElement('ul'),
-          {
-            className:'farama-header-menu-list',
-          }
-        )
-        for (let project of projects) {
-          const liElem = document.createElement("li");
-          const aElem = Object.assign(document.createElement("a"),
-            {
-              href: project.link
-            }
-          );
-          liElem.appendChild(aElem);
-          if (displayImages) {
-            const imgElem = Object.assign(document.createElement("img"),
-              {
-                src: project.image ? imagesBasepath + project.image : imagesBasepath + "/farama_black.svg",
-                alt: `${project.name} logo`,
-                className: "farama-black-logo-invert"
-              }
-            );
-            aElem.appendChild(imgElem);
-          }
-          aElem.appendChild(document.createTextNode(project.name));
-          ulElem.appendChild(liElem);
-        }
-        return ulElem;
-      }
-
-      // Create menu with Farama projects by using the API at farama.org/api/projects.json
-      const createCORSRequest = (method, url) => {
-        let xhr = new XMLHttpRequest();
-        xhr.responseType = 'json';
-
-        if ("withCredentials" in xhr) {
-          xhr.open(method, url, true);
-        } else if (typeof XDomainRequest != "undefined") {
-          // IE8 & IE9
-          xhr = new XDomainRequest();
-          xhr.open(method, url);
-        } else {
-          // CORS not supported.
-          xhr = null;
-        }
-        return xhr;
-      };
-
-      const url = 'https://farama.org/api/projects.json';
-      const imagesBasepath = "https://farama.org/assets/images"
-      const method = 'GET';
-      let xhr = createCORSRequest(method, url);
-
-      xhr.onload = () => {
-        const jsonResponse = xhr.response;
-        const sections = {
-          "Core Projects": [],
-          "Foundation": [
-            {
-              name: "About",
-              link: "https://farama.org/about"
-            },
-            {
-              name: "Standards",
-              link: "https://farama.org/project_standards",
-            },
-            {
-              name: "Donate",
-              link: "https://farama.org/donations"
-            }
-          ],
-          "Mature Projects": {
-            "Documentation": [],
-          },
-          "Incubating Projects": {
-            "Documentation": [],
-            "Repositories": [],
-          }
-        }
-
-        // Categorize projects
-        Object.keys(jsonResponse).forEach(key => {
-          projectJson = jsonResponse[key];
-          if (projectJson.website !== null) {
-            projectJson.link = projectJson.website;
-          } else {
-            projectJson.link = projectJson.github;
-          }
-          if (projectJson.type === "core") {
-            sections["Core Projects"].push(projectJson)
-          } else if (projectJson.type == "mature") {
-            if (projectJson.website !== null) {
-              sections["Mature Projects"]["Documentation"].push(projectJson)
-            }
-          } else {
-            if (projectJson.website !== null) {
-              sections["Incubating Projects"]["Documentation"].push(projectJson)
-            } else {
-              sections["Incubating Projects"]["Repositories"].push(projectJson)
-            }
-          }
-        })
-
-        const menuContainer = document.querySelector(".farama-header-menu__body");
-
-        const stackedColumnElem = Object.assign(
-          document.createElement('div'), {
-            style: 'display: flex; flex-direction: column;'
-          }
-        );
-        const stackedKeys = new Set(["Core Projects", "Foundation"]);
-
-        Object.keys(sections).forEach((key, i) => {
-          const sectionElem = Object.assign(
-            document.createElement('div'), {
-              className:'farama-header-menu__section',
-            }
-          )
-          sectionElem.appendChild(Object.assign(document.createElement('span'),
-            {
-              className:'farama-header-menu__section-title' ,
-              innerText: key
-            }
-          ))
-          // is not a list
-          if (sections[key].constructor !== Array) {
-            const subSections = sections[key];
-            const subSectionContainerElem = Object.assign(
-                document.createElement('div'), {
-                  className:'farama-header-menu__subsections-container',
-                  style: 'display: flex'
-                }
-            )
-            Object.keys(subSections).forEach((subKey, i) => {
-              const subSectionElem = Object.assign(
-                document.createElement('div'), {
-                  className:'farama-header-menu__subsection',
-                }
-              )
-              subSectionElem.appendChild(Object.assign(document.createElement('span'),
-                {
-                  className:'farama-header-menu__subsection-title' ,
-                  innerText: subKey
-                }
-              ))
-              const ulElem = createProjectsList(subSections[subKey], key !== 'Foundation');
-              subSectionElem.appendChild(ulElem);
-              subSectionContainerElem.appendChild(subSectionElem);
-            })
-            sectionElem.appendChild(subSectionContainerElem);
-          } else {
-            const projects = sections[key];
-            const ulElem = createProjectsList(projects, true);
-            sectionElem.appendChild(ulElem);
-          }
-          if (stackedKeys.has(key)) {
-            if (!stackedColumnElem.parentNode) {
-              menuContainer.appendChild(stackedColumnElem);
-            }
-            stackedColumnElem.appendChild(sectionElem);
-          } else {
-            menuContainer.appendChild(sectionElem);
-          }
-        });
-      }
-
-      xhr.onerror = function() {
-        console.error("Unable to load projects");
-      };
-
-      xhr.send();
-    </script>
+    <script defer src="https://farama.org/assets/docs/shared.js"></script>
 
     
     <script>
