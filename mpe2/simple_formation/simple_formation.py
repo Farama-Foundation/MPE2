@@ -4,7 +4,7 @@
 
 This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 environments</a>. Please read that page first for general information.
 
-| Import               | `from mpe2 import simple_formation_v1`        |
+| Import               | `from mpe2 import simple_formation_v2`        |
 |----------------------|-----------------------------------------------|
 | Actions              | Discrete/Continuous                           |
 | Parallel API         | Yes                                           |
@@ -29,7 +29,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_formation_v1.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, terminate_on_success=False)
+simple_formation_v2.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, terminate_on_success=False)
 ```
 
 `N`: number of agents
@@ -43,6 +43,11 @@ simple_formation_v1.env(N=4, max_cycles=25, continuous_actions=False, dynamic_re
 `terminate_on_success`: when True, the episode ends as soon as every agent is within
   0.05 units of its assigned target position.
 
+### Episode-end version change
+
+`simple_formation_v2` reports success on the final allowed cycle as termination,
+not truncation. `simple_formation_v1` gave the time limit precedence.
+With `terminate_on_success=False`, the time-limit behavior is unchanged.
 """
 
 from __future__ import annotations
@@ -99,7 +104,7 @@ class raw_env(SimpleEnv, EzPickle):
             dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
         )
-        self.metadata["name"] = "simple_formation_v1"
+        self.metadata["name"] = "simple_formation_v2"
 
 
 env = make_env(raw_env)

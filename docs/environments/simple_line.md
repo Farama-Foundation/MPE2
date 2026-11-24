@@ -14,7 +14,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 
 The task is adapted from the <a href='https://github.com/sumitsk/marl_transfer/tree/master/mape/multiagent/scenarios'>"Learning Transferable Cooperative Behavior in Multi-Agent Teams"</a> work.
 
-| Import               | `from mpe2 import simple_line_v1`             |
+| Import               | `from mpe2 import simple_line_v2`             |
 |----------------------|-----------------------------------------------|
 | Actions              | Discrete/Continuous                           |
 | Parallel API         | Yes                                           |
@@ -39,7 +39,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, terminate_on_success=False)
+simple_line_v2.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, terminate_on_success=False)
 ```
 
 `N`: number of agents
@@ -53,6 +53,11 @@ simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescali
 `terminate_on_success`: when True, the episode ends as soon as every agent is within
   0.05 units of its assigned target position.
 
+### Episode-end version change
+
+`simple_line_v2` reports success on the final allowed cycle as termination,
+not truncation. `simple_line_v1` gave the time limit precedence.
+With `terminate_on_success=False`, the time-limit behavior is unchanged.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_line.simple_line

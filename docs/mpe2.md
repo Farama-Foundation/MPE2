@@ -45,7 +45,7 @@ support optional observation filters. Set `radius` to a positive finite distance
 at or within that Euclidean distance. Then `num_agent_neighbors` and `num_landmark_neighbors`
 can each limit the visible count to a positive integer. All three default to `None`.
 
-For example, `simple_spread_v3.env(radius=0.75, num_agent_neighbors=2, knn_mode="masked")`
+For example, `simple_spread_v4.env(radius=0.75, num_agent_neighbors=2, knn_mode="masked")`
 shows each agent up to two other agents within 0.75 units and every landmark in that radius.
 
 - `"compact"` (default) packs each filtered group nearest-first and zero-pads unused slots.

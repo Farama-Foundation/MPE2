@@ -7,13 +7,13 @@ from mpe2 import (
     collect_treasure_v1,
     simple_adversary_v3,
     simple_crypto_v3,
-    simple_formation_v1,
-    simple_line_v1,
+    simple_formation_v2,
+    simple_line_v2,
     simple_push_v3,
     simple_reference_v3,
     simple_speaker_listener_v4,
-    simple_spread_v3,
-    simple_tag_v3,
+    simple_spread_v4,
+    simple_tag_v4,
     simple_v3,
     simple_world_comm_v3,
 )
@@ -173,7 +173,7 @@ def test_world_comm_compact_roles_follow_visibility_and_nearest_order() -> None:
     ("env_module", "kwargs"),
     [
         (
-            simple_spread_v3,
+            simple_spread_v4,
             {
                 "N": 4,
                 "num_agent_neighbors": 2,
@@ -181,7 +181,7 @@ def test_world_comm_compact_roles_follow_visibility_and_nearest_order() -> None:
             },
         ),
         (
-            simple_tag_v3,
+            simple_tag_v4,
             {
                 "num_good": 1,
                 "num_adversaries": 3,
@@ -241,8 +241,8 @@ def test_masked_mode_keeps_full_observation_shape(env_module, kwargs) -> None:
 @pytest.mark.parametrize(
     "env_module",
     [
-        simple_spread_v3,
-        simple_tag_v3,
+        simple_spread_v4,
+        simple_tag_v4,
         simple_adversary_v3,
         collect_treasure_v1,
         simple_push_v3,
@@ -269,7 +269,7 @@ def test_radius_mode_has_fixed_declared_observation_shape(env_module) -> None:
 )
 def test_partial_observability_arguments_are_validated(kwargs) -> None:
     with pytest.raises(AssertionError):
-        simple_spread_v3.env(**kwargs)
+        simple_spread_v4.env(**kwargs)
 
 
 @pytest.mark.parametrize(
@@ -277,8 +277,8 @@ def test_partial_observability_arguments_are_validated(kwargs) -> None:
     [
         simple_v3,
         simple_crypto_v3,
-        simple_formation_v1,
-        simple_line_v1,
+        simple_formation_v2,
+        simple_line_v2,
         simple_reference_v3,
         simple_speaker_listener_v4,
     ],
