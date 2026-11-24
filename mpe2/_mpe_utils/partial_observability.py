@@ -3,9 +3,6 @@
 These helpers implement nearest-neighbour and radius filtering. Compact
 observations contain nearest-first entity slots, while masked observations
 retain the full-observation slot layout and zero unobserved entities.
-
-Currently used by simple_spread, simple_tag, and simple_adversary. Can be
-extended to other environments as needed.
 """
 
 from __future__ import annotations
@@ -79,9 +76,13 @@ def observed_entity_slots(
     n: int | None,
     radius: float | None = None,
     knn_mode: KNNMode = "compact",
+    *,
+    candidates: Sequence[_EntityT] | None = None,
 ) -> list[_EntityT | None]:
-    """Build fixed-size compact or identity-preserving masked entity slots."""
-    selected = nearest_entities(agent, entities, n, radius)
+    """Select from eligible candidates, using all entities to define the slots."""
+    if candidates is None:
+        candidates = entities
+    selected = nearest_entities(agent, candidates, n, radius)
     if knn_mode == "masked":
         selected_ids = {id(entity) for entity in selected}
         return [entity if id(entity) in selected_ids else None for entity in entities]

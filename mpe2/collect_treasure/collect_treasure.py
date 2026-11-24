@@ -645,13 +645,14 @@ class Scenario(BaseScenario):
         )
         treasure_slots = observed_entity_slots(
             agent,
-            alive_treasures if self.knn_mode == "compact" else treasures,
+            treasures,
             treasure_cap if self.knn_mode == "compact" else self.num_landmark_neighbors,
             self.radius,
             self.knn_mode,
+            candidates=alive_treasures,
         )
         for treasure in treasure_slots:
-            if treasure is not None and treasure.alive:
+            if treasure is not None:
                 obs.append(treasure.state.p_pos - agent.state.p_pos)
                 obs.append((np.arange(n_types) == treasure.type).astype(float))
             else:

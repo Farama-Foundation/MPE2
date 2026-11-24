@@ -97,7 +97,6 @@ from pettingzoo.utils.conversions import parallel_wrapper_fn
 from mpe2._mpe_utils.core import Agent, Entity, Landmark, World
 from mpe2._mpe_utils.partial_observability import (
     KNNMode,
-    nearest_entities,
     observed_entity_slots,
     validate_partial_observability,
 )
@@ -509,30 +508,14 @@ class Scenario(BaseScenario):
         compact_agent_po = self.knn_mode == "compact" and (
             self.num_agent_neighbors is not None or self.radius is not None
         )
-        if compact_agent_po:
-            agent_cap = (
-                self.num_agent_neighbors
-                if self.num_agent_neighbors is not None
-                else len(others)
-            )
-            agent_slots = observed_entity_slots(
-                agent,
-                forest_visible,
-                agent_cap,
-                self.radius,
-                self.knn_mode,
-            )
-        else:
-            selected = nearest_entities(
-                agent,
-                forest_visible,
-                self.num_agent_neighbors,
-                self.radius,
-            )
-            selected_ids = {id(other) for other in selected}
-            agent_slots = [
-                other if id(other) in selected_ids else None for other in others
-            ]
+        agent_slots = observed_entity_slots(
+            agent,
+            others,
+            self.num_agent_neighbors,
+            self.radius,
+            "compact" if compact_agent_po else "masked",
+            candidates=forest_visible,
+        )
 
         other_pos = [
             (

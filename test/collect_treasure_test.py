@@ -30,6 +30,21 @@ def collect_treasure_env():
     env.close()
 
 
+def test_masked_neighbor_cap_counts_only_live_treasures() -> None:
+    scenario = Scenario(num_landmark_neighbors=1, radius=0.5, knn_mode="masked")
+    world = scenario.make_world(num_collectors=1, num_deposits=1, num_treasures=3)
+    scenario.reset_world(world, np.random.default_rng(123))
+    observer = world.agents[0]
+    _set_position(observer, 0.0, 0.0)
+    for treasure, distance in zip(world.landmarks, (0.5, 0.1, 0.25)):
+        _set_position(treasure, distance, 0.0)
+    world.landmarks[1].alive = False
+
+    # Each original treasure slot contains its relative position and one type bit.
+    slots = scenario.observation(observer, world)[-9:].reshape(3, 3)
+    np.testing.assert_array_equal(slots, [[0, 0, 0], [0, 0, 0], [0.25, 0, 1]])
+
+
 def test_pickup_reward_is_preserved_after_post_step(scenario_world) -> None:
     scenario, world = scenario_world
     collector, deposit = world.agents
