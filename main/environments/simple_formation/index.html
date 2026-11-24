@@ -292,7 +292,7 @@
 <table class="docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Import</p></th>
-<th class="head"><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mpe2</span> <span class="pre">import</span> <span class="pre">simple_formation_v1</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">mpe2</span> <span class="pre">import</span> <span class="pre">simple_formation_v2</span></code></p></th>
 </tr>
 </thead>
 <tbody>
@@ -335,7 +335,7 @@ target positions, clipped to [0, 2].</p>
 <p>Agent action space: <code class="docutils literal notranslate"><span class="pre">[no_action,</span> <span class="pre">move_left,</span> <span class="pre">move_right,</span> <span class="pre">move_down,</span> <span class="pre">move_up]</span></code></p>
 <section id="arguments">
 <h2>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">¶</a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simple_formation_v1</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">terminate_on_success</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simple_formation_v2</span><span class="o">.</span><span class="n">env</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">continuous_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dynamic_rescaling</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">terminate_on_success</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">N</span></code>: number of agents</p>
@@ -344,6 +344,12 @@ target positions, clipped to [0, 2].</p>
 <p><code class="docutils literal notranslate"><span class="pre">dynamic_rescaling</span></code>: whether to rescale the size of agents and landmarks based on the screen size</p>
 <p><code class="docutils literal notranslate"><span class="pre">terminate_on_success</span></code>: when True, the episode ends as soon as every agent is within
 0.05 units of its assigned target position.</p>
+</section>
+<section id="episode-end-version-change">
+<h2>Episode-end version change<a class="headerlink" href="#episode-end-version-change" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">simple_formation_v2</span></code> reports success on the final allowed cycle as termination,
+not truncation. <code class="docutils literal notranslate"><span class="pre">simple_formation_v1</span></code> gave the time limit precedence.
+With <code class="docutils literal notranslate"><span class="pre">terminate_on_success=False</span></code>, the time-limit behavior is unchanged.</p>
 </section>
 <section id="api">
 <h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
@@ -432,6 +438,7 @@ target positions, clipped to [0, 2].</p>
               <ul>
 <li><a class="reference internal" href="#">Simple Formation</a><ul>
 <li><a class="reference internal" href="#arguments">Arguments</a></li>
+<li><a class="reference internal" href="#episode-end-version-change">Episode-end version change</a></li>
 <li><a class="reference internal" href="#api">API</a><ul>
 <li><a class="reference internal" href="#mpe2.simple_formation.simple_formation.env"><code class="docutils literal notranslate"><span class="pre">env</span></code></a></li>
 <li><a class="reference internal" href="#mpe2.simple_formation.simple_formation.raw_env"><code class="docutils literal notranslate"><span class="pre">raw_env</span></code></a></li>
