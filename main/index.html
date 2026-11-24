@@ -333,6 +333,15 @@ A set of communication-oriented environments
 <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>With PettingZoo 1.27 or later, import <code class="docutils literal notranslate"><span class="pre">mpe2</span></code> to register its environments, then
+choose the AEC or Parallel API when calling <code class="docutils literal notranslate"><span class="pre">make</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">mpe2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pettingzoo</span><span class="w"> </span><span class="kn">import</span> <span class="n">make</span>
+
+<span class="n">env</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">"aec"</span><span class="p">,</span> <span class="s2">"mpe/simple_push-v3"</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">parallel_env</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="s2">"parallel"</span><span class="p">,</span> <span class="s2">"mpe/simple_push-v3"</span><span class="p">,</span> <span class="n">max_cycles</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
 </section>
 <section id="citation">
 <h1>Citation<a class="headerlink" href="#citation" title="Link to this heading">¶</a></h1>
