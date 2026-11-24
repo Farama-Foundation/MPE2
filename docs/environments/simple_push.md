@@ -19,7 +19,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | Parallel API       | Yes                                         |
 | Manual Control     | No                                          |
 | Agents             | `agents= [adversary_0, agent_0]`            |
-| Agents             | 2                                           |
+| Agent Count        | 2                                           |
 | Action Shape       | (5)                                         |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (5,))             |
 | Observation Shape  | (8),(19)                                    |
@@ -28,12 +28,12 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | State Values       | (-inf,inf)                                  |
 
 
-This environment has 1 good agent, 1 adversary, and 1 landmark. The good agent is rewarded based on the distance to the landmark. The adversary is rewarded if it is close to the landmark, and if the agent is far from the landmark (the difference of the distances). Thus the adversary must learn to
+This environment has 1 good agent, 1 adversary, and 2 landmarks, one of which is the goal. The good agent is rewarded based on the distance to the landmark. The adversary is rewarded if it is close to the landmark, and if the agent is far from the landmark (the difference of the distances). Thus the adversary must learn to
 push the good agent away from the landmark.
 
-Agent observation space: `[self_vel, goal_rel_position, goal_landmark_id, all_landmark_rel_positions, landmark_ids, other_agent_rel_positions]`
+Agent observation space: `[self_vel, goal_rel_position, self_color, landmark_rel_positions, landmark_colors, other_agent_rel_positions]`
 
-Adversary observation space: `[self_vel, all_landmark_rel_positions, other_agent_rel_positions]`
+Adversary observation space: `[self_vel, landmark_rel_positions, other_agent_rel_positions]`
 
 Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 
@@ -42,12 +42,23 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
+simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`num_agent_neighbors`: Optional nearest-agent cap. There is only one other agent, so radius is
+the more meaningful agent-visibility control.
+
+`num_landmark_neighbors`: Optional nearest-landmark cap.
+
+`radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) stores visible entities nearest-first; ``"masked"`` keeps
+the full stable entity slots and zeros hidden entities. Landmark colors remain aligned with
+their position slots. The good agent's private goal-relative position is always retained.
 
 ## API
 ```{eval-rst}

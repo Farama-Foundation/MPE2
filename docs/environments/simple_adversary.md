@@ -28,7 +28,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | State Values       | (-inf,inf)                                       |
 
 
-In this environment, there is 1 adversary (red), N good agents (green), N landmarks (default N=2). All agents observe the position of landmarks and other agents. One landmark is the 'target landmark' (colored green). Good agents are rewarded based on how close the closest one of them is to the
+In this environment, there is 1 adversary (red), N good agents (green), N landmarks (default N=2). By default, all agents observe the positions of landmarks and other agents. One landmark is the 'target landmark' (colored green). Good agents are rewarded based on how close the closest one of them is to the
 target landmark, but negatively rewarded based on how close the adversary is to the target landmark. The adversary is rewarded based on distance to the target, but it doesn't know which landmark is the target landmark. All rewards are unscaled Euclidean distance (see main MPE documentation for
 average distance). This means good agents have to learn to 'split up' and cover all landmarks to deceive the adversary.
 
@@ -43,7 +43,7 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None)
+simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 `N`:  number of good agents and landmarks
@@ -57,22 +57,33 @@ simple_adversary_v3.env(N=2, max_cycles=25, continuous_actions=False, dynamic_re
 `num_agent_neighbors`: **Partial observability.** Maximum number of *other agents* each agent
 observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
 available count are zero-padded so the observation shape remains fixed.
-``None`` (default) = full observability.
+``None`` (default) disables the k cap; when `radius` is also ``None``, all agents are
+observable.
 
-    .. warning::
-        **Solvability under PO is not guaranteed for simple_adversary.**
-        The core task requires good agents to *split up* and cover all N
-        landmarks simultaneously to confuse the adversary.  Under tight PO
-        constraints good agents may not observe every landmark or every
-        other good agent, making coordinated coverage much harder or
-        impossible.  Investigation and task-specific tuning are recommended
-        before applying PO to this environment.
+```{warning}
+**Solvability under PO is not guaranteed for simple_adversary.**
+The core task requires good agents to *split up* and cover all N
+landmarks simultaneously to confuse the adversary.  Under tight PO
+constraints good agents may not observe every landmark or every
+other good agent, making coordinated coverage much harder or
+impossible.  Investigation and task-specific tuning are recommended
+before applying PO to this environment.
+```
 
 `num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* each agent
 observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed size.
 Note: the goal landmark relative position is *always* included in good agents' observations
 regardless of this setting (it is private, 2-D information, not a positional slot).
-``None`` (default) = full observability.
+``None`` (default) disables the k cap; when `radius` is also ``None``, all landmarks are
+observable.
+
+`radius`: Optional shared observation radius for agents and landmarks. Entities outside the
+radius are hidden before applying the optional nearest-neighbour caps. ``None`` (default)
+disables radius filtering. The private goal position remains visible to good agents.
+
+`knn_mode`: Representation used after visibility filtering. ``"compact"`` (default) places
+visible entities in nearest-first slots and pads unused slots. ``"masked"`` retains the full
+observation's stable entity slots and size, replacing unobserved entities with zeros.
 
 ## API
 ```{eval-rst}

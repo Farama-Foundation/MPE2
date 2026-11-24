@@ -19,7 +19,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | State Values       | (-inf,inf)                                                                          |
 
 
-This environment is similar to simple_tag, except there is food (small blue balls) that the good agents are rewarded for being near, there are 'forests' that hide agents inside from being seen, and there is a 'leader adversary' that can see the agents at all times and can communicate with the
+This environment is similar to simple_tag, except there is food (small blue balls) that the good agents are rewarded for being near, there are 'forests' that hide agents inside from being seen, and there is a 'leader adversary' that can see through forests and communicate with the
 other adversaries to help coordinate the chase. By default, there are 2 good agents, 4 adversaries, 1 obstacle, 2 foods, and 2 forests.
 
 In particular, the good agents reward, is -5 for every collision with an adversary, -2 x bound by the `bound` function described in simple_tag, +2 for every collision with a food, and -0.05 x minimum distance to any food. The adversarial agents are rewarded +5 for collisions and -0.1 x minimum
@@ -31,7 +31,16 @@ Normal adversary observations:`[self_vel, self_pos, landmark_rel_positions, othe
 
 Adversary leader observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities, self_in_forest, leader_comm]`
 
-*Note that when the forests prevent an agent from being seen, the observation of that agents relative position is set to (0,0).*
+In compact mode, filtering landmarks with `num_landmark_neighbors` or `radius` adds a
+block of RGB colors immediately after the landmark positions. Filtering agents with
+`num_agent_neighbors` or `radius` adds a role block immediately after the agent positions.
+Each visible neighbor has a one-hot role vector `[good_agent, adversary, leader]`.
+Positions, roles, and velocities share the same nearest-first slot order. Unused slots
+contain zeros, and only good agents supply a velocity.
+
+In masked mode, a hidden agent's position and any associated velocity are zeroed in
+the layouts above. Forests can hide agents from ordinary observers. The leader sees
+through forests and still uses the configured distance and neighbor limits.
 
 Good agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 
@@ -47,7 +56,9 @@ Adversary leader continuous action space: `[no_action, move_left, move_right, mo
 
 ``` python
 simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
-                num_food=2, max_cycles=25, num_forests=2, continuous_actions=False, dynamic_rescaling=True)
+                num_food=2, max_cycles=25, num_forests=2, continuous_actions=False,
+                dynamic_rescaling=True, num_agent_neighbors=None,
+                num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 `num_good`:  number of good agents
@@ -66,6 +77,17 @@ simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
 
+`num_agent_neighbors`: Optional nearest-agent cap, composed with the environment's existing
+forest occlusion. Forest-hidden agents do not consume the cap.
+
+`num_landmark_neighbors`: Optional nearest-landmark cap across obstacles, food, and forests.
+
+`radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) stores visible entities nearest-first and adds landmark
+color/type features and agent role features; ``"masked"`` preserves stable full slots and
+zeros entities hidden by range, k, or forest occlusion. Adversaries receive the leader's communication at any distance.
+
 """
 
 from __future__ import annotations
@@ -75,6 +97,11 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Entity, Landmark, World
+from mpe2._mpe_utils.partial_observability import (
+    KNNMode,
+    observed_entity_slots,
+    validate_partial_observability,
+)
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -92,7 +119,17 @@ class raw_env(SimpleEnv, EzPickle):
         render_mode: str | None = None,
         dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
+        validate_partial_observability(
+            num_agent_neighbors,
+            num_landmark_neighbors,
+            radius,
+            knn_mode,
+        )
         EzPickle.__init__(
             self,
             num_good=num_good,
@@ -105,8 +142,17 @@ class raw_env(SimpleEnv, EzPickle):
             render_mode=render_mode,
             dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
-        scenario = Scenario()
+        scenario = Scenario(
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
+        )
         world = scenario.make_world(
             num_good, num_adversaries, num_obstacles, num_food, num_forests
         )
@@ -150,6 +196,18 @@ class ExtendedWorld(World):
 
 
 class Scenario(BaseScenario):
+    def __init__(
+        self,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
+    ) -> None:
+        self.num_agent_neighbors = num_agent_neighbors
+        self.num_landmark_neighbors = num_landmark_neighbors
+        self.radius = radius
+        self.knn_mode: KNNMode = knn_mode
+
     def make_world(
         self,
         num_good_agents: int = 2,
@@ -403,70 +461,103 @@ class Scenario(BaseScenario):
         )
 
     def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
-        # get positions of all entities in this agent's reference frame
-        entity_pos = []
-        for entity in world.landmarks:
-            if not entity.boundary:
-                entity_pos.append(entity.state.p_pos - agent.state.p_pos)
+        landmarks = [entity for entity in world.landmarks if not entity.boundary]
+        landmark_slots = observed_entity_slots(
+            agent,
+            landmarks,
+            self.num_landmark_neighbors,
+            self.radius,
+            self.knn_mode,
+        )
+        entity_pos = [
+            (
+                np.zeros(world.dim_p)
+                if entity is None
+                else entity.state.p_pos - agent.state.p_pos
+            )
+            for entity in landmark_slots
+        ]
+        entity_color = (
+            [
+                np.zeros(world.dim_color) if entity is None else entity.color
+                for entity in landmark_slots
+            ]
+            if self.knn_mode == "compact"
+            and (self.num_landmark_neighbors is not None or self.radius is not None)
+            else []
+        )
 
         in_forest = [np.array([-1]) for _ in range(len(world.forests))]
-        inf = [False for _ in range(len(world.forests))]
-
-        for i in range(len(world.forests)):
-            if self.is_collision(agent, world.forests[i]):
+        agent_forests = [self.is_collision(agent, forest) for forest in world.forests]
+        for i, is_inside in enumerate(agent_forests):
+            if is_inside:
                 in_forest[i] = np.array([1])
-                inf[i] = True
 
-        food_pos = []
-        for entity in world.food:
-            if not entity.boundary:
-                food_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # communication of all other agents
-        comm = []
-        other_pos = []
-        other_vel = []
-        for other in world.agents:
-            if other is agent:
-                continue
-            comm.append(other.state.c)
+        others = [other for other in world.agents if other is not agent]
 
-            oth_f = [
-                self.is_collision(other, world.forests[i])
-                for i in range(len(world.forests))
+        def visible_through_forest(other: ExtendedAgent) -> bool:
+            if agent.leader:
+                return True
+            other_forests = [
+                self.is_collision(other, forest) for forest in world.forests
             ]
+            return any(
+                observer_inside and other_inside
+                for observer_inside, other_inside in zip(agent_forests, other_forests)
+            ) or (not any(agent_forests) and not any(other_forests))
 
-            # without forest vis
-            for i in range(len(world.forests)):
-                if inf[i] and oth_f[i]:
-                    other_pos.append(other.state.p_pos - agent.state.p_pos)
-                    if not other.adversary:
-                        other_vel.append(other.state.p_vel)
-                    break
-            else:
-                if ((not any(inf)) and (not any(oth_f))) or agent.leader:
-                    other_pos.append(other.state.p_pos - agent.state.p_pos)
-                    if not other.adversary:
-                        other_vel.append(other.state.p_vel)
-                else:
-                    other_pos.append([0, 0])
-                    if not other.adversary:
-                        other_vel.append([0, 0])
+        forest_visible = [other for other in others if visible_through_forest(other)]
+        compact_agent_po = self.knn_mode == "compact" and (
+            self.num_agent_neighbors is not None or self.radius is not None
+        )
+        agent_slots = observed_entity_slots(
+            agent,
+            others,
+            self.num_agent_neighbors,
+            self.radius,
+            "compact" if compact_agent_po else "masked",
+            candidates=forest_visible,
+        )
 
-        # to tell the pred when the prey are in the forest
-        prey_forest = []
-        ga = self.good_agents(world)
-        for a in ga:
-            if any([self.is_collision(a, f) for f in world.forests]):
-                prey_forest.append(np.array([1]))
-            else:
-                prey_forest.append(np.array([-1]))
-        # to tell leader when pred are in forest
-        prey_forest_lead = []
-        for f in world.forests:
-            if any([self.is_collision(a, f) for a in ga]):
-                prey_forest_lead.append(np.array([1]))
-            else:
-                prey_forest_lead.append(np.array([-1]))
+        other_pos = [
+            (
+                np.zeros(world.dim_p)
+                if other is None
+                else other.state.p_pos - agent.state.p_pos
+            )
+            for other in agent_slots
+        ]
+        other_role = []
+        if compact_agent_po:
+            other_role = [
+                (
+                    np.array(
+                        [
+                            not other.adversary,
+                            other.adversary and not other.leader,
+                            other.leader,
+                        ],
+                        dtype=float,
+                    )
+                    if other is not None
+                    else np.zeros(3)
+                )
+                for other in agent_slots
+            ]
+            other_vel = [
+                (
+                    other.state.p_vel
+                    if other is not None and not other.adversary
+                    else np.zeros(world.dim_p)
+                )
+                for other in agent_slots
+            ]
+        else:
+            other_vel = [
+                slot.state.p_vel if slot is not None else np.zeros(world.dim_p)
+                for other, slot in zip(others, agent_slots)
+                if not other.adversary
+            ]
 
         comm = [world.agents[0].state.c]
 
@@ -475,7 +566,9 @@ class Scenario(BaseScenario):
                 [agent.state.p_vel]
                 + [agent.state.p_pos]
                 + entity_pos
+                + entity_color
                 + other_pos
+                + other_role
                 + other_vel
                 + in_forest
                 + comm
@@ -485,7 +578,9 @@ class Scenario(BaseScenario):
                 [agent.state.p_vel]
                 + [agent.state.p_pos]
                 + entity_pos
+                + entity_color
                 + other_pos
+                + other_role
                 + other_vel
                 + in_forest
                 + comm
@@ -495,7 +590,9 @@ class Scenario(BaseScenario):
                 [agent.state.p_vel]
                 + [agent.state.p_pos]
                 + entity_pos
+                + entity_color
                 + other_pos
+                + other_role
                 + in_forest
                 + other_vel
             )

@@ -10,7 +10,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | Parallel API       | Yes                                         |
 | Manual Control     | No                                          |
 | Agents             | `agents= [adversary_0, agent_0]`            |
-| Agents             | 2                                           |
+| Agent Count        | 2                                           |
 | Action Shape       | (5)                                         |
 | Action Values      | Discrete(5)/Box(0.0, 1.0, (5,))             |
 | Observation Shape  | (8),(19)                                    |
@@ -19,12 +19,12 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | State Values       | (-inf,inf)                                  |
 
 
-This environment has 1 good agent, 1 adversary, and 1 landmark. The good agent is rewarded based on the distance to the landmark. The adversary is rewarded if it is close to the landmark, and if the agent is far from the landmark (the difference of the distances). Thus the adversary must learn to
+This environment has 1 good agent, 1 adversary, and 2 landmarks, one of which is the goal. The good agent is rewarded based on the distance to the landmark. The adversary is rewarded if it is close to the landmark, and if the agent is far from the landmark (the difference of the distances). Thus the adversary must learn to
 push the good agent away from the landmark.
 
-Agent observation space: `[self_vel, goal_rel_position, goal_landmark_id, all_landmark_rel_positions, landmark_ids, other_agent_rel_positions]`
+Agent observation space: `[self_vel, goal_rel_position, self_color, landmark_rel_positions, landmark_colors, other_agent_rel_positions]`
 
-Adversary observation space: `[self_vel, all_landmark_rel_positions, other_agent_rel_positions]`
+Adversary observation space: `[self_vel, landmark_rel_positions, other_agent_rel_positions]`
 
 Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 
@@ -33,12 +33,23 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
+simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
 `dynamic_rescaling`: Whether to rescale the size of agents and landmarks based on the screen size
+
+`num_agent_neighbors`: Optional nearest-agent cap. There is only one other agent, so radius is
+the more meaningful agent-visibility control.
+
+`num_landmark_neighbors`: Optional nearest-landmark cap.
+
+`radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
+
+`knn_mode`: ``"compact"`` (default) stores visible entities nearest-first; ``"masked"`` keeps
+the full stable entity slots and zeros hidden entities. Landmark colors remain aligned with
+their position slots. The good agent's private goal-relative position is always retained.
 
 """
 
@@ -49,6 +60,11 @@ from gymnasium.utils import EzPickle
 from pettingzoo.utils.conversions import parallel_wrapper_fn
 
 from mpe2._mpe_utils.core import Agent, Landmark, World, _require_initialized
+from mpe2._mpe_utils.partial_observability import (
+    KNNMode,
+    observed_entity_slots,
+    validate_partial_observability,
+)
 from mpe2._mpe_utils.scenario import BaseScenario
 from mpe2._mpe_utils.simple_env import SimpleEnv, make_env
 
@@ -61,7 +77,17 @@ class raw_env(SimpleEnv, EzPickle):
         render_mode: str | None = None,
         dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
     ) -> None:
+        validate_partial_observability(
+            num_agent_neighbors,
+            num_landmark_neighbors,
+            radius,
+            knn_mode,
+        )
         EzPickle.__init__(
             self,
             max_cycles=max_cycles,
@@ -69,8 +95,17 @@ class raw_env(SimpleEnv, EzPickle):
             render_mode=render_mode,
             dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
         )
-        scenario = Scenario()
+        scenario = Scenario(
+            num_agent_neighbors=num_agent_neighbors,
+            num_landmark_neighbors=num_landmark_neighbors,
+            radius=radius,
+            knn_mode=knn_mode,
+        )
         world = scenario.make_world()
         SimpleEnv.__init__(
             self,
@@ -118,6 +153,18 @@ class ExtendedWorld(World):
 
 
 class Scenario(BaseScenario):
+    def __init__(
+        self,
+        num_agent_neighbors: int | None = None,
+        num_landmark_neighbors: int | None = None,
+        radius: float | None = None,
+        knn_mode: KNNMode = "compact",
+    ) -> None:
+        self.num_agent_neighbors = num_agent_neighbors
+        self.num_landmark_neighbors = num_landmark_neighbors
+        self.radius = radius
+        self.knn_mode: KNNMode = knn_mode
+
     def make_world(self) -> ExtendedWorld:
         world = ExtendedWorld()
         # set any world properties first
@@ -196,22 +243,42 @@ class Scenario(BaseScenario):
         return pos_rew - neg_rew
 
     def observation(self, agent: ExtendedAgent, world: ExtendedWorld) -> np.ndarray:
-        # get positions of all entities in this agent's reference frame
-        entity_pos = []
-        for entity in world.landmarks:  # world.entities:
-            entity_pos.append(entity.state.p_pos - agent.state.p_pos)
-        # entity colors
-        entity_color = []
-        for entity in world.landmarks:  # world.entities:
-            entity_color.append(entity.color)
-        # communication of all other agents
-        comm = []
-        other_pos = []
-        for other in world.agents:
-            if other is agent:
-                continue
-            comm.append(other.state.c)
-            other_pos.append(other.state.p_pos - agent.state.p_pos)
+        landmark_slots = observed_entity_slots(
+            agent,
+            world.landmarks,
+            self.num_landmark_neighbors,
+            self.radius,
+            self.knn_mode,
+        )
+        entity_pos = [
+            (
+                np.zeros(world.dim_p)
+                if entity is None
+                else entity.state.p_pos - agent.state.p_pos
+            )
+            for entity in landmark_slots
+        ]
+        entity_color = [
+            np.zeros(world.dim_color) if entity is None else entity.color
+            for entity in landmark_slots
+        ]
+
+        others = [other for other in world.agents if other is not agent]
+        agent_slots = observed_entity_slots(
+            agent,
+            others,
+            self.num_agent_neighbors,
+            self.radius,
+            self.knn_mode,
+        )
+        other_pos = [
+            (
+                np.zeros(world.dim_p)
+                if other is None
+                else other.state.p_pos - agent.state.p_pos
+            )
+            for other in agent_slots
+        ]
         if not agent.adversary:
             return np.concatenate(
                 [agent.state.p_vel]
