@@ -28,7 +28,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | State Values       | (-inf,inf)                                                                          |
 
 
-This environment is similar to simple_tag, except there is food (small blue balls) that the good agents are rewarded for being near, there are 'forests' that hide agents inside from being seen, and there is a 'leader adversary' that can see the agents at all times and can communicate with the
+This environment is similar to simple_tag, except there is food (small blue balls) that the good agents are rewarded for being near, there are 'forests' that hide agents inside from being seen, and there is a 'leader adversary' that can see through forests and communicate with the
 other adversaries to help coordinate the chase. By default, there are 2 good agents, 4 adversaries, 1 obstacle, 2 foods, and 2 forests.
 
 In particular, the good agents reward, is -5 for every collision with an adversary, -2 x bound by the `bound` function described in simple_tag, +2 for every collision with a food, and -0.05 x minimum distance to any food. The adversarial agents are rewarded +5 for collisions and -0.1 x minimum
@@ -40,13 +40,16 @@ Normal adversary observations:`[self_vel, self_pos, landmark_rel_positions, othe
 
 Adversary leader observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities, self_in_forest, leader_comm]`
 
-When compact agent filtering is enabled by `num_agent_neighbors` or `radius`, an
-`other_agent_roles` block follows `other_agent_rel_positions`. Each nearest-first
-agent slot has a one-hot role vector `[good_agent, adversary, leader]`; hidden or
-padded slots have `[0, 0, 0]`. Role vectors use the same slots as positions and
-velocities. Default and masked observations retain the layouts above.
+In compact mode, filtering landmarks with `num_landmark_neighbors` or `radius` adds a
+block of RGB colors immediately after the landmark positions. Filtering agents with
+`num_agent_neighbors` or `radius` adds a role block immediately after the agent positions.
+Each visible neighbor has a one-hot role vector `[good_agent, adversary, leader]`.
+Positions, roles, and velocities share the same nearest-first slot order. Unused slots
+contain zeros, and only good agents supply a velocity.
 
-*Note that when the forests prevent an agent from being seen, the observation of that agents relative position is set to (0,0).*
+In masked mode, a hidden agent's position and any associated velocity are zeroed in
+the layouts above. Forests can hide agents from ordinary observers. The leader sees
+through forests and still uses the configured distance and neighbor limits.
 
 Good agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 
@@ -92,8 +95,7 @@ forest occlusion. Forest-hidden agents do not consume the cap.
 
 `knn_mode`: ``"compact"`` (default) stores visible entities nearest-first and adds landmark
 color/type features and agent role features; ``"masked"`` preserves stable full slots and
-zeros entities hidden by range, k, or forest occlusion. The leader's communication remains
-globally available.
+zeros entities hidden by range, k, or forest occlusion. Adversaries receive the leader's communication at any distance.
 
 ## API
 ```{eval-rst}

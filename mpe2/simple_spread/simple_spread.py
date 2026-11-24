@@ -339,6 +339,7 @@ class Scenario(BaseScenario):
         """Return the observation vector for *agent*.
 
         Full observability (``num_*_neighbors=None`` and ``radius=None``, default):
+            Each agent observes every landmark and every other agent in world order.
 
         Partial observability:
             Visibility is filtered by radius and/or the N nearest entities.

@@ -75,8 +75,9 @@ on the next `env.reset()`.
 observes, selected by Euclidean distance (nearest first).  Observation slots beyond the
 available count are zero-padded so the observation shape remains fixed. ``None`` (default)
 disables the k cap; when `radius` is also ``None``, all agents are observable.
-Under PO, velocity information is restricted to good agents visible within the neighbour
-window; velocity slots for adversaries or padded slots are zero.
+With compact agent filtering, every neighbor slot has a velocity pair. Only visible good
+agents supply a velocity. Adversary and unused slots contain zeros. In masked mode, the
+velocity block has one pair per other good agent, with zeros for hidden good agents.
 
 `num_landmark_neighbors`: **Partial observability.** Maximum number of *landmarks* (obstacles)
 each agent observes, selected by Euclidean distance (nearest first).  Zero-padded to a fixed
