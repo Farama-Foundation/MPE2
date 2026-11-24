@@ -27,6 +27,17 @@ pip install mpe2
 
 ## Usage
 
+With PettingZoo 1.27 or later, import `mpe2` to register its environments, then
+choose the AEC or Parallel API when calling `make`.
+
+```python
+import mpe2
+from pettingzoo import make
+
+env = make("aec", "mpe/simple_push-v3", max_cycles=50)
+parallel_env = make("parallel", "mpe/simple_push-v3", max_cycles=50)
+```
+
 ### Basic Example
 
 To launch a [Simple Push](/environments/simple_push/) environment with random agents:

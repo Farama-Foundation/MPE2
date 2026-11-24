@@ -1,3 +1,5 @@
+from mpe2 import _registration
+
 __version__ = "1.1.1"
 
 try:
