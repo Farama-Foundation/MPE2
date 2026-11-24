@@ -11,9 +11,14 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 from pettingzoo import AECEnv
 from pettingzoo.utils import wrappers
-from pettingzoo.utils.agent_selector import AgentSelector
 
 from mpe2._mpe_utils.core import Agent
+
+try:
+    from pettingzoo.utils.agent_selector import AgentSelector
+except ImportError:
+    # PettingZoo 1.24.3 provides the selector under its original name.
+    from pettingzoo.utils.agent_selector import agent_selector as AgentSelector
 
 if TYPE_CHECKING:
     from mpe2._mpe_utils.core import World
