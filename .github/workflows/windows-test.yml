@@ -1,0 +1,49 @@
+---
+name: Windows tests
+
+on:
+    push:
+        paths:
+        - '.github/workflows/windows-test.yml'
+        - 'mpe2/**'
+        - 'test/**'
+        - 'setup.py'
+        - 'pyproject.toml'
+        branches: [main]
+    pull_request:
+        paths:
+        - '.github/workflows/windows-test.yml'
+        - 'mpe2/**'
+        - 'test/**'
+        - 'setup.py'
+        - 'pyproject.toml'
+        branches: [main]
+
+permissions:
+    contents: read
+
+jobs:
+    windows-test:
+        name: Windows ${{ matrix.runner.architecture }} / Python ${{ matrix.python-version }}
+        runs-on: ${{ matrix.runner.os }}
+        env:
+            SDL_VIDEODRIVER: dummy
+        strategy:
+            matrix:
+                runner:
+                    - os: windows-latest
+                      architecture: x64
+                    - os: windows-11-arm
+                      architecture: arm64
+                python-version: ['3.11', '3.14']
+        steps:
+            - uses: actions/checkout@v7
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v7
+              with:
+                  python-version: ${{ matrix.python-version }}
+                  architecture: ${{ matrix.runner.architecture }}
+            - name: Install dependencies
+              run: python -m pip install -e '.[testing]'
+            - name: Full Python tests
+              run: python -m pytest -v --cov=mpe2 --cov-report term
