@@ -14,13 +14,13 @@ from mpe2 import (
     collect_treasure_v1,
     simple_adversary_v3,
     simple_crypto_v3,
-    simple_formation_v1,
-    simple_line_v1,
+    simple_formation_v2,
+    simple_line_v2,
     simple_push_v3,
     simple_reference_v3,
     simple_speaker_listener_v4,
-    simple_spread_v3,
-    simple_tag_v3,
+    simple_spread_v4,
+    simple_tag_v4,
     simple_v3,
     simple_world_comm_v3,
 )
@@ -29,13 +29,13 @@ all_envs = [
     collect_treasure_v1,
     simple_adversary_v3,
     simple_crypto_v3,
-    simple_formation_v1,
-    simple_line_v1,
+    simple_formation_v2,
+    simple_line_v2,
     simple_push_v3,
     simple_reference_v3,
     simple_speaker_listener_v4,
-    simple_spread_v3,
-    simple_tag_v3,
+    simple_spread_v4,
+    simple_tag_v4,
     simple_v3,
     simple_world_comm_v3,
 ]
@@ -43,7 +43,7 @@ all_envs = [
 partial_obs_envs = [
     # simple_tag: N nearest agents + landmarks (fewer than actual → zero-padding)
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(
             num_good=1,
             num_adversaries=3,
@@ -55,7 +55,7 @@ partial_obs_envs = [
     ],
     # simple_tag: more neighbors than agents/landmarks → no padding needed
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(
             num_good=1,
             num_adversaries=3,
@@ -67,7 +67,7 @@ partial_obs_envs = [
     ],
     # simple_tag: only agent neighbors limited, landmarks fully visible
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(
             num_good=2,
             num_adversaries=4,
@@ -78,7 +78,7 @@ partial_obs_envs = [
     ],
     # simple_tag: continuous actions with PO
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(
             num_good=1,
             num_adversaries=3,
@@ -91,17 +91,17 @@ partial_obs_envs = [
     ],
     # simple_spread: N nearest agents + landmarks with communication filtering
     [
-        simple_spread_v3,
+        simple_spread_v4,
         dict(N=5, num_agent_neighbors=2, num_landmark_neighbors=2, max_cycles=50),
     ],
     # simple_spread: only landmark neighbors limited
     [
-        simple_spread_v3,
+        simple_spread_v4,
         dict(N=4, num_landmark_neighbors=2, max_cycles=50),
     ],
     # simple_spread: continuous actions with PO
     [
-        simple_spread_v3,
+        simple_spread_v4,
         dict(
             N=5,
             num_agent_neighbors=2,
@@ -112,7 +112,7 @@ partial_obs_envs = [
     ],
     # simple_spread: more neighbors than exist → no padding needed (graceful)
     [
-        simple_spread_v3,
+        simple_spread_v4,
         dict(N=3, num_agent_neighbors=100, num_landmark_neighbors=100, max_cycles=50),
     ],
     # simple_adversary: PO with disclaimer (solvability not guaranteed)
@@ -169,27 +169,27 @@ parameterized_envs = [
         simple_reference_v3,
         dict(local_ratio=0.2, max_cycles=50),
     ],
-    [simple_formation_v1, dict(max_cycles=50)],
-    [simple_formation_v1, dict(N=3, max_cycles=50)],
-    [simple_formation_v1, dict(N=6, max_cycles=50)],
-    [simple_formation_v1, dict(N=4, continuous_actions=True, max_cycles=50)],
-    [simple_formation_v1, dict(N=4, terminate_on_success=True, max_cycles=50)],
-    [simple_line_v1, dict(max_cycles=50)],
-    [simple_line_v1, dict(N=3, max_cycles=50)],
-    [simple_line_v1, dict(N=6, max_cycles=50)],
-    [simple_line_v1, dict(N=4, continuous_actions=True, max_cycles=50)],
-    [simple_line_v1, dict(N=4, terminate_on_success=True, max_cycles=50)],
-    [simple_spread_v3, dict(N=5, max_cycles=50)],
+    [simple_formation_v2, dict(max_cycles=50)],
+    [simple_formation_v2, dict(N=3, max_cycles=50)],
+    [simple_formation_v2, dict(N=6, max_cycles=50)],
+    [simple_formation_v2, dict(N=4, continuous_actions=True, max_cycles=50)],
+    [simple_formation_v2, dict(N=4, terminate_on_success=True, max_cycles=50)],
+    [simple_line_v2, dict(max_cycles=50)],
+    [simple_line_v2, dict(N=3, max_cycles=50)],
+    [simple_line_v2, dict(N=6, max_cycles=50)],
+    [simple_line_v2, dict(N=4, continuous_actions=True, max_cycles=50)],
+    [simple_line_v2, dict(N=4, terminate_on_success=True, max_cycles=50)],
+    [simple_spread_v4, dict(N=5, max_cycles=50)],
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(num_good=5, num_adversaries=10, num_obstacles=4, max_cycles=50),
     ],
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(num_good=1, num_adversaries=1, num_obstacles=1, max_cycles=50),
     ],
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(
             num_good=5,
             num_adversaries=10,
@@ -199,7 +199,7 @@ parameterized_envs = [
         ),
     ],
     [
-        simple_tag_v3,
+        simple_tag_v4,
         dict(
             num_good=1,
             num_adversaries=1,
@@ -249,7 +249,7 @@ parameterized_envs = [
         dict(local_ratio=0.2, continuous_actions=True, max_cycles=50),
     ],
     [
-        simple_spread_v3,
+        simple_spread_v4,
         dict(N=5, continuous_actions=True, max_cycles=50),
     ],
 ]
@@ -274,8 +274,8 @@ def test_dynamic_rescaling_defaults_to_true(env_module):
 
 
 def test_seeded_render_is_deterministic():
-    env_a = simple_spread_v3.env(render_mode="rgb_array")
-    env_b = simple_spread_v3.env(render_mode="rgb_array")
+    env_a = simple_spread_v4.env(render_mode="rgb_array")
+    env_b = simple_spread_v4.env(render_mode="rgb_array")
 
     try:
         # Simulate different constructor-time random camera ranges. A seeded reset
