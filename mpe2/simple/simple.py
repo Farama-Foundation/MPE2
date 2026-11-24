@@ -26,10 +26,8 @@ Observation space: `[self_vel, landmark_rel_position]`
 ### Arguments
 
 ``` python
-simple_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False)
+simple_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True)
 ```
-
-
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
@@ -56,7 +54,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
     ) -> None:
         EzPickle.__init__(
@@ -64,6 +62,7 @@ class raw_env(SimpleEnv, EzPickle):
             max_cycles=max_cycles,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
         )
         scenario = Scenario()

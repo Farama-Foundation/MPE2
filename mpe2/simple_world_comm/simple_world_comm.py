@@ -9,7 +9,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 | Actions            | Discrete/Continuous                                                                 |
 | Parallel API       | Yes                                                                                 |
 | Manual Control     | No                                                                                  |
-| Agents             | `agents=[leadadversary_0, adversary_0, adversary_1, adversary_3, agent_0, agent_1]` |
+| Agents             | `agents=[leadadversary_0, adversary_0, adversary_1, adversary_2, agent_0, agent_1]` |
 | Agent Count        | 6                                                                                   |
 | Action Shape       | (5),(20)                                                                            |
 | Action Values      | Discrete(5),(20)/Box(0.0, 1.0, (5)), Box(0.0, 1.0, (9))                             |
@@ -20,7 +20,7 @@ This environment is part of the <a href='https://mpe2.farama.org/mpe2/'>MPE2 env
 
 
 This environment is similar to simple_tag, except there is food (small blue balls) that the good agents are rewarded for being near, there are 'forests' that hide agents inside from being seen, and there is a 'leader adversary' that can see the agents at all times and can communicate with the
-other adversaries to help coordinate the chase. By default, there are 2 good agents, 3 adversaries, 1 obstacles, 2 foods, and 2 forests.
+other adversaries to help coordinate the chase. By default, there are 2 good agents, 4 adversaries, 1 obstacle, 2 foods, and 2 forests.
 
 In particular, the good agents reward, is -5 for every collision with an adversary, -2 x bound by the `bound` function described in simple_tag, +2 for every collision with a food, and -0.05 x minimum distance to any food. The adversarial agents are rewarded +5 for collisions and -0.1 x minimum
 distance to a good agent. s
@@ -45,7 +45,7 @@ Normal adversary action space: `[no_action, move_left, move_right, move_down, mo
 
 Adversary leader discrete action space: `[say_0, say_1, say_2, say_3] X [no_action, move_left, move_right, move_down, move_up]`
 
-Where X is the Cartesian product (giving a total action space of 50).
+Where X is the Cartesian product (giving a total action space of 20).
 
 Adversary leader continuous action space: `[no_action, move_left, move_right, move_down, move_up, say_0, say_1, say_2, say_3]`
 
@@ -54,11 +54,9 @@ Adversary leader continuous action space: `[no_action, move_left, move_right, mo
 ``` python
 simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
                 num_food=2, max_cycles=25, num_forests=2, continuous_actions=False,
-                dynamic_rescaling=False, num_agent_neighbors=None,
+                dynamic_rescaling=True, num_agent_neighbors=None,
                 num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
-
-
 
 `num_good`:  number of good agents
 
@@ -118,7 +116,7 @@ class raw_env(SimpleEnv, EzPickle):
         num_forests: int = 2,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,
@@ -141,6 +139,7 @@ class raw_env(SimpleEnv, EzPickle):
             num_forests=num_forests,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,

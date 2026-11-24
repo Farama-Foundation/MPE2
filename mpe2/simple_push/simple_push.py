@@ -33,10 +33,8 @@ Adversary action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=False, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
+simple_push_v3.env(max_cycles=25, continuous_actions=False, dynamic_rescaling=True, num_agent_neighbors=None, num_landmark_neighbors=None, radius=None, knn_mode="compact")
 ```
-
-
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
@@ -52,7 +50,6 @@ the more meaningful agent-visibility control.
 `knn_mode`: ``"compact"`` (default) stores visible entities nearest-first; ``"masked"`` keeps
 the full stable entity slots and zeros hidden entities. Landmark colors remain aligned with
 their position slots. The good agent's private goal-relative position is always retained.
-
 
 """
 
@@ -78,7 +75,7 @@ class raw_env(SimpleEnv, EzPickle):
         max_cycles: int = 25,
         continuous_actions: bool = False,
         render_mode: str | None = None,
-        dynamic_rescaling: bool = False,
+        dynamic_rescaling: bool = True,
         benchmark_data: bool = False,
         num_agent_neighbors: int | None = None,
         num_landmark_neighbors: int | None = None,
@@ -96,6 +93,7 @@ class raw_env(SimpleEnv, EzPickle):
             max_cycles=max_cycles,
             continuous_actions=continuous_actions,
             render_mode=render_mode,
+            dynamic_rescaling=dynamic_rescaling,
             benchmark_data=benchmark_data,
             num_agent_neighbors=num_agent_neighbors,
             num_landmark_neighbors=num_landmark_neighbors,

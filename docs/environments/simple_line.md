@@ -39,7 +39,7 @@ Agent action space: `[no_action, move_left, move_right, move_down, move_up]`
 ### Arguments
 
 ``` python
-simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_on_success=False)
+simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, dynamic_rescaling=True, terminate_on_success=False)
 ```
 
 `N`: number of agents
@@ -48,8 +48,11 @@ simple_line_v1.env(N=4, max_cycles=25, continuous_actions=False, terminate_on_su
 
 `continuous_actions`: whether action spaces are discrete (default) or continuous
 
+`dynamic_rescaling`: whether to rescale the size of agents and landmarks based on the screen size
+
 `terminate_on_success`: when True, the episode ends as soon as every agent is within
   0.05 units of its assigned target position.
+
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_line.simple_line
