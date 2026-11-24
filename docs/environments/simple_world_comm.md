@@ -40,6 +40,12 @@ Normal adversary observations:`[self_vel, self_pos, landmark_rel_positions, othe
 
 Adversary leader observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities, self_in_forest, leader_comm]`
 
+When compact agent filtering is enabled by `num_agent_neighbors` or `radius`, an
+`other_agent_roles` block follows `other_agent_rel_positions`. Each nearest-first
+agent slot has a one-hot role vector `[good_agent, adversary, leader]`; hidden or
+padded slots have `[0, 0, 0]`. Role vectors use the same slots as positions and
+velocities. Default and masked observations retain the layouts above.
+
 *Note that when the forests prevent an agent from being seen, the observation of that agents relative position is set to (0,0).*
 
 Good agent action space: `[no_action, move_left, move_right, move_down, move_up]`
@@ -87,8 +93,9 @@ forest occlusion. Forest-hidden agents do not consume the cap.
 `radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
 
 `knn_mode`: ``"compact"`` (default) stores visible entities nearest-first and adds landmark
-color/type features; ``"masked"`` preserves stable full slots and zeros entities hidden by
-range, k, or forest occlusion. The leader's communication remains globally available.
+color/type features and agent role features; ``"masked"`` preserves stable full slots and
+zeros entities hidden by range, k, or forest occlusion. The leader's communication remains
+globally available.
 ## API
 ```{eval-rst}
 .. currentmodule:: mpe2.simple_world_comm.simple_world_comm

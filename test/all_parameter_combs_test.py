@@ -172,6 +172,15 @@ partial_obs_envs = [
             num_agent_neighbors=3,
             num_landmark_neighbors=3,
             radius=1.0,
+            max_cycles=50,
+        ),
+    ],
+    [
+        simple_world_comm_v3,
+        dict(
+            num_agent_neighbors=3,
+            num_landmark_neighbors=3,
+            radius=1.0,
             knn_mode="masked",
             max_cycles=50,
         ),

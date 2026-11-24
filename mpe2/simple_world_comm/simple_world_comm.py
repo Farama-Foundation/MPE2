@@ -31,6 +31,12 @@ Normal adversary observations:`[self_vel, self_pos, landmark_rel_positions, othe
 
 Adversary leader observations: `[self_vel, self_pos, landmark_rel_positions, other_agent_rel_positions, other_agent_velocities, self_in_forest, leader_comm]`
 
+When compact agent filtering is enabled by `num_agent_neighbors` or `radius`, an
+`other_agent_roles` block follows `other_agent_rel_positions`. Each nearest-first
+agent slot has a one-hot role vector `[good_agent, adversary, leader]`; hidden or
+padded slots have `[0, 0, 0]`. Role vectors use the same slots as positions and
+velocities. Default and masked observations retain the layouts above.
+
 *Note that when the forests prevent an agent from being seen, the observation of that agents relative position is set to (0,0).*
 
 Good agent action space: `[no_action, move_left, move_right, move_down, move_up]`
@@ -78,8 +84,9 @@ forest occlusion. Forest-hidden agents do not consume the cap.
 `radius`: Optional shared sensing radius for agents and landmarks, applied before the caps.
 
 `knn_mode`: ``"compact"`` (default) stores visible entities nearest-first and adds landmark
-color/type features; ``"masked"`` preserves stable full slots and zeros entities hidden by
-range, k, or forest occlusion. The leader's communication remains globally available.
+color/type features and agent role features; ``"masked"`` preserves stable full slots and
+zeros entities hidden by range, k, or forest occlusion. The leader's communication remains
+globally available.
 
 """
 
@@ -536,7 +543,23 @@ class Scenario(BaseScenario):
             )
             for other in agent_slots
         ]
+        other_role = []
         if compact_agent_po:
+            other_role = [
+                (
+                    np.array(
+                        [
+                            not other.adversary,
+                            other.adversary and not other.leader,
+                            other.leader,
+                        ],
+                        dtype=float,
+                    )
+                    if other is not None
+                    else np.zeros(3)
+                )
+                for other in agent_slots
+            ]
             other_vel = [
                 (
                     other.state.p_vel
@@ -561,6 +584,7 @@ class Scenario(BaseScenario):
                 + entity_pos
                 + entity_color
                 + other_pos
+                + other_role
                 + other_vel
                 + in_forest
                 + comm
@@ -572,6 +596,7 @@ class Scenario(BaseScenario):
                 + entity_pos
                 + entity_color
                 + other_pos
+                + other_role
                 + other_vel
                 + in_forest
                 + comm
@@ -583,6 +608,7 @@ class Scenario(BaseScenario):
                 + entity_pos
                 + entity_color
                 + other_pos
+                + other_role
                 + in_forest
                 + other_vel
             )
