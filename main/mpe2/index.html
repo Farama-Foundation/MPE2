@@ -454,9 +454,9 @@
 <h2>Key Concepts<a class="headerlink" href="#key-concepts" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><strong>Landmarks</strong>: Landmarks are static circular features of the environment that cannot be controlled. In some environments, like Simple, they are destinations that affect the rewards of the agents depending on how close the agents are to them. In other environments, they can be obstacles that block the motion of the agents. These are described in more detail in the documentation for each environment.</p></li>
-<li><p><strong>Visibility</strong>: When an agent is visible to another agent, that other agent’s observation contains the first agent’s relative position (and in Simple World Comm and Simple Tag, the first agent’s velocity). If an agent is temporarily hidden (only possible in Simple World Comm), then the agent’s position and velocity is set to zero.</p></li>
+<li><p><strong>Visibility</strong> determines which other agents and landmarks an agent can observe. Simple World Comm has forests that hide agents. The environments listed under Partial Observability also support distance-based filtering.</p></li>
 <li><p><strong>Communication</strong>: Some agents in some environments can broadcast a message as a part of its action (see action space for more details) which will be transmitted to each agent that is allowed to see that message. In Simple Crypto, this message is used to signal that Bob and Eve have reconstructed the message.</p></li>
-<li><p><strong>Color</strong>: Since all agents are rendered as circles, the agents are only identifiable to a human by their color, so the color of the agents is described in most of the environments. The color is not observed by the agents.</p></li>
+<li><p><strong>Color</strong> helps identify agents and landmarks in the rendered environment. Some observations also encode color, such as the goal and landmark colors seen by the good agent in Simple Push.</p></li>
 <li><p><strong>Distances</strong>: The landmarks and agents typically start out uniformly randomly placed from -1 to 1 on the map. This means they are typically around 1-2 units apart. This is important to keep in mind when reasoning about the scale of the rewards (which often depend on distance) and the observation space, which contains relative and absolute positions.</p></li>
 </ul>
 </section>
@@ -467,7 +467,22 @@
 <section id="observation-space">
 <h2>Observation Space<a class="headerlink" href="#observation-space" title="Link to this heading">¶</a></h2>
 <p>The observation space of an agent is a vector generally composed of the agent’s position and velocity, other agents’ relative positions and velocities, landmarks’ relative positions, landmarks’ and agents’ types, and communications received from other agents. The exact form of this is detailed in the environments’ documentation.</p>
-<p>If an agent cannot see or observe the communication of a second agent, then the second agent is not included in the first’s observation space, resulting in different agents having different observation space sizes in certain environments.</p>
+<p>Observation sizes can differ by role. For example, adversaries in Simple World Comm receive the leader’s communication as an additional part of their observation.</p>
+</section>
+<section id="partial-observability">
+<h2>Partial Observability<a class="headerlink" href="#partial-observability" title="Link to this heading">¶</a></h2>
+<p>Collect Treasure, Simple Adversary, Simple Push, Simple Spread, Simple Tag, and Simple World Comm
+support optional observation filters. Set <code class="docutils literal notranslate"><span class="pre">radius</span></code> to a positive finite distance to include entities
+at or within that Euclidean distance. Then <code class="docutils literal notranslate"><span class="pre">num_agent_neighbors</span></code> and <code class="docutils literal notranslate"><span class="pre">num_landmark_neighbors</span></code>
+can each limit the visible count to a positive integer. All three default to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>For example, <code class="docutils literal notranslate"><span class="pre">simple_spread_v4.env(radius=0.75,</span> <span class="pre">num_agent_neighbors=2,</span> <span class="pre">knn_mode=&quot;masked&quot;)</span></code>
+shows each agent up to two other agents within 0.75 units and every landmark in that radius.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;compact&quot;</span></code> (default) packs each filtered group nearest-first and zero-pads unused slots.
+Its capacity is the configured neighbor cap, or the full group size for a radius alone.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;masked&quot;</span></code> gives each entity a fixed slot and zeros hidden entries. Each agent keeps
+its full observation size as neighbors move in and out of view.</p></li>
+</ul>
 </section>
 <section id="action-space">
 <h2>Action Space<a class="headerlink" href="#action-space" title="Link to this heading">¶</a></h2>
@@ -546,6 +561,7 @@
 <li><a class="reference internal" href="#key-concepts">Key Concepts</a></li>
 <li><a class="reference internal" href="#termination">Termination</a></li>
 <li><a class="reference internal" href="#observation-space">Observation Space</a></li>
+<li><a class="reference internal" href="#partial-observability">Partial Observability</a></li>
 <li><a class="reference internal" href="#action-space">Action Space</a></li>
 <li><a class="reference internal" href="#rendering">Rendering</a></li>
 </ul>
