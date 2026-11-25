@@ -76,7 +76,7 @@ simple_world_comm_v3.env(num_good=2, num_adversaries=4, num_obstacles=1,
 
 `num_obstacles`:  number of obstacles
 
-`num_food`:  number of food locations that good agents are rewarded at
+`num_food`:  number of food locations that good agents are rewarded at. Set to 0 to omit food and its reward terms.
 
 `max_cycles`:  number of frames (a step for each agent) until game terminates
 
